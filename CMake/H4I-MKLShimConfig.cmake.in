@@ -1,0 +1,8 @@
+
+@PACKAGE_INIT@
+
+include ( "${CMAKE_CURRENT_LIST_DIR}/MKLShim.cmake" )
+set_and_check(H4I_MKLShim_INCLUDE_DIR "@PACKAGE_CMAKE_INSTALL_INCLUDEDIR@")
+set(H4I_MKLShim_LIBRARIES H4I::MKLShim)
+check_required_components(H4I-MKLShim)
+
