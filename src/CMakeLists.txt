@@ -15,6 +15,7 @@ target_include_directories(MKLShim
 target_link_libraries(MKLShim
     PRIVATE
         H4I-MKLShimCommonConfig
+        MKL::MKL_DPCPP
     )
 
 # Specify how to install the library.
