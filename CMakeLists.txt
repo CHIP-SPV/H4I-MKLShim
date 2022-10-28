@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.24)
+include (${CMAKE_SOURCE_DIR}/CMake/MKLShimVersion.cmake)
 project(H4I-MKLShim
-    VERSION 0.1.0
+    VERSION ${MKLShim_VERSION}
     LANGUAGES CXX)
 
 # Define a target capturing common compiler configuration.
