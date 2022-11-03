@@ -1,0 +1,24 @@
+
+@PACKAGE_INIT@
+
+# Because of the way the Linux linker and loader works,
+# we can't completely hide the fact that we depend on
+# MKL from any code that users our library.  Specify
+# that it is a dependency.
+#
+# Note: we use the SYCL version of MKL.  If CMake
+# thinks we're using a non-SYCL-capable compiler,
+# the following find_dependency call for MKL will
+# not define the imported SYCL/DPC++ MKL targets.
+# As a complete and utter hack, we set a variable
+# to trick CMake into importing the SYCL targets.
+set(ENABLE_OMP_OFFLOAD ON)
+include(CMakeFindDependencyMacro)
+find_dependency(MKL CONFIG)
+#message(STATUS "Known MKL Targets: ${MKL_IMPORTED_TARGETS}")
+
+include ( "${CMAKE_CURRENT_LIST_DIR}/MKLShim.cmake" )
+set_and_check(H4I_MKLShim_INCLUDE_DIR "@PACKAGE_CMAKE_INSTALL_INCLUDEDIR@")
+set(H4I_MKLShim_LIBRARIES H4I::MKLShim)
+check_required_components(MKLShim)
+

@@ -1,9 +1,5 @@
 
 
-# We use MKL for implementations of functions we expose.
-find_package(MKL CONFIG REQUIRED)
-message(STATUS "Known MKL Targets: ${MKL_IMPORTED_TARGETS}")
-
 # Specify how to build the library.
 add_library(MKLShim SHARED
     sgemm.cpp)
@@ -12,10 +8,20 @@ target_include_directories(MKLShim
         $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
     )
+# When defining the library's link interface, ideally we would
+# use MKL::MKL_DPCPP. But then our "clients" will see this 
+# specific target as a dependency.  If those clients are not
+# built with a DPC++ compiler, the MKL CMake import logic won't
+# define the MKL::MKL_DPCPP target making the CMake configuration
+# fail for any of our clients.  To avoid this, we extract
+# the relevant info from the MKL::MKL_DPCPP target and 
+# use that instead of the target itself.
+get_target_property(MKL_DPCPP_INTERFACE_LINK_LIBS MKL::MKL_DPCPP INTERFACE_LINK_LIBRARIES)
 target_link_libraries(MKLShim
     PRIVATE
-        H4I-MKLShimCommonConfig
-        MKL::MKL_DPCPP
+        MKLShimCommonConfig
+    PUBLIC
+        ${MKL_DPCPP_INTERFACE_LINK_LIBS}
     )
 
 # Specify how to install the library.
@@ -32,20 +38,20 @@ install(FILES
     )
 
 install(EXPORT MKLShim
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/H4I-MKLShim
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/MKLShim
     NAMESPACE H4I::
 )
 
 include(CMakePackageConfigHelpers)
 
-configure_package_config_file(${CMAKE_SOURCE_DIR}/CMake/H4I-MKLShimConfig.cmake.in
-    ${CMAKE_CURRENT_BINARY_DIR}/H4I-MKLShimConfig.cmake
+configure_package_config_file(${CMAKE_SOURCE_DIR}/CMake/MKLShimConfig.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/MKLShimConfig.cmake
     PATH_VARS CMAKE_INSTALL_INCLUDEDIR
-    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/H4I-MKLShim
+    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/MKLShim
 )
 
 install(FILES
-    ${CMAKE_CURRENT_BINARY_DIR}/H4I-MKLShimConfig.cmake
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/H4I-MKLShim
+    ${CMAKE_CURRENT_BINARY_DIR}/MKLShimConfig.cmake
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/MKLShim
 )
 
