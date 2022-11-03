@@ -1,7 +1,5 @@
 # pragma once
 
-#include "h4i/mklshim/types.h"
-#include "h4i/mklshim/Context.h"
 
 namespace H4I::MKLShim
 {

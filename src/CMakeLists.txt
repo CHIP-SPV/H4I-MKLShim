@@ -2,6 +2,8 @@
 
 # Specify how to build the library.
 add_library(MKLShim SHARED
+    Context.cpp
+    Stream.cpp
     sgemm.cpp)
 target_include_directories(MKLShim
     PUBLIC
@@ -32,6 +34,7 @@ install(TARGETS MKLShim
 install(FILES 
             ${CMAKE_SOURCE_DIR}/include/h4i/mklshim/mklshim.h
             ${CMAKE_SOURCE_DIR}/include/h4i/mklshim/Context.h
+            ${CMAKE_SOURCE_DIR}/include/h4i/mklshim/Stream.h
             ${CMAKE_SOURCE_DIR}/include/h4i/mklshim/types.h
             ${CMAKE_SOURCE_DIR}/include/h4i/mklshim/sgemm.h
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/h4i/mklshim/

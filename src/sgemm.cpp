@@ -1,6 +1,6 @@
 #include <iostream>
 #include "oneapi/mkl.hpp"
-#include "h4i/mklshim/sgemm.h"
+#include "h4i/mklshim/mklshim.h"
 #include "h4i/mklshim/impl/Context.h"
 #include "h4i/mklshim/impl/Operation.h"
 

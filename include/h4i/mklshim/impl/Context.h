@@ -21,19 +21,5 @@ namespace H4I::MKLShim
         }
     };
 
-inline
-Context*
-Create(void)
-{
-    return new Context();
-}
-
-inline
-void
-Destroy(Context* ctxt)
-{
-    delete ctxt;
-}
-
 } // namespace
 
