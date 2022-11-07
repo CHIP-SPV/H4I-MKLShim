@@ -17,7 +17,9 @@ target_include_directories(MKLShim
 # define the MKL::MKL_DPCPP target making the CMake configuration
 # fail for any of our clients.  To avoid this, we extract
 # the relevant info from the MKL::MKL_DPCPP target and 
-# use that instead of the target itself.
+# use that instead of the target itself.  This also reflects
+# our avoidance of using DPC++ in the compiler (see top level
+# CMakeLists.txt for more details).
 get_target_property(MKL_DPCPP_INTERFACE_LINK_LIBS MKL::MKL_DPCPP INTERFACE_LINK_LIBRARIES)
 target_link_libraries(MKLShim
     PRIVATE
