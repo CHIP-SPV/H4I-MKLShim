@@ -20,14 +20,19 @@ SetStream(Context* ctxt, const std::array<uintptr_t, nHandles>& nativeHandles)
         auto hQueue = (ze_command_queue_handle_t)nativeHandles[3];
 
         // Build SYCL objects from native handles.
-        ctxt->platform = sycl::make_platform<sycl::backend::ext_oneapi_level_zero>(hPlatform);
-        ctxt->device = sycl::make_device<sycl::backend::ext_oneapi_level_zero>(hDevice);
+        constexpr const auto Backend = sycl::backend::ext_oneapi_level_zero;
+        sycl::backend_input_t<Backend, sycl::platform> mpinput {hPlatform};
+        ctxt->platform = sycl::make_platform<Backend>(mpinput);
+
+        sycl::backend_input_t<Backend, sycl::device> mdinput {hDevice};
+        ctxt->device = sycl::make_device<Backend>(mdinput);
+
         std::vector<sycl::device> devs;
         devs.push_back(ctxt->device);
-        ctxt->context = sycl::level_zero::make<sycl::context>(devs, hContext);
+        sycl::backend_input_t<Backend, sycl::context> mcinput {hContext, devs};
+        ctxt->context = sycl::make_context<Backend>(mcinput);
 
-#if READY
-        auto asyncExceptionhandler = [](sycl::exception_list exceptions) {
+        auto asyncExceptionHandler = [](sycl::exception_list exceptions) {
             // Report all asynchronous exceptions that occurred.
             for(std::exception_ptr const& e : exceptions)
             {
@@ -47,10 +52,11 @@ SetStream(Context* ctxt, const std::array<uintptr_t, nHandles>& nativeHandles)
                 std::rethrow_exception(e);
             }
         };
-#endif // READY
 
-        ctxt->queue = sycl::level_zero::make<sycl::queue>(ctxt->context, hQueue);
-                                // , asyncExceptionhandler);
+        sycl::backend_input_t<Backend, sycl::queue> mqinput(hQueue, ctxt->device);
+        ctxt->queue = sycl::make_queue<Backend>(mqinput,
+                                ctxt->context,
+                                asyncExceptionHandler);
     }
 }
 
