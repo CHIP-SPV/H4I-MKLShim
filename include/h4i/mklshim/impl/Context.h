@@ -4,18 +4,19 @@ namespace H4I::MKLShim
 {
     struct Context
     {
-        sycl::platform platform;
+        sycl::queue queue;
         sycl::device device;
         sycl::context context;
-        sycl::queue queue;
+        sycl::platform platform;
 
         // Create default SYCL context and queue.
-        // TODO Does this create a context for running SYCL on host CPU cores?
+        // TODO if we have multiple GPUs in a node, how do we
+        // select which one to use?
         Context(void)
-          : platform(),
-            device(),
-            context(),
-            queue()
+          : queue(sycl::gpu_selector_v),
+            device(queue.get_device()),
+            context(queue.get_context()),
+            platform(device.get_platform())
         {
             // Nothing else to do.
         }
