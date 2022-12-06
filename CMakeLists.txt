@@ -1,3 +1,6 @@
+# Copyright 2021-2022 UT-Battelle
+# See LICENSE.txt in the root of the source distribution for license info.
+
 cmake_minimum_required(VERSION 3.24)
 include (${CMAKE_SOURCE_DIR}/CMake/MKLShimVersion.cmake)
 project(MKLShim
