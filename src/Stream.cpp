@@ -1,3 +1,5 @@
+// Copyright 2021-2022 UT-Battelle
+// See LICENSE.txt in the root of the source distribution for license info.
 #include <CL/sycl.hpp>
 #include <level_zero/ze_api.h>
 #include <sycl/ext/oneapi/backend/level_zero.hpp>
