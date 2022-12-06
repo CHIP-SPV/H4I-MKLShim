@@ -1,3 +1,5 @@
+// Copyright 2021-2022 UT-Battelle
+// See LICENSE.txt in the root of the source distribution for license info.
 #include <iostream>
 #include "oneapi/mkl.hpp"
 #include "h4i/mklshim/sgemm.h"
