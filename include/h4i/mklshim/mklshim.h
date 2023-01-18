@@ -11,4 +11,26 @@
 // using unspecified but guaranteed behavior of intel-sycl runtime.
 // Once SYCL standard committee approves sycl::queue::flush() we will change the macro to use the same
 #define __FORCE_MKL_FLUSH__(cmd) \
-            get_native<sycl::backend::ext_oneapi_level_zero>(cmd)
+    get_native<sycl::backend::ext_oneapi_level_zero>(cmd)
+
+#define ONEMKL_TRY \
+    if(ctxt == nullptr) { \
+      std::cerr << "Error context is null"<<std::endl; \
+      return;\
+    }\
+    try\
+    {
+
+#define ONEMKL_CATCH(msg) \
+      __FORCE_MKL_FLUSH__(status);\
+    }\
+    catch(sycl::exception const& e)\
+    {\
+      std::cerr << msg<<" SYCL exception: " << e.what() << std::endl;\
+      throw;\
+    }\
+    catch(std::exception const& e)\
+    {\
+      std::cerr << msg<<" exception: " << e.what() << std::endl;\
+      throw;\
+    }

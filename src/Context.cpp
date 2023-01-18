@@ -23,12 +23,12 @@ Context* Update(Context* ctxt, unsigned long const* lzHandles, int numOfHandles)
     std::vector<sycl::device> sycl_devices(1);
     sycl_devices[0] = ctxt->device;
     ctxt->context = sycl::ext::oneapi::level_zero::make_context(sycl_devices, (pi_native_handle)hContext, 1);
-    ctxt->queue = sycl::ext::oneapi::level_zero::make_queue(ctxt->context, (pi_native_handle)hQueue, 1);
+    ctxt->queue = sycl::ext::oneapi::level_zero::make_queue(ctxt->context, ctxt->device, (pi_native_handle)hQueue, 1);
     return ctxt;
 }
 
 Context*
-Create(void)
+Create(unsigned long const* lzHandles, int numOfHandles)
 {
     auto ctxt = new Context();
     return Update(ctxt, lzHandles, numOfHandles);
@@ -37,6 +37,8 @@ Create(void)
 void
 Destroy(Context* ctxt)
 {
+    // Fix Me: Since not all resources are owned by Sycl,
+    // do we need to deleted Sycl pointers?
     //delete ctxt;
 }
 

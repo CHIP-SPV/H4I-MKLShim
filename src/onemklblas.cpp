@@ -7,96 +7,104 @@
 #include "h4i/mklshim/impl/Context.h"
 #include "h4i/mklshim/impl/Operation.h"
 
+
 namespace H4I::MKLShim
 {
-  void onemklDamax(Context* ctxt, int64_t n, const double *x,
-                            int64_t incx, int64_t *result){
-    if(ctxt == nullptr) {
-      std::cerr << "Error context is null"<<std::endl;
-      return;
-    }
-    try
-    {
-      auto status = oneapi::mkl::blas::column_major::iamax(ctxt->queue, n, x, incx, result);
-      __FORCE_MKL_FLUSH__(status);
-    }
-    catch(sycl::exception const& e)
-    {
-      std::cerr << "MAX SYCL exception: " << e.what() << std::endl;
-      throw;
-    }
-    catch(std::exception const& e)
-    {
-      std::cerr << "MAX exception: " << e.what() << std::endl;
-      throw;
-    }
+  //asum
+  void sAsum(Context* ctxt, int64_t n, const float *x, int64_t incx,
+            float *result) {
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::asum(ctxt->queue, n, x,
+                                                        incx, result);
+    ONEMKL_CATCH("ASUM")
   }
-  void onemklSamax(Context* ctxt, int64_t n, const float  *x,
-                            int64_t incx, int64_t *result){
-    if(ctxt == nullptr) {
-      std::cerr << "Error context is null"<<std::endl;
-      return;
-    }
-    try
-    {
-      auto status = oneapi::mkl::blas::column_major::iamax(ctxt->queue, n, x, incx, result);
-      __FORCE_MKL_FLUSH__(status);
-    }
-    catch(sycl::exception const& e)
-    {
-      std::cerr << "MAX SYCL exception: " << e.what() << std::endl;
-      throw;
-    }
-    catch(std::exception const& e)
-    {
-      std::cerr << "MAX exception: " << e.what() << std::endl;
-      throw;
-    }
+
+  void dAsum(Context* ctxt, int64_t n, const double *x, int64_t incx,
+            double *result) {
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::asum(ctxt->queue, n, x,
+                                                        incx, result);
+    ONEMKL_CATCH("ASUM")
   }
-  void onemklZamax(Context* ctxt, int64_t n, const double _Complex *x,
+
+  void cAsum(Context* ctxt, int64_t n, const float _Complex *x, int64_t incx,
+            float *result) {
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::asum(ctxt->queue, n, 
+                                        reinterpret_cast<const std::complex<float> *>(x),
+                                        incx, result);
+    ONEMKL_CATCH("ASUM")
+  }
+
+  void zAsum(Context* ctxt, int64_t n, const double _Complex *x, int64_t incx,
+            double *result) {
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::asum(ctxt->queue, n, 
+                                        reinterpret_cast<const std::complex<double> *>(x),
+                                        incx, result);
+    ONEMKL_CATCH("ASUM")
+  }
+
+  //axpy
+  void sAxpy(Context* ctxt, int64_t n, float alpha, const float *x, std::int64_t incx,
+                  float *y, int64_t incy) {
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::axpy(ctxt->queue, n, alpha, x,
+                                                incx, y, incy);
+    ONEMKL_CATCH("AXPY")
+  }
+
+  void dAxpy(Context* ctxt, int64_t n, double alpha, const double *x, std::int64_t incx, 
+                  double *y, int64_t incy) {
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::axpy(ctxt->queue, n, alpha, x,
+                                                  incx, y, incy);
+    ONEMKL_CATCH("AXPY")
+  }
+
+  void cAxpy(Context* ctxt, int64_t n, float _Complex alpha, const float _Complex *x,
+                  std::int64_t incx, float _Complex *y, int64_t incy) {
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::axpy(ctxt->queue, n, alpha,
+                              reinterpret_cast<const std::complex<float> *>(x), incx,
+                              reinterpret_cast<std::complex<float> *>(y), incy);
+    ONEMKL_CATCH("AXPY")
+  }
+
+  void zAxpy(Context* ctxt, int64_t n, double _Complex alpha, const double _Complex *x,
+                  std::int64_t incx, double _Complex *y, int64_t incy) {
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::axpy(ctxt->queue, n, alpha,
+                            reinterpret_cast<const std::complex<double> *>(x), incx,
+                            reinterpret_cast<std::complex<double> *>(y), incy);
+    ONEMKL_CATCH("AXPY")
+  }
+
+  //amax
+  void dAmax(Context* ctxt, int64_t n, const double *x,
                             int64_t incx, int64_t *result){
-    if(ctxt == nullptr) {
-      std::cerr << "Error context is null"<<std::endl;
-      return;
-    }
-    try
-    {
-      auto status = oneapi::mkl::blas::column_major::iamax(ctxt->queue, n,
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::iamax(ctxt->queue, n, x, incx, result);
+    ONEMKL_CATCH("MAX")
+  }
+  void sAmax(Context* ctxt, int64_t n, const float  *x,
+                            int64_t incx, int64_t *result){
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::iamax(ctxt->queue, n, x, incx, result);
+    ONEMKL_CATCH("MAX")
+  }
+  void zAmax(Context* ctxt, int64_t n, const double _Complex *x,
+                            int64_t incx, int64_t *result){
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::iamax(ctxt->queue, n,
                               reinterpret_cast<const std::complex<double> *>(x), incx, result);
-      __FORCE_MKL_FLUSH__(status);
-    }
-    catch(sycl::exception const& e)
-    {
-      std::cerr << "MAX SYCL exception: " << e.what() << std::endl;
-      throw;
-    }
-    catch(std::exception const& e)
-    {
-      std::cerr << "MAX exception: " << e.what() << std::endl;
-      throw;
-    }
+    ONEMKL_CATCH("MAX")
   }
-  void onemklCamax(Context* ctxt, int64_t n, const float _Complex *x,
+  void cAmax(Context* ctxt, int64_t n, const float _Complex *x,
                             int64_t incx, int64_t *result){
-    if(ctxt == nullptr) {
-      std::cerr << "Error context is null"<<std::endl;
-      return;
-    }
-    try
-    {
-      auto status = oneapi::mkl::blas::column_major::iamax(ctxt->queue, n,
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::iamax(ctxt->queue, n,
                               reinterpret_cast<const std::complex<float> *>(x), incx, result);
-      __FORCE_MKL_FLUSH__(status);
-    }
-    catch(sycl::exception const& e)
-    {
-      std::cerr << "MAX SYCL exception: " << e.what() << std::endl;
-      throw;
-    }
-    catch(std::exception const& e)
-    {
-      std::cerr << "MAX exception: " << e.what() << std::endl;
-      throw;
-    }
+    ONEMKL_CATCH("MAX")
   }
-}// end of namespacecd
+}// end of namespace
