@@ -15,10 +15,6 @@ namespace H4I::MKLShim
         // TODO if we have multiple GPUs in a node, how do we
         // select which one to use?
         Context(void)
-          : queue(sycl::gpu_selector_v),
-            device(queue.get_device()),
-            context(queue.get_context()),
-            platform(device.get_platform())
         {
             // Nothing else to do.
         }

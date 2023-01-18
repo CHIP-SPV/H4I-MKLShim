@@ -5,7 +5,8 @@
 add_library(MKLShim SHARED
     Context.cpp
     Stream.cpp
-    sgemm.cpp)
+    sgemm.cpp
+    onemklblas.cpp)
 target_include_directories(MKLShim
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
@@ -40,6 +41,7 @@ install(FILES
             ${CMAKE_SOURCE_DIR}/include/h4i/mklshim/Stream.h
             ${CMAKE_SOURCE_DIR}/include/h4i/mklshim/types.h
             ${CMAKE_SOURCE_DIR}/include/h4i/mklshim/sgemm.h
+            ${CMAKE_SOURCE_DIR}/include/h4i/mklshim/onemklblas.h
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/h4i/mklshim/
     )
 

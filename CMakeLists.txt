@@ -44,6 +44,7 @@ if(IntelDPCPP_FOUND)
     # after the SYCL version, not DPC++ support.
     set(DPCPP_COMPILER ON)
 endif()
+set(MKL_THREADING sequential)
 find_package(MKL CONFIG REQUIRED)
 message(STATUS "Known MKL Targets: ${MKL_IMPORTED_TARGETS}")
 
