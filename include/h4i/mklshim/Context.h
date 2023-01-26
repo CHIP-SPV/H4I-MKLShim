@@ -7,7 +7,7 @@ namespace H4I::MKLShim
 
 struct Context;
 
-Context* Create(void);
+Context* Create(unsigned long const* lzHandles, int numOfHandles);
 void Destroy(Context* context);
 
 } // namespace

@@ -16,6 +16,7 @@
 # to trick CMake into importing the SYCL targets.
 set(ENABLE_OMP_OFFLOAD ON)
 include(CMakeFindDependencyMacro)
+set(MKL_THREADING sequential)
 find_dependency(MKL CONFIG)
 #message(STATUS "Known MKL Targets: ${MKL_IMPORTED_TARGETS}")
 
