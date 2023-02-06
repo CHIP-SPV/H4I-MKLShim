@@ -437,4 +437,732 @@ namespace H4I::MKLShim
     auto status = oneapi::mkl::blas::column_major::rotmg(ctxt->queue, d1, d2, x1, y1, param);
     ONEMKL_CATCH("ROTMG")
   }
+
+  //--------------------------------------------------------
+  // ===================== Level-2 =========================
+  //--------------------------------------------------------
+  oneapi::mkl::transpose convert(onemklTranspose val) {
+    switch (val) {
+      case ONEMKL_TRANSPOSE_NONTRANS:
+          return oneapi::mkl::transpose::nontrans;
+      case ONEMKL_TRANSPOSE_TRANS:
+          return oneapi::mkl::transpose::trans;
+      case ONEMLK_TRANSPOSE_CONJTRANS:
+          return oneapi::mkl::transpose::conjtrans;
+    }
+  }
+
+  oneapi::mkl::uplo convert(onemklUplo val) {
+    switch(val) {
+      case ONEMKL_UPLO_UPPER:
+        return oneapi::mkl::uplo::upper;
+      case ONEMKL_UPLO_LOWER:
+        return oneapi::mkl::uplo::lower;
+    }
+  }
+
+  oneapi::mkl::side convert(onemklSideMode val) {
+    switch(val) {
+      case ONEMKL_SIDE_LEFT:
+        return oneapi::mkl::side::left;
+      case ONEMKL_SIDE_RIGHT:
+        return oneapi::mkl::side::right;
+    }
+  }
+
+  oneapi::mkl::diag convert(onemklDiag val) {
+    switch(val) {
+      case ONEMKL_DIAG_NONUNIT:
+        return oneapi::mkl::diag::nonunit;
+      case ONEMKL_DIAG_UNIT:
+        return oneapi::mkl::diag::unit;
+    }
+  }
+  void sGbmv(Context* ctxt, onemklTranspose trans,
+                    int64_t m, int64_t n, int64_t kl, int64_t ku,
+                    float alpha, const float *a, int64_t lda,
+                    const float *x, int64_t incx, float beta, float *y,
+                    int64_t incy) {
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::gbmv(ctxt->queue,
+                                  convert(trans), m, n, kl, ku, alpha, a, lda, x,
+                                  incx, beta, y, incy);
+    ONEMKL_CATCH("")
+  }
+
+  void dGbmv(Context* ctxt, onemklTranspose trans,
+                    int64_t m, int64_t n, int64_t kl, int64_t ku,
+                    double alpha, const double *a, int64_t lda,
+                    const double *x, int64_t incx, double beta, double *y,
+                    int64_t incy) {
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::gbmv(ctxt->queue, convert(trans),
+                                    m, n, kl, ku, alpha, a, lda, x, incx, beta, y, incy);
+    ONEMKL_CATCH("")
+  }
+
+  void cGbmv(Context* ctxt, onemklTranspose trans,
+                    int64_t m, int64_t n, int64_t kl, int64_t ku,
+                    float _Complex alpha, const float _Complex *a, int64_t lda,
+                    const float _Complex *x, int64_t incx, float _Complex beta,
+                    float _Complex *y, int64_t incy) {
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::gbmv(ctxt->queue, convert(trans),
+                                    m, n, kl, ku, static_cast<std::complex<float> >(alpha),
+                                    reinterpret_cast<const std::complex<float> *>(a),
+                                    lda, reinterpret_cast<const std::complex<float> *>(x),
+                                    incx, static_cast<std::complex<float> >(beta),
+                                    reinterpret_cast<std::complex<float> *>(y), incy);
+    ONEMKL_CATCH("")
+  }
+
+  void zGbmv(Context* ctxt, onemklTranspose trans, int64_t m, int64_t n, int64_t kl, int64_t ku,
+                    double _Complex alpha, const double _Complex *a, int64_t lda,
+                    const double _Complex *x, int64_t incx, double _Complex beta,
+                    double _Complex *y, int64_t incy) {
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::gbmv(ctxt->queue, convert(trans), m,
+                                        n, kl, ku, static_cast<std::complex<double> >(alpha),
+                                        reinterpret_cast<const std::complex<double> *>(a),
+                                        lda, reinterpret_cast<const std::complex<double> *>(x), incx,
+                                        static_cast<std::complex<double> >(beta),
+                                        reinterpret_cast<std::complex<double> *>(y), incy);
+    ONEMKL_CATCH("GBMV")
+  }
+
+  void sGemv(Context* ctxt, onemklTranspose trans,
+                            int64_t m, int64_t n, float alpha, const float *a,
+                            int64_t lda, const float *x, int64_t incx, float beta,
+                            float *y, int64_t incy) {
+    ONEMKL_TRY
+	  auto status = oneapi::mkl::blas::column_major::gemv(ctxt->queue, convert(trans),
+                                            m, n, alpha, a, lda, x, incx, beta, y, incy);
+    ONEMKL_CATCH("GEMV")
+  }
+
+  void dGemv(Context* ctxt, onemklTranspose trans,
+                            int64_t m, int64_t n, double alpha, const double *a,
+                            int64_t lda, const double *x, int64_t incx, double beta,
+                            double *y, int64_t incy) {
+    ONEMKL_TRY
+	  auto status = oneapi::mkl::blas::column_major::gemv(ctxt->queue, convert(trans),
+                                            m, n, alpha, a, lda, x, incx, beta, y, incy);
+    ONEMKL_CATCH("GEMV")
+  }
+
+  void cGemv(Context* ctxt, onemklTranspose trans,
+                            int64_t m, int64_t n, float _Complex alpha,
+                            const float _Complex *a, int64_t lda,
+                            const float _Complex *x, int64_t incx,
+                            float _Complex beta, float _Complex *y,
+                            int64_t incy) {
+    ONEMKL_TRY
+	  auto status = oneapi::mkl::blas::column_major::gemv(ctxt->queue, convert(trans), m, n,
+                                            static_cast<std::complex<float> >(alpha),
+                                            reinterpret_cast<const std::complex<float> *>(a), lda,
+                                            reinterpret_cast<const std::complex<float> *>(x), incx,
+                                            static_cast<std::complex<float> >(beta),
+                                            reinterpret_cast<std::complex<float> *>(y), incy);
+    ONEMKL_CATCH("GEMV")
+  }
+
+  void zGemv(Context* ctxt, onemklTranspose trans,
+                            int64_t m, int64_t n, double _Complex alpha,
+                            const double _Complex *a, int64_t lda,
+                            const double _Complex *x, int64_t incx,
+                            double _Complex beta, double _Complex *y,
+                            int64_t incy) {
+    ONEMKL_TRY
+	  auto status = oneapi::mkl::blas::column_major::gemv(ctxt->queue, convert(trans), m, n,
+                                            static_cast<std::complex<double> >(alpha),
+                                            reinterpret_cast<const std::complex<double> *>(a), lda,
+                                            reinterpret_cast<const std::complex<double> *>(x), incx,
+                                            static_cast<std::complex<double> >(beta),
+                                            reinterpret_cast<std::complex<double> *>(y), incy);
+    ONEMKL_CATCH("GEMV")
+  }
+
+  void sGer(Context* ctxt, int64_t m, int64_t n, float alpha,
+                            const float *x, int64_t incx, const float *y, int64_t incy,
+                            float *a, int64_t lda) {
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::ger(ctxt->queue, m, n, alpha, x,
+                                                    incx, y, incy, a, lda);
+    ONEMKL_CATCH("")
+  }
+
+  void dGer(Context* ctxt, int64_t m, int64_t n, double alpha,
+                            const double *x, int64_t incx, const double *y, int64_t incy,
+                            double *a, int64_t lda) {
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::ger(ctxt->queue, m, n, alpha, x,
+                                                    incx, y, incy, a, lda);
+    ONEMKL_CATCH("")
+  }
+
+  void cGerc(Context* ctxt, int64_t m, int64_t n, float _Complex alpha,
+                            const float _Complex *x, int64_t incx, const float _Complex *y, int64_t incy,
+                            float _Complex *a, int64_t lda) {
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::gerc(ctxt->queue, m, n,
+                                            static_cast<std::complex<float> >(alpha),
+                                            reinterpret_cast<const std::complex<float> *>(x), incx,
+                                            reinterpret_cast<const std::complex<float> *>(y), incy,
+                                            reinterpret_cast<std::complex<float> *>(a), lda);
+    ONEMKL_CATCH("")
+  }
+
+  void cGeru(Context* ctxt, int64_t m, int64_t n, float _Complex alpha,
+                            const float _Complex *x, int64_t incx, const float _Complex *y, int64_t incy,
+                            float _Complex *a, int64_t lda) {
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::geru(ctxt->queue, m, n,
+                                            static_cast<std::complex<float> >(alpha),
+                                            reinterpret_cast<const std::complex<float> *>(x), incx,
+                                            reinterpret_cast<const std::complex<float> *>(y), incy,
+                                            reinterpret_cast<std::complex<float> *>(a), lda);
+    ONEMKL_CATCH("")
+  }
+
+  void zGerc(Context* ctxt, int64_t m, int64_t n, double _Complex alpha,
+                            const double _Complex *x, int64_t incx, const double _Complex *y, int64_t incy,
+                            double _Complex *a, int64_t lda) {
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::gerc(ctxt->queue, m, n,
+                                          static_cast<std::complex<float> >(alpha),
+                                          reinterpret_cast<const std::complex<double> *>(x), incx,
+                                          reinterpret_cast<const std::complex<double> *>(y), incy,
+                                          reinterpret_cast<std::complex<double> *>(a), lda);
+    ONEMKL_CATCH("")
+  }
+
+  void zGeru(Context* ctxt, int64_t m, int64_t n, double _Complex alpha,
+                            const double _Complex *x, int64_t incx, const double _Complex *y, int64_t incy,
+                            double _Complex *a, int64_t lda) {
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::geru(ctxt->queue, m, n,
+                                          static_cast<std::complex<float> >(alpha),
+                                          reinterpret_cast<const std::complex<double> *>(x), incx,
+                                          reinterpret_cast<const std::complex<double> *>(y), incy,
+                                          reinterpret_cast<std::complex<double> *>(a), lda);
+    ONEMKL_CATCH("")
+  }
+
+  void cHbmv(Context* ctxt, onemklUplo uplo, int64_t n,
+                            int64_t k, float _Complex alpha, const float _Complex *a,
+                            int64_t lda, const float _Complex *x, int64_t incx, float _Complex beta,
+                            float _Complex *y, int64_t incy) {
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::hbmv(ctxt->queue, convert(uplo), n,
+                                          k, static_cast<std::complex<float> >(alpha),
+                                          reinterpret_cast<const std::complex<float> *>(a),
+                                          lda, reinterpret_cast<const std::complex<float> *>(x),
+                                          incx, static_cast<std::complex<float> >(beta),
+                                          reinterpret_cast<std::complex<float> *>(y), incy);
+    ONEMKL_CATCH("")
+  }
+
+  void zHbmv(Context* ctxt, onemklUplo uplo, int64_t n,
+                            int64_t k, double _Complex alpha, const double _Complex *a,
+                            int64_t lda, const double _Complex *x, int64_t incx, double _Complex beta,
+                            double _Complex *y, int64_t incy) {
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::hbmv(ctxt->queue, convert(uplo), n,
+                                          k, static_cast<std::complex<double> >(alpha),
+                                          reinterpret_cast<const std::complex<double> *>(a),
+                                          lda, reinterpret_cast<const std::complex<double> *>(x),
+                                          incx, static_cast<std::complex<double> >(beta),
+                                          reinterpret_cast<std::complex<double> *>(y), incy);
+    ONEMKL_CATCH("")
+  }
+
+  void cHemv(Context* ctxt, onemklUplo uplo, int64_t n,
+                            float _Complex alpha, const float _Complex *a, int64_t lda,
+                            const float _Complex *x, int64_t incx, float _Complex beta,
+                            float _Complex *y, int64_t incy) {
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::hemv(ctxt->queue, convert(uplo), n,
+                                          static_cast<std::complex<float> >(alpha),
+                                          reinterpret_cast<const std::complex<float> *>(a),
+                                          lda, reinterpret_cast<const std::complex<float> *>(x), incx,
+                                          static_cast<std::complex<float> >(beta),
+                                          reinterpret_cast<std::complex<float> *>(y), incy);
+    ONEMKL_CATCH("")
+  }
+
+  void zHemv(Context* ctxt, onemklUplo uplo, int64_t n,
+                            double _Complex alpha, const double _Complex *a, int64_t lda,
+                            const double _Complex *x, int64_t incx, double _Complex beta,
+                            double _Complex *y, int64_t incy) {
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::hemv(ctxt->queue, convert(uplo), n,
+                                          static_cast<std::complex<double> >(alpha),
+                                          reinterpret_cast<const std::complex<double> *>(a),
+                                          lda, reinterpret_cast<const std::complex<double> *>(x), incx,
+                                          static_cast<std::complex<double> >(beta),
+                                          reinterpret_cast<std::complex<double> *>(y), incy);
+    ONEMKL_CATCH("")
+  }
+
+  void cHer(Context* ctxt, onemklUplo uplo, int64_t n, float alpha,
+                            const float _Complex *x, int64_t incx, float _Complex *a,
+                            int64_t lda) {
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::her(ctxt->queue, convert(uplo), n, alpha,
+                                        reinterpret_cast<const std::complex<float> *>(x), incx,
+                                        reinterpret_cast<std::complex<float> *>(a), lda);
+    ONEMKL_CATCH("")
+  }
+
+  void zHer(Context* ctxt, onemklUplo uplo, int64_t n, double alpha,
+                            const double _Complex *x, int64_t incx, double _Complex *a,
+                            int64_t lda) {
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::her(ctxt->queue, convert(uplo), n, alpha,
+                                        reinterpret_cast<const std::complex<double> *>(x), incx,
+                                        reinterpret_cast<std::complex<double> *>(a), lda);
+    ONEMKL_CATCH("")
+  }
+
+  void cHer2(Context* ctxt, onemklUplo uplo, int64_t n, float _Complex alpha,
+                            const float _Complex *x, int64_t incx, const float _Complex *y, int64_t incy,
+                            float _Complex *a, int64_t lda) {
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::her2(ctxt->queue, convert(uplo), n,
+                                          static_cast<std::complex<float> >(alpha),
+                                          reinterpret_cast<const std::complex<float> *>(x), incx,
+                                          reinterpret_cast<const std::complex<float> *>(y), incy,
+                                          reinterpret_cast<std::complex<float> *>(a), lda);
+    ONEMKL_CATCH("")
+  }
+
+  void zHer2(Context* ctxt, onemklUplo uplo, int64_t n, double _Complex alpha,
+                            const double _Complex *x, int64_t incx, const double _Complex *y, int64_t incy,
+                            double _Complex *a, int64_t lda) {
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::her2(ctxt->queue, convert(uplo), n,
+                                          static_cast<std::complex<double> >(alpha),
+                                          reinterpret_cast<const std::complex<double> *>(x), incx,
+                                          reinterpret_cast<const std::complex<double> *>(y), incy,
+                                          reinterpret_cast<std::complex<double> *>(a), lda);
+    ONEMKL_CATCH("")
+  }
+
+  void cHpmv(Context* ctxt, onemklUplo uplo, int64_t n, float _Complex alpha,
+                const float _Complex *a, const float _Complex *x, int64_t incx,
+                float _Complex beta, float _Complex *y, int64_t incy)
+  {
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::hpmv(ctxt->queue, convert(uplo), n,
+                                        static_cast<std::complex<float> >(alpha),
+                                        reinterpret_cast<const std::complex<float> *>(a),
+                                        reinterpret_cast<const std::complex<float> *>(x), incx,
+                                        static_cast<std::complex<float> >(beta),
+                                        reinterpret_cast<std::complex<float> *>(y), incy);
+    ONEMKL_CATCH("")
+  }
+  void zHpmv(Context* ctxt, onemklUplo uplo, int64_t n, double _Complex alpha,
+                const double _Complex *a, const double _Complex *x, int64_t incx,
+                double _Complex beta, double _Complex *y, int64_t incy)
+  {
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::hpmv(ctxt->queue, convert(uplo), n,
+                                        static_cast<std::complex<double> >(alpha),
+                                        reinterpret_cast<const std::complex<double> *>(a),
+                                        reinterpret_cast<const std::complex<double> *>(x), incx,
+                                        static_cast<std::complex<double> >(beta),
+                                        reinterpret_cast<std::complex<double> *>(y), incy);
+    ONEMKL_CATCH("")
+  }
+
+  void cHpr(Context* ctxt, onemklUplo uplo, int64_t n, float alpha,
+                const float _Complex *x, int64_t incx, float _Complex *a)
+  {
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::hpr(ctxt->queue, convert(uplo), n,
+                                        alpha, reinterpret_cast<const std::complex<float> *>(x), incx,
+                                        reinterpret_cast<std::complex<float> *>(a));
+    ONEMKL_CATCH("")
+  }
+  void zHpr(Context* ctxt, onemklUplo uplo, int64_t n, double alpha,
+                const double _Complex *x, int64_t incx, double _Complex *a)
+  {
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::hpr(ctxt->queue, convert(uplo), n,
+                                        alpha, reinterpret_cast<const std::complex<double> *>(x), incx,
+                                        reinterpret_cast<std::complex<double> *>(a));
+    ONEMKL_CATCH("")
+  }
+
+  void cHpr2(Context* ctxt, onemklUplo uplo, int64_t n, float _Complex alpha,
+                const float _Complex *x, int64_t incx, const float _Complex *y, int64_t incy, float _Complex *a)
+  {
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::hpr2(ctxt->queue, convert(uplo), n,
+                                        static_cast<std::complex<float> >(alpha),
+                                        reinterpret_cast<const std::complex<float> *>(x), incx,
+                                        reinterpret_cast<const std::complex<float> *>(y), incy,
+                                        reinterpret_cast<std::complex<float> *>(a));
+    ONEMKL_CATCH("")
+  }
+  void zHpr2(Context* ctxt, onemklUplo uplo, int64_t n, double _Complex alpha,
+                const double _Complex *x, int64_t incx, const double _Complex *y, int64_t incy, double _Complex *a)
+  {
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::hpr2(ctxt->queue, convert(uplo), n,
+                                        static_cast<std::complex<double> >(alpha),
+                                        reinterpret_cast<const std::complex<double> *>(x), incx,
+                                        reinterpret_cast<const std::complex<double> *>(y), incy,
+                                        reinterpret_cast<std::complex<double> *>(a));
+    ONEMKL_CATCH("")
+  }
+
+  void sSbmv(Context* ctxt, onemklUplo uplo, int64_t n, int64_t k,
+                            float alpha, const float *a, int64_t lda, const float *x,
+                            int64_t incx, float beta, float *y, int64_t incy) {
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::sbmv(ctxt->queue, convert(uplo), n, k,
+                                                    alpha, a, lda, x, incx, beta, y, incy);
+    ONEMKL_CATCH("")
+  }
+  void dSbmv(Context* ctxt, onemklUplo uplo, int64_t n, int64_t k,
+                            double alpha, const double *a, int64_t lda, const double *x,
+                            int64_t incx, double beta, double *y, int64_t incy) {
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::sbmv(ctxt->queue, convert(uplo), n, k,
+                                                    alpha, a, lda, x, incx, beta, y, incy);
+    ONEMKL_CATCH("")
+  }
+
+  void sSpmv(Context* ctxt, onemklUplo uplo, int64_t n,
+                            float alpha, const float *a, const float *x,
+                            int64_t incx, float beta, float *y, int64_t incy) {
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::spmv(ctxt->queue, convert(uplo), n,
+                                                    alpha, a, x, incx, beta, y, incy);
+    ONEMKL_CATCH("")
+  }
+  void dSpmv(Context* ctxt, onemklUplo uplo, int64_t n,
+                            double alpha, const double *a, const double *x,
+                            int64_t incx, double beta, double *y, int64_t incy) {
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::spmv(ctxt->queue, convert(uplo), n,
+                                                    alpha, a, x, incx, beta, y, incy);
+    ONEMKL_CATCH("")
+  }
+
+  void sSpr(Context* ctxt, onemklUplo uplo, int64_t n,
+                  float alpha, const float *x, int64_t incx, float *a) {
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::spr(ctxt->queue, convert(uplo), n, alpha, x, incx, a);
+    ONEMKL_CATCH("")
+  }
+  void dSpr(Context* ctxt, onemklUplo uplo, int64_t n,
+                  double alpha, const double *x, int64_t incx, double *a) {
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::spr(ctxt->queue, convert(uplo), n, alpha, x, incx, a);
+    ONEMKL_CATCH("")
+  }
+
+  void sSpr2(Context* ctxt, onemklUplo uplo, int64_t n,
+                  float alpha, const float *x, int64_t incx,
+                  const float *y, int64_t incy, float *a) {
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::spr2(ctxt->queue, convert(uplo), n, alpha,
+                  x, incx, y, incy, a);
+    ONEMKL_CATCH("")
+  }
+
+  void dSpr2(Context* ctxt, onemklUplo uplo, int64_t n,
+                  double alpha, const double *x, int64_t incx,
+                  const double *y, int64_t incy, double *a) {
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::spr2(ctxt->queue, convert(uplo), n, alpha,
+                  x, incx, y, incy, a);
+    ONEMKL_CATCH("")
+  }
+
+  void sSymv(Context* ctxt, onemklUplo uplo, int64_t n, float alpha,
+                            const float *a, int64_t lda, const float *x, int64_t incx, float beta,
+                            float *y, int64_t incy) {
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::symv(ctxt->queue, convert(uplo), n, alpha,
+                                                    a, lda, x, incx, beta, y, incy);
+    ONEMKL_CATCH("")
+  }
+
+  void dSymv(Context* ctxt, onemklUplo uplo, int64_t n, double alpha,
+                            const double *a, int64_t lda, const double *x, int64_t incx, double beta,
+                            double *y, int64_t incy) {
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::symv(ctxt->queue, convert(uplo), n, alpha,
+                                                    a, lda, x, incx, beta, y, incy);
+    ONEMKL_CATCH("")
+  }
+
+  void sSyr(Context* ctxt, onemklUplo uplo, int64_t n, float alpha,
+                            const float *x, int64_t incx, float *a, int64_t lda) {
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::syr(ctxt->queue, convert(uplo), n, alpha,
+                                                    x, incx, a, lda);
+    ONEMKL_CATCH("")
+  }
+
+  void dSyr(Context* ctxt, onemklUplo uplo, int64_t n, double alpha,
+                            const double *x, int64_t incx, double *a, int64_t lda) {
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::syr(ctxt->queue, convert(uplo), n, alpha,
+                                                    x, incx, a, lda);
+    ONEMKL_CATCH("")
+  }
+
+  void sSyr2(Context* ctxt, onemklUplo uplo, int64_t n, float alpha,
+                            const float *x, int64_t incx, const float *y, int64_t incy, float *a, int64_t lda)
+  {
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::syr2(ctxt->queue, convert(uplo), n, alpha, x, incx, y, incy, a, lda);
+    ONEMKL_CATCH("")
+  }
+  void dSyr2(Context* ctxt, onemklUplo uplo, int64_t n, double alpha,
+                            const double *x, int64_t incx, const double *y, int64_t incy, double *a, int64_t lda)
+
+  {
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::syr2(ctxt->queue, convert(uplo), n, alpha, x, incx, y, incy, a, lda);
+    ONEMKL_CATCH("")
+  }
+
+  void sTbmv(Context* ctxt, onemklUplo uplo,
+                            onemklTranspose trans, onemklDiag diag, int64_t n,
+                            int64_t k, const float *a, int64_t lda, float *x, int64_t incx) {
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::tbmv(ctxt->queue, convert(uplo), convert(trans),
+                                                        convert(diag), n, k, a, lda, x, incx);
+    ONEMKL_CATCH("")
+  }
+
+  void dTbmv(Context* ctxt, onemklUplo uplo,
+                            onemklTranspose trans, onemklDiag diag, int64_t n,
+                            int64_t k, const double *a, int64_t lda, double *x, int64_t incx) {
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::tbmv(ctxt->queue, convert(uplo), convert(trans),
+                                                    convert(diag), n, k, a, lda, x, incx);
+    ONEMKL_CATCH("")
+  }
+
+  void cTbmv(Context* ctxt, onemklUplo uplo,
+                              onemklTranspose trans, onemklDiag diag, int64_t n,
+                              int64_t k, const float _Complex *a, int64_t lda, float _Complex *x,
+                              int64_t incx) {
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::tbmv(ctxt->queue, convert(uplo), convert(trans),
+                                            convert(diag), n, k, reinterpret_cast<const std::complex<float> *>(a),
+                                            lda, reinterpret_cast<std::complex<float> *>(x), incx);
+    ONEMKL_CATCH("")
+  }
+
+  void zTbmv(Context* ctxt, onemklUplo uplo,
+                            onemklTranspose trans, onemklDiag diag, int64_t n,
+                            int64_t k, const double _Complex *a, int64_t lda, double _Complex *x,
+                            int64_t incx) {
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::tbmv(ctxt->queue, convert(uplo), convert(trans),
+                                        convert(diag), n, k, reinterpret_cast<const std::complex<double> *>(a),
+                                        lda, reinterpret_cast<std::complex<double> *>(x), incx);
+    ONEMKL_CATCH("")
+  }
+
+  void sTbsv(Context* ctxt, onemklUplo uplo,
+                              onemklTranspose trans, onemklDiag diag, int64_t n,
+                              int64_t k, const float *a, int64_t lda, float *x, int64_t incx) {
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::tbsv(ctxt->queue, convert(uplo), convert(trans),
+                                                        convert(diag), n, k, a, lda, x, incx);
+    ONEMKL_CATCH("")
+  }
+
+  void dTbsv(Context* ctxt, onemklUplo uplo,
+                              onemklTranspose trans, onemklDiag diag, int64_t n,
+                              int64_t k, const double *a, int64_t lda, double *x, int64_t incx) {
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::tbsv(ctxt->queue, convert(uplo), convert(trans),
+                                                    convert(diag), n, k, a, lda, x, incx);
+    ONEMKL_CATCH("")
+  }
+
+  void cTbsv(Context* ctxt, onemklUplo uplo,
+                              onemklTranspose trans, onemklDiag diag, int64_t n,
+                              int64_t k, const float _Complex *a, int64_t lda, float _Complex *x,
+                              int64_t incx) {
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::tbsv(ctxt->queue, convert(uplo), convert(trans),
+                                            convert(diag), n, k, reinterpret_cast<const std::complex<float> *>(a),
+                                            lda, reinterpret_cast<std::complex<float> *>(x), incx);
+    ONEMKL_CATCH("")
+  }
+
+  void zTbsv(Context* ctxt, onemklUplo uplo,
+                              onemklTranspose trans, onemklDiag diag, int64_t n,
+                              int64_t k, const double _Complex *a, int64_t lda, double _Complex *x,
+                              int64_t incx) {
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::tbsv(ctxt->queue, convert(uplo), convert(trans),
+                                        convert(diag), n, k, reinterpret_cast<const std::complex<double> *>(a),
+                                        lda, reinterpret_cast<std::complex<double> *>(x), incx);
+    ONEMKL_CATCH("")
+  }
+
+  void sTpmv(Context* ctxt, onemklUplo uplo,
+                  onemklTranspose trans, onemklDiag diag, int64_t n,
+                  const float *a, float *x, int64_t incx) {
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::tpmv(ctxt->queue, convert(uplo), convert(trans),
+                                                    convert(diag), n, a, x, incx);
+    ONEMKL_CATCH("")
+  }
+
+  void dTpmv(Context* ctxt, onemklUplo uplo,
+                  onemklTranspose trans, onemklDiag diag, int64_t n,
+                  const double *a, double *x, int64_t incx) {
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::tpmv(ctxt->queue, convert(uplo), convert(trans),
+                                                    convert(diag), n, a, x, incx);
+    ONEMKL_CATCH("")
+  }
+
+  void cTpmv(Context* ctxt, onemklUplo uplo,
+                  onemklTranspose trans, onemklDiag diag, int64_t n,
+                  const float _Complex *a, float _Complex *x, int64_t incx) {
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::tpmv(ctxt->queue, convert(uplo), convert(trans),
+                                            convert(diag), n, reinterpret_cast<const std::complex<float> *>(a),
+                                            reinterpret_cast<std::complex<float> *>(x), incx);
+    ONEMKL_CATCH("")
+  }
+
+  void zTpmv(Context* ctxt, onemklUplo uplo,
+                  onemklTranspose trans, onemklDiag diag, int64_t n,
+                  const double _Complex *a, double _Complex *x, int64_t incx) {
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::tpmv(ctxt->queue, convert(uplo), convert(trans),
+                                        convert(diag), n, reinterpret_cast<const std::complex<double> *>(a),
+                                        reinterpret_cast<std::complex<double> *>(x), incx);
+    ONEMKL_CATCH("")
+  }
+
+  void sTpsv(Context* ctxt, onemklUplo uplo,
+                  onemklTranspose trans, onemklDiag diag, int64_t m,
+                  const float *a, float *x, int64_t incx) {
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::tpsv(ctxt->queue, convert(uplo), convert(trans),
+                                                    convert(diag), m, a, x, incx);
+    ONEMKL_CATCH("")
+  }
+
+  void dTpsv(Context* ctxt, onemklUplo uplo,
+                  onemklTranspose trans, onemklDiag diag, int64_t m,
+                const double *a, double *x, int64_t incx) {
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::tpsv(ctxt->queue, convert(uplo), convert(trans),
+                                                    convert(diag), m, a, x, incx);
+    ONEMKL_CATCH("")
+  }
+
+  void cTpsv(Context* ctxt, onemklUplo uplo,
+                  onemklTranspose trans, onemklDiag diag, int64_t m,
+                  const float _Complex *a, float _Complex *x, int64_t incx) {
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::tpsv(ctxt->queue, convert(uplo), convert(trans),
+                                            convert(diag), m, reinterpret_cast<const std::complex<float> *>(a),
+                                            reinterpret_cast<std::complex<float> *>(x), incx);
+    ONEMKL_CATCH("")
+  }
+
+  void zTpsv(Context* ctxt, onemklUplo uplo,
+                  onemklTranspose trans, onemklDiag diag, int64_t m,
+                  const double _Complex *a, double _Complex *x, int64_t incx) {
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::tpsv(ctxt->queue, convert(uplo), convert(trans),
+                                        convert(diag), m, reinterpret_cast<const std::complex<double> *>(a),
+                                        reinterpret_cast<std::complex<double> *>(x), incx);
+    ONEMKL_CATCH("")
+  }
+
+// trmv
+  void sTrmv(Context* ctxt, onemklUplo uplo, onemklTranspose trans,
+                              onemklDiag diag, int64_t n, const float *a, int64_t lda, float *x,
+                              int64_t incx) {
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::trmv(ctxt->queue, convert(uplo), convert(trans),
+                                        convert(diag), n, a, lda, x, incx);
+    ONEMKL_CATCH("")
+  }
+
+  void dTrmv(Context* ctxt, onemklUplo uplo, onemklTranspose trans,
+                              onemklDiag diag, int64_t n, const double *a, int64_t lda, double *x,
+                              int64_t incx) {
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::trmv(ctxt->queue, convert(uplo), convert(trans),
+                                        convert(diag), n, a, lda, x, incx);
+    ONEMKL_CATCH("")
+  }
+
+  void cTrmv(Context* ctxt, onemklUplo uplo, onemklTranspose trans,
+                              onemklDiag diag, int64_t n, const float _Complex *a, int64_t lda, float _Complex *x,
+                              int64_t incx) {
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::trmv(ctxt->queue, convert(uplo), convert(trans),
+                                        convert(diag), n, reinterpret_cast<const std::complex<float> *>(a),
+                                        lda, reinterpret_cast<std::complex<float> *>(x), incx);
+    ONEMKL_CATCH("")
+  }
+
+  void zTrmv(Context* ctxt, onemklUplo uplo, onemklTranspose trans,
+                              onemklDiag diag, int64_t n, const double _Complex *a, int64_t lda, double _Complex *x,
+                              int64_t incx) {
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::trmv(ctxt->queue, convert(uplo), convert(trans),
+                                        convert(diag), n, reinterpret_cast<const std::complex<double> *>(a),
+                                        lda, reinterpret_cast<std::complex<double> *>(x), incx);
+    ONEMKL_CATCH("")
+  }
+
+// trsv
+  void sTrsv(Context* ctxt, onemklUplo uplo, onemklTranspose trans,
+                              onemklDiag diag, int64_t n, const float *a, int64_t lda, float *x,
+                              int64_t incx) {
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::trsv(ctxt->queue, convert(uplo), convert(trans),
+                                          convert(diag), n, a, lda, x, incx);
+    ONEMKL_CATCH("")
+  }
+
+  void dTrsv(Context* ctxt, onemklUplo uplo, onemklTranspose trans,
+                              onemklDiag diag, int64_t n, const double *a, int64_t lda, double *x,
+                              int64_t incx) {
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::trsv(ctxt->queue, convert(uplo), convert(trans),
+                                          convert(diag), n, a, lda, x, incx);
+    ONEMKL_CATCH("")
+  }
+
+  void cTrsv(Context* ctxt, onemklUplo uplo, onemklTranspose trans,
+                              onemklDiag diag, int64_t n, const float  _Complex *a, int64_t lda,
+                              float _Complex *x, int64_t incx) {
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::trsv(ctxt->queue, convert(uplo), convert(trans),
+                                          convert(diag), n, reinterpret_cast<const std::complex<float> *>(a),
+                                          lda, reinterpret_cast<std::complex<float> *>(x), incx);
+    ONEMKL_CATCH("")
+  }
+
+  void zTrsv(Context* ctxt, onemklUplo uplo, onemklTranspose trans,
+                              onemklDiag diag, int64_t n, const double _Complex *a, int64_t lda,
+                              double _Complex *x, int64_t incx) {
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::trsv(ctxt->queue, convert(uplo), convert(trans),
+                                          convert(diag), n, reinterpret_cast<const std::complex<double> *>(a),
+                                          lda, reinterpret_cast<std::complex<double> *>(x), incx);
+    ONEMKL_CATCH("")
+  }
 }// end of namespace
