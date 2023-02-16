@@ -5,7 +5,6 @@
 add_library(MKLShim SHARED
     Context.cpp
     Stream.cpp
-    sgemm.cpp
     onemklblas.cpp)
 target_include_directories(MKLShim
     PUBLIC

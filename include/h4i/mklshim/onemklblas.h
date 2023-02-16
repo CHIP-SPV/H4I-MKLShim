@@ -344,4 +344,108 @@ namespace H4I::MKLShim
   void zTrsv(Context* ctxt, onemklUplo uplo, onemklTranspose trans,
                   onemklDiag diag, int64_t n, const double _Complex *a, int64_t lda,
                   double _Complex *x, int64_t incx);
+
+  /*void hGemm(Context* ctxt, onemklTranspose transA,
+                            onemklTranspose transB, int64_t m, int64_t n,
+                            int64_t k, sycl::half alpha, const sycl::half *A, int64_t lda,
+                            const sycl::half *B, int64_t ldb, sycl::half beta, sycl::half *C,
+                            int64_t ldc);*/
+  void sGemm(Context* ctxt, onemklTranspose transA,
+                            onemklTranspose transB, int64_t m, int64_t n,
+                            int64_t k, float alpha, const float *A, int64_t lda,
+                            const float *B, int64_t ldb, float beta, float *C,
+                            int64_t ldc);
+
+  void dGemm(Context* ctxt, onemklTranspose transA,
+                            onemklTranspose transB, int64_t m, int64_t n,
+                            int64_t k, double alpha, const double *A,
+                            int64_t lda, const double *B, int64_t ldb,
+                            double beta, double *C, int64_t ldc);
+
+  void cGemm(Context* ctxt, onemklTranspose transA,
+                            onemklTranspose transB, int64_t m, int64_t n,
+                            int64_t k, float _Complex alpha,
+                            const float _Complex *A, int64_t lda,
+                            const float _Complex *B, int64_t ldb,
+                            float _Complex beta, float _Complex *C,
+                            int64_t ldc);
+
+  void zGemm(Context* ctxt, onemklTranspose transA,
+                            onemklTranspose transB, int64_t m, int64_t n,
+                            int64_t k, double _Complex alpha,
+                            const double _Complex *A, int64_t lda,
+                            const double _Complex *B, int64_t ldb,
+                            double _Complex beta, double _Complex *C,
+                            int64_t ldc);
+
+  void cHerk(Context* ctxt, onemklUplo uplo, onemklTranspose trans, int64_t n, int64_t k,
+                  float alpha, const float _Complex* a, int64_t lda, float beta, float _Complex* c, int64_t ldc);
+  void zHerk(Context* ctxt, onemklUplo uplo, onemklTranspose trans, int64_t n, int64_t k,
+                  double alpha, const double _Complex* a, int64_t lda, double beta, double _Complex* c, int64_t ldc);
+
+  void cHer2k(Context* ctxt, onemklUplo uplo, onemklTranspose trans, int64_t n, int64_t k,
+                  float _Complex alpha, const float _Complex* a, int64_t lda, const float _Complex* b, int64_t ldb,
+                  float beta, float _Complex* c, int64_t ldc);
+  void zHer2k(Context* ctxt, onemklUplo uplo, onemklTranspose trans, int64_t n, int64_t k,
+                  double _Complex alpha, const double _Complex* a, int64_t lda,  const double _Complex* b, int64_t ldb,
+                  double beta, double _Complex* c, int64_t ldc);
+
+  void sSymm(Context* ctxt, onemklSideMode side, onemklUplo uplo, int64_t m, int64_t n,
+                  float alpha, const float* a, int64_t lda, const float* b, int64_t ldb,
+                  float beta, float* c, int64_t ldc);
+  void dSymm(Context* ctxt, onemklSideMode side, onemklUplo uplo, int64_t m, int64_t n,
+                  double alpha, const double* a, int64_t lda, const double* b, int64_t ldb,
+                  double beta, double* c, int64_t ldc);
+  void cSymm(Context* ctxt, onemklSideMode side, onemklUplo uplo, int64_t m, int64_t n,
+                  float _Complex alpha, const float _Complex* a, int64_t lda, const float _Complex* b, int64_t ldb,
+                  float _Complex beta, float _Complex* c, int64_t ldc);
+  void zSymm(Context* ctxt, onemklSideMode side, onemklUplo uplo, int64_t m, int64_t n,
+                  double _Complex alpha, const double _Complex* a, int64_t lda, const double _Complex* b, int64_t ldb,
+                  double _Complex beta, double _Complex* c, int64_t ldc);
+
+  void sSyrk(Context* ctxt, onemklUplo uplo, onemklTranspose trans, int64_t n, int64_t k,
+                  float alpha, const float* a, int64_t lda, float beta, float* c, int64_t ldc);
+  void dSyrk(Context* ctxt, onemklUplo uplo, onemklTranspose trans, int64_t n, int64_t k,
+                  double alpha, const double* a, int64_t lda, double beta, double* c, int64_t ldc);
+  void cSyrk(Context* ctxt, onemklUplo uplo, onemklTranspose trans, int64_t n, int64_t k,
+                  float _Complex alpha, const float _Complex* a, int64_t lda, float _Complex beta, float _Complex* c, int64_t ldc);
+  void zSyrk(Context* ctxt, onemklUplo uplo, onemklTranspose trans, int64_t n, int64_t k,
+                  double _Complex alpha, const double _Complex* a, int64_t lda, double _Complex beta, double _Complex* c, int64_t ldc);
+
+  void sSyr2k(Context* ctxt, onemklUplo uplo, onemklTranspose trans, int64_t n, int64_t k,
+                  float alpha, const float* a, int64_t lda, const float* b, int64_t ldb, float beta, float* c, int64_t ldc);
+  void dSyr2k(Context* ctxt, onemklUplo uplo, onemklTranspose trans, int64_t n, int64_t k,
+                  double alpha, const double* a, int64_t lda, const double* b, int64_t ldb, double beta, double* c, int64_t ldc);
+  void cSyr2k(Context* ctxt, onemklUplo uplo, onemklTranspose trans, int64_t n, int64_t k,
+                  float _Complex alpha, const float _Complex* a, int64_t lda, const float _Complex* b, int64_t ldb,
+                  float _Complex beta, float _Complex* c, int64_t ldc);
+  void zSyr2k(Context* ctxt, onemklUplo uplo, onemklTranspose trans, int64_t n, int64_t k,
+                  double _Complex alpha, const double _Complex* a, int64_t lda, const double _Complex* b, int64_t ldb,
+                  double _Complex beta, double _Complex* c, int64_t ldc);
+
+  void cHemm(Context* ctxt, onemklSideMode side, onemklUplo uplo, int64_t m, int64_t n,
+                  float _Complex alpha, const float _Complex* a, int64_t lda, const float _Complex* b, int64_t ldb,
+                  float _Complex beta, float _Complex* c, int64_t ldc);
+  void zHemm(Context* ctxt, onemklSideMode side, onemklUplo uplo, int64_t m, int64_t n,
+                  double _Complex alpha, const double _Complex* a, int64_t lda, const double _Complex* b, int64_t ldb,
+                  double _Complex beta, double _Complex* c, int64_t ldc);
+
+  void sTrmm(Context* ctxt, onemklSideMode side, onemklUplo uplo, onemklTranspose trans, onemklDiag diag,
+                  int64_t m, int64_t n, float alpha, const float *a, int64_t lda, float *b, int64_t ldb);
+  void dTrmm(Context* ctxt, onemklSideMode side, onemklUplo uplo, onemklTranspose trans, onemklDiag diag,
+                  int64_t m, int64_t n, double alpha, const double *a, int64_t lda, double *b, int64_t ldb);
+  void cTrmm(Context* ctxt, onemklSideMode side, onemklUplo uplo, onemklTranspose trans, onemklDiag diag,
+                  int64_t m, int64_t n, float _Complex alpha, const float _Complex*a, int64_t lda, float _Complex*b, int64_t ldb);
+  void zTrmm(Context* ctxt, onemklSideMode side, onemklUplo uplo, onemklTranspose trans, onemklDiag diag,
+                  int64_t m, int64_t n, double _Complex alpha, const double _Complex *a, int64_t lda, double _Complex *b, int64_t ldb);
+
+  void sTrsm(Context* ctxt, onemklSideMode side, onemklUplo uplo, onemklTranspose trans, onemklDiag diag,
+                  int64_t m, int64_t n, float alpha, const float *a, int64_t lda, float *b, int64_t ldb);
+  void dTrsm(Context* ctxt, onemklSideMode side, onemklUplo uplo, onemklTranspose trans, onemklDiag diag,
+                  int64_t m, int64_t n, double alpha, const double *a, int64_t lda, double *b, int64_t ldb);
+  void cTrsm(Context* ctxt, onemklSideMode side, onemklUplo uplo, onemklTranspose trans, onemklDiag diag,
+                  int64_t m, int64_t n, float _Complex alpha, const float _Complex*a, int64_t lda, float _Complex*b, int64_t ldb);
+  void zTrsm(Context* ctxt, onemklSideMode side, onemklUplo uplo, onemklTranspose trans, onemklDiag diag,
+                  int64_t m, int64_t n, double _Complex alpha, const double _Complex *a, int64_t lda, double _Complex *b, int64_t ldb);
+
 } // namespace
