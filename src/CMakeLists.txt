@@ -26,7 +26,6 @@ get_target_property(MKL_DPCPP_INTERFACE_LINK_LIBS MKL::MKL_DPCPP INTERFACE_LINK_
 target_link_libraries(MKLShim
     PRIVATE
         MKLShimCommonConfig
-    PUBLIC
         ${MKL_DPCPP_INTERFACE_LINK_LIBS}
     )
 
