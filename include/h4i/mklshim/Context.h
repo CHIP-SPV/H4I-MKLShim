@@ -5,6 +5,11 @@
 namespace H4I::MKLShim
 {
 
+enum Backend{
+  level0, // default
+  opencl
+};
+extern Backend currentBackend;
 struct Context;
 
 Context* Create(unsigned long const* lzHandles, int numOfHandles);
