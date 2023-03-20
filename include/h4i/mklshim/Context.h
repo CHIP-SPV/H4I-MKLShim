@@ -12,7 +12,7 @@ enum Backend{
 extern Backend currentBackend;
 struct Context;
 
-Context* Create(unsigned long const* lzHandles, int numOfHandles);
+Context* Create(unsigned long const* lzHandles, int numOfHandles, const char* backendName);
 void Destroy(Context* context);
 
 } // namespace
