@@ -27,17 +27,8 @@ target_compile_features(MKLShimCommonConfig
 # We use the SYCL version of MKL, so ensure that our compiler
 # knows how to compile SYCL.
 # TODO this *only* supports the Intel C++ compiler.
-find_package(IntelDPCPP REQUIRED)
-# Note that the current Intel CMake support sets DPC++-related
-# compiler flags that cause the compiler to issue deprecation
-# warnings.  So - strip out the DPC++ flags.
-string(REPLACE "--dpcpp " "" NEW_SYCL_FLAGS "${SYCL_FLAGS}")
-set(SYCL_FLAGS ${NEW_SYCL_FLAGS} CACHE STRING "SYCL flags for the compiler" FORCE)
-string(REPLACE "--dpcpp " "" NEW_CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-set(CMAKE_CXX_FLAGS ${NEW_CMAKE_CXX_FLAGS})
-
-# We use MKL for implementations of functions we expose.
-if(IntelDPCPP_FOUND)
+find_package(IntelSYCL REQUIRED)
+if(IntelSYCL_FOUND)
     # Ensure that when we look for MKL, we import the
     # support for using its SYCL version.
     # Despite the name of the variable, we are only
