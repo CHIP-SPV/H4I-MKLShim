@@ -5,7 +5,6 @@
 #include "h4i/mklshim/types.h"
 #include "h4i/mklshim/Context.h"
 #include "h4i/mklshim/Stream.h"
-#include "h4i/mklshim/sgemm.h"
 
 // This is a workaround to flush MKL submissions into Level-zero queue,
 // using unspecified but guaranteed behavior of intel-sycl runtime.
@@ -24,8 +23,7 @@
     try\
     {
 
-#define ONEMKL_CATCH(msg) \
-      __FORCE_MKL_FLUSH__(status);\
+#define __CATCH__(msg) \ 
     }\
     catch(sycl::exception const& e)\
     {\
@@ -37,3 +35,10 @@
       std::cerr << msg<<" exception: " << e.what() << std::endl;\
       throw;\
     }
+
+#define ONEMKL_CATCH(msg) \
+    __FORCE_MKL_FLUSH__(status); \
+    __CATCH__(msg)
+
+#define ONEMKL_CATCH_NO_FLUSH(msg) \
+    __CATCH__(msg)

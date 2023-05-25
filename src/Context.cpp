@@ -9,6 +9,7 @@ namespace H4I::MKLShim
 
 // Indicates current backend used
 Backend currentBackend;
+std::unordered_map<uintptr_t, Context*> context_tbl;
 
 Context* Update(Context* ctxt, unsigned long const* backendHandles, int numOfHandles, const char* backendName) {
     // Obtain the handles to the LZ constructs.
@@ -43,14 +44,21 @@ Context* Update(Context* ctxt, unsigned long const* backendHandles, int numOfHan
         ctxt->context = sycl::ext::oneapi::level_zero::make_context(sycl_devices, (pi_native_handle)hContext, 1);
         ctxt->queue = sycl::ext::oneapi::level_zero::make_queue(ctxt->context, ctxt->device, (pi_native_handle)hQueue, 1);
     }
+    // add context to the table
+    context_tbl[backendHandles[3]] = ctxt;
     return ctxt;
 }
 
 Context*
-Create(unsigned long const* lzHandles, int numOfHandles, const char* backendName)
+Create(unsigned long const* nativeHandles, int numOfHandles, const char* backendName)
 {
-    auto ctxt = new Context();
-    return Update(ctxt, lzHandles, numOfHandles, backendName);
+    Context *ctxt;
+    if (numOfHandles == 4 && (context_tbl.find(nativeHandles[3]) != context_tbl.end())) {
+        ctxt = context_tbl[nativeHandles[3]];
+    } else {
+        ctxt = Update(new Context(), nativeHandles, numOfHandles, backendName);
+    }
+    return ctxt;
 }
 
 void
