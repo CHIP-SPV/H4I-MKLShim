@@ -15,50 +15,13 @@ SetStream(Context* ctxt, const std::array<uintptr_t, nHandles>& nativeHandles)
 {
     if(ctxt != nullptr)
     {
-        // Obtain the native handles.
-        auto hPlatform = (ze_driver_handle_t)nativeHandles[0];
-        auto hDevice = (ze_device_handle_t)nativeHandles[1];
-        auto hContext = (ze_context_handle_t)nativeHandles[2];
-        auto hQueue = (ze_command_queue_handle_t)nativeHandles[3];
-
-        // Build SYCL objects from native handles.
-        constexpr const auto Backend = sycl::backend::ext_oneapi_level_zero;
-        sycl::backend_input_t<Backend, sycl::platform> mpinput {hPlatform};
-        ctxt->platform = sycl::make_platform<Backend>(mpinput);
-
-        sycl::backend_input_t<Backend, sycl::device> mdinput {hDevice};
-        ctxt->device = sycl::make_device<Backend>(mdinput);
-
-        std::vector<sycl::device> devs;
-        devs.push_back(ctxt->device);
-        sycl::backend_input_t<Backend, sycl::context> mcinput {hContext, devs};
-        ctxt->context = sycl::make_context<Backend>(mcinput);
-
-        auto asyncExceptionHandler = [](sycl::exception_list exceptions) {
-            // Report all asynchronous exceptions that occurred.
-            for(std::exception_ptr const& e : exceptions)
-            {
-                try
-                {
-                    std::rethrow_exception(e);
-                } 
-                catch(std::exception& e)
-                {
-                    std::cerr << "Async exception: " << e.what() << std::endl;
-                }
-            }
-
-            // Rethrow the first asynchronous exception.
-            for(std::exception_ptr const& e : exceptions)
-            {
-                std::rethrow_exception(e);
-            }
-        };
-
-        sycl::backend_input_t<Backend, sycl::queue> mqinput(hQueue, ctxt->device);
-        ctxt->queue = sycl::make_queue<Backend>(mqinput,
-                                ctxt->context,
-                                asyncExceptionHandler);
+        if (context_tbl.find(nativeHandles[3]) != context_tbl.end()) {
+            ctxt = context_tbl[nativeHandles[3]];
+        } else {
+            // new context hence update corresponding sycl queue and other structures .....
+            std::string backendName = (currentBackend == level0) ? "level0" : "opencl";
+            Update(ctxt, nativeHandles.data(), nativeHandles.size(), backendName.c_str());
+        }
     }
 }
 
