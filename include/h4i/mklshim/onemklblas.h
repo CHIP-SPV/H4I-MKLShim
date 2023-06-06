@@ -4,28 +4,6 @@
 
 namespace H4I::MKLShim
 {
-  typedef enum {
-    ONEMKL_TRANSPOSE_NONTRANS,
-    ONEMKL_TRANSPOSE_TRANS,
-    ONEMLK_TRANSPOSE_CONJTRANS
-  } onemklTranspose;
-
-  typedef enum {
-    ONEMKL_UPLO_UPPER,
-    ONEMKL_UPLO_LOWER
-  } onemklUplo;
-
-  typedef enum {
-    ONEMKL_SIDE_LEFT,
-    ONEMKL_SIDE_RIGHT,
-    ONEMKL_SIDE_BOTH
-  } onemklSideMode;
-
-  typedef enum {
-    ONEMKL_DIAG_NONUNIT,
-    ONEMKL_DIAG_UNIT
-  } onemklDiag;
-
   void sDot(Context* ctxt, int64_t n, const float *x, int64_t incx, const float *y,
             int64_t incy, float *result);
   void dDot(Context* ctxt, int64_t n, const double *x, int64_t incx, const double *y,
