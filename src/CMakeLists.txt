@@ -40,6 +40,7 @@ install(FILES
             ${CMAKE_SOURCE_DIR}/include/h4i/mklshim/Context.h
             ${CMAKE_SOURCE_DIR}/include/h4i/mklshim/Stream.h
             ${CMAKE_SOURCE_DIR}/include/h4i/mklshim/types.h
+            ${CMAKE_SOURCE_DIR}/include/h4i/mklshim/common.h
             ${CMAKE_SOURCE_DIR}/include/h4i/mklshim/onemklblas.h
             ${CMAKE_SOURCE_DIR}/include/h4i/mklshim/onemklsolver.h
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/h4i/mklshim/

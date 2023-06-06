@@ -441,6 +441,7 @@ namespace H4I::MKLShim
   //--------------------------------------------------------
   // ===================== Level-2 =========================
   //--------------------------------------------------------
+  //TODO:convert functions should be moved to common place
   oneapi::mkl::transpose convert(onemklTranspose val) {
     switch (val) {
       case ONEMKL_TRANSPOSE_NONTRANS:
