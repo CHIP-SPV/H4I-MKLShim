@@ -4,6 +4,7 @@
 # Specify how to build the library.
 add_library(MKLShim SHARED
     Context.cpp
+    Common.cpp
     Stream.cpp
     onemklblas.cpp
     onemklsolver.cpp)
