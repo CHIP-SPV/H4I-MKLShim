@@ -6,7 +6,7 @@
 #include "h4i/mklshim/onemklblas.h"
 #include "h4i/mklshim/impl/Context.h"
 #include "h4i/mklshim/impl/Operation.h"
-
+#include "h4i/mklshim/common.h"
 
 namespace H4I::MKLShim
 {
@@ -441,44 +441,6 @@ namespace H4I::MKLShim
   //--------------------------------------------------------
   // ===================== Level-2 =========================
   //--------------------------------------------------------
-  //TODO:convert functions should be moved to common place
-  oneapi::mkl::transpose convert(onemklTranspose val) {
-    switch (val) {
-      case ONEMKL_TRANSPOSE_NONTRANS:
-          return oneapi::mkl::transpose::nontrans;
-      case ONEMKL_TRANSPOSE_TRANS:
-          return oneapi::mkl::transpose::trans;
-      case ONEMLK_TRANSPOSE_CONJTRANS:
-          return oneapi::mkl::transpose::conjtrans;
-    }
-  }
-
-  oneapi::mkl::uplo convert(onemklUplo val) {
-    switch(val) {
-      case ONEMKL_UPLO_UPPER:
-        return oneapi::mkl::uplo::upper;
-      case ONEMKL_UPLO_LOWER:
-        return oneapi::mkl::uplo::lower;
-    }
-  }
-
-  oneapi::mkl::side convert(onemklSideMode val) {
-    switch(val) {
-      case ONEMKL_SIDE_LEFT:
-        return oneapi::mkl::side::left;
-      case ONEMKL_SIDE_RIGHT:
-        return oneapi::mkl::side::right;
-    }
-  }
-
-  oneapi::mkl::diag convert(onemklDiag val) {
-    switch(val) {
-      case ONEMKL_DIAG_NONUNIT:
-        return oneapi::mkl::diag::nonunit;
-      case ONEMKL_DIAG_UNIT:
-        return oneapi::mkl::diag::unit;
-    }
-  }
   void sGbmv(Context* ctxt, onemklTranspose trans,
                     int64_t m, int64_t n, int64_t kl, int64_t ku,
                     float alpha, const float *a, int64_t lda,
