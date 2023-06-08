@@ -880,7 +880,7 @@ namespace H4I::MKLShim
     ONEMKL_CATCH("Dsytrf")
   }
   void Chetrd(Context* ctxt, onemklUplo uplo, int64_t n, float _Complex* A, int64_t lda, float* d, float* e, float _Complex* tau,
-             float* scratchpad, int64_t scratchpad_size){
+             float _Complex* scratchpad, int64_t scratchpad_size){
     ONEMKL_TRY
     auto status = oneapi::mkl::lapack::hetrd(ctxt->queue, convert(uplo), n, reinterpret_cast<std::complex<float>*>(A), lda, d, e,
                                              reinterpret_cast<std::complex<float>*>(tau),
@@ -888,7 +888,7 @@ namespace H4I::MKLShim
     ONEMKL_CATCH("Chetrd")
   }
   void Zhetrd(Context* ctxt, onemklUplo uplo, int64_t n, double _Complex* A, int64_t lda, double* d, double* e, double _Complex* tau,
-             double* scratchpad, int64_t scratchpad_size){
+             double _Complex* scratchpad, int64_t scratchpad_size){
     ONEMKL_TRY
     auto status = oneapi::mkl::lapack::hetrd(ctxt->queue, convert(uplo), n, reinterpret_cast<std::complex<double>*>(A), lda, d, e,
                                              reinterpret_cast<std::complex<double>*>(tau),
