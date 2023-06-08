@@ -161,13 +161,13 @@ namespace H4I::MKLShim
   int64_t Dpotrs_ScPadSz(Context* ctxt, onemklUplo uplo, int64_t n, int64_t nrhs, int64_t lda, int64_t ldb);
   int64_t Cpotrs_ScPadSz(Context* ctxt, onemklUplo uplo, int64_t n, int64_t nrhs, int64_t lda, int64_t ldb);
   int64_t Zpotrs_ScPadSz(Context* ctxt, onemklUplo uplo, int64_t n, int64_t nrhs, int64_t lda, int64_t ldb);
-  void Spotrs(Context* ctxt, onemklUplo uplo, int64_t n, int64_t nrhs, float* A, int64_t lda, std::int64_t *ipiv,
+  void Spotrs(Context* ctxt, onemklUplo uplo, int64_t n, int64_t nrhs, float* A, int64_t lda,
               float* B, int64_t ldb, float* scratchpad, int64_t scratchpad_size);
-  void Dpotrs(Context* ctxt, onemklUplo uplo, int64_t n, int64_t nrhs, double* A, int64_t lda, std::int64_t *ipiv,
+  void Dpotrs(Context* ctxt, onemklUplo uplo, int64_t n, int64_t nrhs, double* A, int64_t lda,
               double* B, int64_t ldb, double* scratchpad, int64_t scratchpad_size);
-  void Cpotrs(Context* ctxt, onemklUplo uplo, int64_t n, int64_t nrhs, float _Complex* A, int64_t lda, std::int64_t *ipiv,
+  void Cpotrs(Context* ctxt, onemklUplo uplo, int64_t n, int64_t nrhs, float _Complex* A, int64_t lda,
               float _Complex* B, int64_t ldb, float _Complex* scratchpad, int64_t scratchpad_size);
-  void Zpotrs(Context* ctxt, onemklUplo uplo, int64_t n, int64_t nrhs, double _Complex* A, int64_t lda, std::int64_t *ipiv,
+  void Zpotrs(Context* ctxt, onemklUplo uplo, int64_t n, int64_t nrhs, double _Complex* A, int64_t lda,
               double _Complex* B, int64_t ldb, double _Complex* scratchpad, int64_t scratchpad_size);
 
   //gesvd
@@ -218,7 +218,7 @@ namespace H4I::MKLShim
   int64_t Zhetrd_ScPadSz(Context* ctxt, onemklUplo uplo, int64_t n, int64_t lda);
   void Ssytrd(Context* ctxt, onemklUplo uplo, int64_t n, float* A, int64_t lda, float* d, float* e, float* tau, float* scratchpad, int64_t scratchpad_size);
   void Dsytrd(Context* ctxt, onemklUplo uplo, int64_t n, double* A, int64_t lda, double* d, double* e, double* tau, double* scratchpad, int64_t scratchpad_size);
-  void Chetrd(Context* ctxt, onemklUplo uplo, int64_t n, float _Complex* A, int64_t lda, float* d, float* e, float _Complex* tau, float* scratchpad, int64_t scratchpad_size);
-  void Zhetrd(Context* ctxt, onemklUplo uplo, int64_t n, double _Complex* A, int64_t lda, double* d, double* e, double _Complex* tau, double* scratchpad, int64_t scratchpad_size);
+  void Chetrd(Context* ctxt, onemklUplo uplo, int64_t n, float _Complex* A, int64_t lda, float* d, float* e, float _Complex* tau, float _Complex* scratchpad, int64_t scratchpad_size);
+  void Zhetrd(Context* ctxt, onemklUplo uplo, int64_t n, double _Complex* A, int64_t lda, double* d, double* e, double _Complex* tau, double _Complex* scratchpad, int64_t scratchpad_size);
 
 }// H4I::MKLShim
