@@ -49,9 +49,9 @@ struct Context;
   } onemklJob;
 
   typedef enum {
-      ONEMKL_TRANSPOSE_NONTRANS,
-      ONEMKL_TRANSPOSE_TRANS,
-      ONEMLK_TRANSPOSE_CONJTRANS
+    ONEMKL_TRANSPOSE_NONTRANS,
+    ONEMKL_TRANSPOSE_TRANS,
+    ONEMLK_TRANSPOSE_CONJTRANS
   } onemklTranspose;
 
 } // namespace

@@ -895,4 +895,56 @@ namespace H4I::MKLShim
                                              reinterpret_cast<std::complex<double>*>(scratchpad), scratchpad_size);
     ONEMKL_CATCH("Zhetrd")
   }
+
+  // sygvd/hegvd
+  int64_t Ssygvd_ScPadSz(Context* ctxt, int64_t itype, onemklJob job, onemklUplo uplo, int64_t n, int64_t lda, int64_t ldb){
+    ONEMKL_TRY
+    auto size = oneapi::mkl::lapack::sygvd_scratchpad_size<float>(ctxt->queue, itype, convert(job), convert(uplo), n, lda, ldb);
+    ONEMKL_CATCH_NO_FLUSH("Ssygvd_ScPadSz")
+  }
+  int64_t Dsygvd_ScPadSz(Context* ctxt, int64_t itype, onemklJob job, onemklUplo uplo, int64_t n, int64_t lda, int64_t ldb){
+    ONEMKL_TRY
+    auto size = oneapi::mkl::lapack::sygvd_scratchpad_size<double>(ctxt->queue, itype, convert(job), convert(uplo), n, lda, ldb);
+    ONEMKL_CATCH_NO_FLUSH("Dsygvd_ScPadSz")
+  }
+  int64_t Chegvd_ScPadSz(Context* ctxt, int64_t itype, onemklJob job, onemklUplo uplo, int64_t n, int64_t lda, int64_t ldb){
+    ONEMKL_TRY
+    auto size = oneapi::mkl::lapack::hegvd_scratchpad_size<std::complex<float>>(ctxt->queue, itype, convert(job), convert(uplo), n, lda, ldb);
+    ONEMKL_CATCH_NO_FLUSH("Chegvd_ScPadSz")
+  }
+  int64_t Zhegvd_ScPadSz(Context* ctxt, int64_t itype, onemklJob job, onemklUplo uplo, int64_t n, int64_t lda, int64_t ldb){
+    ONEMKL_TRY
+    auto size = oneapi::mkl::lapack::hegvd_scratchpad_size<std::complex<double>>(ctxt->queue, itype, convert(job), convert(uplo), n, lda, ldb);
+    ONEMKL_CATCH_NO_FLUSH("Zhegvd_ScPadSz")
+  }
+  void Ssygvd(Context* ctxt, int64_t itype, onemklJob job, onemklUplo uplo, int64_t n, float* A, int64_t lda, float* B, int64_t ldb, float* W,
+              float* scratchpad, int64_t scratchpad_size){
+    ONEMKL_TRY
+    auto status = oneapi::mkl::lapack::sygvd(ctxt->queue, itype, convert(job), convert(uplo), n, A, lda, B, ldb, W,
+                                            scratchpad, scratchpad_size);
+    ONEMKL_CATCH("Ssygvd")
+  }
+  void Dsygvd(Context* ctxt, int64_t itype, onemklJob job, onemklUplo uplo, int64_t n, double* A, int64_t lda, double* B, int64_t ldb, double* W,
+              double* scratchpad, int64_t scratchpad_size){
+    ONEMKL_TRY
+    auto status = oneapi::mkl::lapack::sygvd(ctxt->queue, itype, convert(job), convert(uplo), n, A, lda, B, ldb, W,
+                                            scratchpad, scratchpad_size);
+    ONEMKL_CATCH("Dsygvd")
+  }
+  void Chegvd(Context* ctxt, int64_t itype, onemklJob job, onemklUplo uplo, int64_t n, float _Complex* A, int64_t lda, float _Complex* B, int64_t ldb, float* W,
+              float _Complex* scratchpad, int64_t scratchpad_size){
+    ONEMKL_TRY
+    auto status = oneapi::mkl::lapack::hegvd(ctxt->queue, itype, convert(job), convert(uplo), n, reinterpret_cast<std::complex<float>*>(A), lda,
+                                             reinterpret_cast<std::complex<float>*>(B), ldb, W,
+                                             reinterpret_cast<std::complex<float>*>(scratchpad), scratchpad_size);
+    ONEMKL_CATCH("Chegvd")
+  }
+  void Zhegvd(Context* ctxt, int64_t itype, onemklJob job, onemklUplo uplo, int64_t n, double _Complex* A, int64_t lda, double _Complex* B, int64_t ldb, double* W,
+              double _Complex* scratchpad, int64_t scratchpad_size){
+    ONEMKL_TRY
+    auto status = oneapi::mkl::lapack::hegvd(ctxt->queue, itype, convert(job), convert(uplo), n, reinterpret_cast<std::complex<double>*>(A), lda,
+                                             reinterpret_cast<std::complex<double>*>(B), ldb, W,
+                                             reinterpret_cast<std::complex<double>*>(scratchpad), scratchpad_size);
+    ONEMKL_CATCH("Zhegvd")
+  }
 }//H4I::MKLShim
