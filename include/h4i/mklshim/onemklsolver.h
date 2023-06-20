@@ -221,4 +221,14 @@ namespace H4I::MKLShim
   void Chetrd(Context* ctxt, onemklUplo uplo, int64_t n, float _Complex* A, int64_t lda, float* d, float* e, float _Complex* tau, float _Complex* scratchpad, int64_t scratchpad_size);
   void Zhetrd(Context* ctxt, onemklUplo uplo, int64_t n, double _Complex* A, int64_t lda, double* d, double* e, double _Complex* tau, double _Complex* scratchpad, int64_t scratchpad_size);
 
+  //sygvd/hegvd
+  int64_t Ssygvd_ScPadSz(Context* ctxt, int64_t itype, onemklJob job, onemklUplo uplo, int64_t n, int64_t lda, int64_t ldb);
+  int64_t Dsygvd_ScPadSz(Context* ctxt, int64_t itype, onemklJob job, onemklUplo uplo, int64_t n, int64_t lda, int64_t ldb);
+  int64_t Chegvd_ScPadSz(Context* ctxt, int64_t itype, onemklJob job, onemklUplo uplo, int64_t n, int64_t lda, int64_t ldb);
+  int64_t Zhegvd_ScPadSz(Context* ctxt, int64_t itype, onemklJob job, onemklUplo uplo, int64_t n, int64_t lda, int64_t ldb);
+  void Ssygvd(Context* ctxt, int64_t itype, onemklJob job, onemklUplo uplo, int64_t n, float* A, int64_t lda, float* B, int64_t ldb, float* W, float* scratchpad, int64_t scratchpad_size);
+  void Dsygvd(Context* ctxt, int64_t itype, onemklJob job, onemklUplo uplo, int64_t n, double* A, int64_t lda, double* B, int64_t ldb, double* W, double* scratchpad, int64_t scratchpad_size);
+  void Chegvd(Context* ctxt, int64_t itype, onemklJob job, onemklUplo uplo, int64_t n, float _Complex* A, int64_t lda, float _Complex* B, int64_t ldb, float* W, float _Complex* scratchpad, int64_t scratchpad_size);
+  void Zhegvd(Context* ctxt, int64_t itype, onemklJob job, onemklUplo uplo, int64_t n, double _Complex* A, int64_t lda, double _Complex* B, int64_t ldb, double* W, double _Complex* scratchpad, int64_t scratchpad_size);
+
 }// H4I::MKLShim
