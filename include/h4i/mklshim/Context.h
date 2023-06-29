@@ -1,8 +1,8 @@
 // Copyright 2021-2023 UT-Battelle
 // See LICENSE.txt in the root of the source distribution for license info.
 #pragma once
+#include <string>
 #include <array>
-#include <unordered_map>
 
 namespace H4I::MKLShim
 {
@@ -28,7 +28,6 @@ Backend GetCurrentBackend(void);
 struct Context;
 
 Context* Create(const NativeHandleArray& handles, Backend backend);
-Context* Update(Context* ctxt, const NativeHandleArray& handles, Backend backend);
 void Destroy(Context* context);
 void SetStream(Context* context, const NativeHandleArray& handles);
 
