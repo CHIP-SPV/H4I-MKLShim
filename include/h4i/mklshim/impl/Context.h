@@ -2,10 +2,17 @@
 // See LICENSE.txt in the root of the source distribution for license info.
 #pragma once
 
+#include <unordered_map>
+
 namespace H4I::MKLShim
 {
     struct Context
     {
+        // Table to track SYCL queues created.
+        // Used to help avoid creating multiple SYCL queues for same native queue,
+        // which helps interoperability across libraries (e.g., hipSolver with hipBLAS).
+        static std::unordered_map<uintptr_t, Context*> knownContexts;
+
         sycl::queue queue;
         sycl::device device;
         sycl::context context;
@@ -19,6 +26,7 @@ namespace H4I::MKLShim
             // Nothing else to do.
         }
     };
+
 
 } // namespace
 

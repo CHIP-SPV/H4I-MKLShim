@@ -1,27 +1,36 @@
 // Copyright 2021-2023 UT-Battelle
 // See LICENSE.txt in the root of the source distribution for license info.
 #pragma once
+#include <array>
 #include <unordered_map>
+
 namespace H4I::MKLShim
 {
+
+constexpr const int nHandles = 4;
+using NativeHandleArray = std::array<uintptr_t, nHandles>;
 
 enum Backend{
   level0, // default
   opencl
 };
 
+
+// Convert a backend name to the Enum.
+// May throw an exception if given an unrecognized backend name.
+Backend ToBackend(const std::string&);
+
+Backend GetCurrentBackend(void);
+
+// Provide an interface for creating and manipulating
+// Contexts that avoids the caller from seeing the backend-specific
+// implementation.
 struct Context;
 
-// Since shim supports multiple backends hence this indicates current backend is in use
-extern Backend currentBackend;
-
-// Maintains a global table to avoid duplicate sycl queue creation for same native queue
-// This helps synchronization between two libraries e.g. hipSolver and hipBlas
-extern std::unordered_map<uintptr_t, Context*> context_tbl;
-
-Context* Create(unsigned long const* lzHandles, int numOfHandles, const char* backendName);
-Context* Update(Context* ctxt, unsigned long const* backendHandles, int numOfHandles, const char* backendName);
+Context* Create(const NativeHandleArray& handles, Backend backend);
+Context* Update(Context* ctxt, const NativeHandleArray& handles, Backend backend);
 void Destroy(Context* context);
+void SetStream(Context* context, const NativeHandleArray& handles);
 
 } // namespace
 
