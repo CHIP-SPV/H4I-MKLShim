@@ -14,7 +14,7 @@ namespace H4I::MKLShim
   void sDot(Context* ctxt, int64_t n, const float *x, int64_t incx, const float *y,
             int64_t incy, float *result) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::dot(ctxt->queue, n, x,
+    auto status = oneapi::mkl::blas::column_major::dot(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, n, x,
                                                       incx, y, incy, result);
     ONEMKL_CATCH("DOT")
   }
@@ -22,7 +22,7 @@ namespace H4I::MKLShim
   void dDot(Context* ctxt, int64_t n, const double *x, int64_t incx, const double *y,
             int64_t incy, double *result) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::dot(ctxt->queue, n, x,
+    auto status = oneapi::mkl::blas::column_major::dot(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, n, x,
                                                       incx, y, incy, result);
     ONEMKL_CATCH("DOT")
   }
@@ -30,7 +30,7 @@ namespace H4I::MKLShim
   void cDotc(Context* ctxt, int64_t n, const float _Complex *x, int64_t incx,
              const float _Complex *y, int64_t incy, float _Complex *result) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::dotc(ctxt->queue, n,
+    auto status = oneapi::mkl::blas::column_major::dotc(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, n,
                                                 reinterpret_cast<const std::complex<float> *>(x), incx,
                                                 reinterpret_cast<const std::complex<float> *>(y), incy,
                                                 reinterpret_cast<std::complex<float> *>(result));
@@ -40,7 +40,7 @@ namespace H4I::MKLShim
   void zDotc(Context* ctxt, int64_t n, const double _Complex *x, int64_t incx,
              const double _Complex *y, int64_t incy, double _Complex *result) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::dotc(ctxt->queue, n,
+    auto status = oneapi::mkl::blas::column_major::dotc(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, n,
                                                 reinterpret_cast<const std::complex<double> *>(x), incx,
                                                 reinterpret_cast<const std::complex<double> *>(y), incy,
                                                 reinterpret_cast<std::complex<double> *>(result));
@@ -50,7 +50,7 @@ namespace H4I::MKLShim
   void cDotu(Context* ctxt, int64_t n, const float _Complex *x, int64_t incx,
              const float _Complex *y, int64_t incy, float _Complex *result) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::dotu(ctxt->queue, n,
+    auto status = oneapi::mkl::blas::column_major::dotu(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, n,
                                                 reinterpret_cast<const std::complex<float> *>(x), incx,
                                                 reinterpret_cast<const std::complex<float> *>(y), incy,
                                                 reinterpret_cast<std::complex<float> *>(result));
@@ -60,7 +60,7 @@ namespace H4I::MKLShim
   void zDotu(Context* ctxt, int64_t n, const double _Complex *x, int64_t incx,
              const double _Complex *y, int64_t incy, double _Complex *result) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::dotu(ctxt->queue, n,
+    auto status = oneapi::mkl::blas::column_major::dotu(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, n,
                                                 reinterpret_cast<const std::complex<double> *>(x), incx,
                                                 reinterpret_cast<const std::complex<double> *>(y), incy,
                                                 reinterpret_cast<std::complex<double> *>(result));
@@ -71,7 +71,7 @@ namespace H4I::MKLShim
   void sAsum(Context* ctxt, int64_t n, const float *x, int64_t incx,
             float *result) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::asum(ctxt->queue, n, x,
+    auto status = oneapi::mkl::blas::column_major::asum(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, n, x,
                                                         incx, result);
     ONEMKL_CATCH("ASUM")
   }
@@ -79,7 +79,7 @@ namespace H4I::MKLShim
   void dAsum(Context* ctxt, int64_t n, const double *x, int64_t incx,
             double *result) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::asum(ctxt->queue, n, x,
+    auto status = oneapi::mkl::blas::column_major::asum(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, n, x,
                                                         incx, result);
     ONEMKL_CATCH("ASUM")
   }
@@ -87,7 +87,7 @@ namespace H4I::MKLShim
   void cAsum(Context* ctxt, int64_t n, const float _Complex *x, int64_t incx,
             float *result) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::asum(ctxt->queue, n, 
+    auto status = oneapi::mkl::blas::column_major::asum(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, n, 
                                         reinterpret_cast<const std::complex<float> *>(x),
                                         incx, result);
     ONEMKL_CATCH("ASUM")
@@ -96,7 +96,7 @@ namespace H4I::MKLShim
   void zAsum(Context* ctxt, int64_t n, const double _Complex *x, int64_t incx,
             double *result) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::asum(ctxt->queue, n, 
+    auto status = oneapi::mkl::blas::column_major::asum(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, n, 
                                         reinterpret_cast<const std::complex<double> *>(x),
                                         incx, result);
     ONEMKL_CATCH("ASUM")
@@ -106,7 +106,7 @@ namespace H4I::MKLShim
   void sAxpy(Context* ctxt, int64_t n, float alpha, const float *x, std::int64_t incx,
                   float *y, int64_t incy) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::axpy(ctxt->queue, n, alpha, x,
+    auto status = oneapi::mkl::blas::column_major::axpy(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, n, alpha, x,
                                                 incx, y, incy);
     ONEMKL_CATCH("AXPY")
   }
@@ -114,7 +114,7 @@ namespace H4I::MKLShim
   void dAxpy(Context* ctxt, int64_t n, double alpha, const double *x, std::int64_t incx, 
                   double *y, int64_t incy) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::axpy(ctxt->queue, n, alpha, x,
+    auto status = oneapi::mkl::blas::column_major::axpy(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, n, alpha, x,
                                                   incx, y, incy);
     ONEMKL_CATCH("AXPY")
   }
@@ -122,7 +122,7 @@ namespace H4I::MKLShim
   void cAxpy(Context* ctxt, int64_t n, float _Complex alpha, const float _Complex *x,
                   std::int64_t incx, float _Complex *y, int64_t incy) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::axpy(ctxt->queue, n, alpha,
+    auto status = oneapi::mkl::blas::column_major::axpy(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, n, alpha,
                               reinterpret_cast<const std::complex<float> *>(x), incx,
                               reinterpret_cast<std::complex<float> *>(y), incy);
     ONEMKL_CATCH("AXPY")
@@ -131,7 +131,7 @@ namespace H4I::MKLShim
   void zAxpy(Context* ctxt, int64_t n, double _Complex alpha, const double _Complex *x,
                   std::int64_t incx, double _Complex *y, int64_t incy) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::axpy(ctxt->queue, n, alpha,
+    auto status = oneapi::mkl::blas::column_major::axpy(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, n, alpha,
                             reinterpret_cast<const std::complex<double> *>(x), incx,
                             reinterpret_cast<std::complex<double> *>(y), incy);
     ONEMKL_CATCH("AXPY")
@@ -141,7 +141,7 @@ namespace H4I::MKLShim
   void dScal(Context* ctxt, int64_t n, double alpha,
                     double *x, int64_t incx) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::scal(ctxt->queue, n, alpha,
+    auto status = oneapi::mkl::blas::column_major::scal(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, n, alpha,
                                                     x, incx);
     ONEMKL_CATCH("SCAL")
 
@@ -150,7 +150,7 @@ namespace H4I::MKLShim
   void sScal(Context* ctxt, int64_t n, float alpha,
                               float *x, int64_t incx) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::scal(ctxt->queue, n, alpha,
+    auto status = oneapi::mkl::blas::column_major::scal(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, n, alpha,
                                                         x, incx);
     ONEMKL_CATCH("SCAL")
   }
@@ -159,7 +159,7 @@ namespace H4I::MKLShim
                               float _Complex alpha, float _Complex *x,
                               int64_t incx) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::scal(ctxt->queue, n,
+    auto status = oneapi::mkl::blas::column_major::scal(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, n,
                                         static_cast<std::complex<float> >(alpha),
                                         reinterpret_cast<std::complex<float> *>(x),incx);
     ONEMKL_CATCH("SCAL")
@@ -169,7 +169,7 @@ namespace H4I::MKLShim
                               float alpha, float _Complex *x,
                               int64_t incx) {
       ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::scal(ctxt->queue, n, alpha,
+    auto status = oneapi::mkl::blas::column_major::scal(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, n, alpha,
                                           reinterpret_cast<std::complex<float> *>(x),incx);
       ONEMKL_CATCH("SCAL")
   }
@@ -178,7 +178,7 @@ namespace H4I::MKLShim
                               double _Complex alpha, double _Complex *x,
                               int64_t incx) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::scal(ctxt->queue, n,
+    auto status = oneapi::mkl::blas::column_major::scal(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, n,
                                         static_cast<std::complex<double> >(alpha),
                                         reinterpret_cast<std::complex<double> *>(x),incx);
     ONEMKL_CATCH("SCAL")
@@ -188,7 +188,7 @@ namespace H4I::MKLShim
                               double alpha, double _Complex *x,
                               int64_t incx) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::scal(ctxt->queue, n, alpha,
+    auto status = oneapi::mkl::blas::column_major::scal(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, n, alpha,
                                         reinterpret_cast<std::complex<double> *>(x),incx);
     ONEMKL_CATCH("SCAL")
   }
@@ -197,21 +197,21 @@ namespace H4I::MKLShim
   void dNrm2(Context* ctxt, int64_t n, const double *x,
                               int64_t incx, double *result) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::nrm2(ctxt->queue, n, x, incx, result);
+    auto status = oneapi::mkl::blas::column_major::nrm2(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, n, x, incx, result);
     ONEMKL_CATCH("NRM2")
   }
 
   void sNrm2(Context* ctxt, int64_t n, const float *x,
                               int64_t incx, float *result) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::nrm2(ctxt->queue, n, x, incx, result);
+    auto status = oneapi::mkl::blas::column_major::nrm2(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, n, x, incx, result);
     ONEMKL_CATCH("NRM2")
   }
 
   void cNrm2(Context* ctxt, int64_t n, const float _Complex *x,
                               int64_t incx, float *result) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::nrm2(ctxt->queue, n,
+    auto status = oneapi::mkl::blas::column_major::nrm2(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, n,
                     reinterpret_cast<const std::complex<float> *>(x), incx, result);
     ONEMKL_CATCH("NRM2")
   }
@@ -219,7 +219,7 @@ namespace H4I::MKLShim
   void zNrm2(Context* ctxt, int64_t n, const double _Complex *x,
                               int64_t incx, double *result) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::nrm2(ctxt->queue, n,
+    auto status = oneapi::mkl::blas::column_major::nrm2(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, n,
                     reinterpret_cast<const std::complex<double> *>(x), incx, result);
     ONEMKL_CATCH("NRM2")
   }
@@ -228,21 +228,21 @@ namespace H4I::MKLShim
   void dCopy(Context* ctxt, int64_t n, const double *x,
                               int64_t incx, double *y, int64_t incy) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::copy(ctxt->queue, n, x, incx, y, incy);
+    auto status = oneapi::mkl::blas::column_major::copy(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, n, x, incx, y, incy);
     ONEMKL_CATCH("COPY")
   }
 
   void sCopy(Context* ctxt, int64_t n, const float *x,
                               int64_t incx, float *y, int64_t incy) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::copy(ctxt->queue, n, x, incx, y, incy);
+    auto status = oneapi::mkl::blas::column_major::copy(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, n, x, incx, y, incy);
     ONEMKL_CATCH("COPY")
   }
 
   void zCopy(Context* ctxt, int64_t n, const double _Complex *x,
                               int64_t incx, double _Complex *y, int64_t incy) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::copy(ctxt->queue, n,
+    auto status = oneapi::mkl::blas::column_major::copy(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, n,
           reinterpret_cast<const std::complex<double> *>(x), incx,
           reinterpret_cast<std::complex<double> *>(y), incy);
     ONEMKL_CATCH("COPY")
@@ -251,7 +251,7 @@ namespace H4I::MKLShim
   void cCopy(Context* ctxt, int64_t n, const float _Complex *x,
                               int64_t incx, float _Complex *y, int64_t incy) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::copy(ctxt->queue, n,
+    auto status = oneapi::mkl::blas::column_major::copy(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, n,
           reinterpret_cast<const std::complex<float> *>(x), incx,
           reinterpret_cast<std::complex<float> *>(y), incy);
     ONEMKL_CATCH("COPY")
@@ -261,26 +261,26 @@ namespace H4I::MKLShim
   void dAmax(Context* ctxt, int64_t n, const double *x,
                             int64_t incx, int64_t *result){
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::iamax(ctxt->queue, n, x, incx, result);
+    auto status = oneapi::mkl::blas::column_major::iamax(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, n, x, incx, result);
     ONEMKL_CATCH("MAX")
   }
   void sAmax(Context* ctxt, int64_t n, const float  *x,
                             int64_t incx, int64_t *result){
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::iamax(ctxt->queue, n, x, incx, result);
+    auto status = oneapi::mkl::blas::column_major::iamax(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, n, x, incx, result);
     ONEMKL_CATCH("MAX")
   }
   void zAmax(Context* ctxt, int64_t n, const double _Complex *x,
                             int64_t incx, int64_t *result){
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::iamax(ctxt->queue, n,
+    auto status = oneapi::mkl::blas::column_major::iamax(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, n,
                               reinterpret_cast<const std::complex<double> *>(x), incx, result);
     ONEMKL_CATCH("MAX")
   }
   void cAmax(Context* ctxt, int64_t n, const float _Complex *x,
                             int64_t incx, int64_t *result){
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::iamax(ctxt->queue, n,
+    auto status = oneapi::mkl::blas::column_major::iamax(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, n,
                               reinterpret_cast<const std::complex<float> *>(x), incx, result);
     ONEMKL_CATCH("MAX")
   }
@@ -288,43 +288,43 @@ namespace H4I::MKLShim
   // amin
   void dAmin(Context* ctxt, int64_t n, const double *x, int64_t incx, int64_t *result){
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::iamin(ctxt->queue, n, x, incx, result);
+    auto status = oneapi::mkl::blas::column_major::iamin(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, n, x, incx, result);
     ONEMKL_CATCH("AMIN")
   }
   void sAmin(Context* ctxt, int64_t n, const float  *x, int64_t incx, int64_t *result){
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::iamin(ctxt->queue, n, x, incx, result);
+    auto status = oneapi::mkl::blas::column_major::iamin(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, n, x, incx, result);
     ONEMKL_CATCH("AMIN")
   }
   void zAmin(Context* ctxt, int64_t n, const double _Complex *x, int64_t incx, int64_t *result){
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::iamin(ctxt->queue, n,
+    auto status = oneapi::mkl::blas::column_major::iamin(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, n,
                             reinterpret_cast<const std::complex<double> *>(x), incx, result);
     ONEMKL_CATCH("AMIN")
   }
   void cAmin(Context* ctxt, int64_t n, const float _Complex *x, int64_t incx, int64_t *result){
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::iamin(ctxt->queue, n,
+    auto status = oneapi::mkl::blas::column_major::iamin(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, n,
                             reinterpret_cast<const std::complex<float> *>(x), incx, result);
     ONEMKL_CATCH("AMIN")
   }
   //swap
   void sSwap(Context* ctxt, int64_t n, float *x, int64_t incx, float *y, int64_t incy){
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::swap(ctxt->queue, n, x, incx, y, incy);
+    auto status = oneapi::mkl::blas::column_major::swap(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, n, x, incx, y, incy);
     ONEMKL_CATCH("SWAP")
   }
 
   void dSwap(Context* ctxt, int64_t n, double *x, int64_t incx, double *y, int64_t incy){
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::swap(ctxt->queue, n, x, incx, y, incy);
+    auto status = oneapi::mkl::blas::column_major::swap(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, n, x, incx, y, incy);
     ONEMKL_CATCH("SWAP")
   }
 
   void cSwap(Context* ctxt, int64_t n, float _Complex *x, int64_t incx,
               float _Complex *y, int64_t incy){
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::swap(ctxt->queue, n,
+    auto status = oneapi::mkl::blas::column_major::swap(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, n,
                             reinterpret_cast<std::complex<float> *>(x), incx,
                             reinterpret_cast<std::complex<float> *>(y), incy);
     ONEMKL_CATCH("SWAP")
@@ -333,7 +333,7 @@ namespace H4I::MKLShim
   void zSwap(Context* ctxt, int64_t n, double _Complex *x, int64_t incx,
               double _Complex *y, int64_t incy){
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::swap(ctxt->queue, n,
+    auto status = oneapi::mkl::blas::column_major::swap(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, n,
                             reinterpret_cast<std::complex<double> *>(x), incx,
                             reinterpret_cast<std::complex<double> *>(y), incy);
     ONEMKL_CATCH("SWAP")
@@ -342,19 +342,19 @@ namespace H4I::MKLShim
   void sRot(Context* ctxt, int n, float* x, int incx, float* y, int incy,
               const float c, const float s){
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::rot(ctxt->queue, n, x, incx, y, incy, c, s);
+    auto status = oneapi::mkl::blas::column_major::rot(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, n, x, incx, y, incy, c, s);
     ONEMKL_CATCH("ROT")
   }
   void dRot(Context* ctxt, int n, double* x, int incx, double* y, int incy,
               const double c, const double s){
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::rot(ctxt->queue, n, x, incx, y, incy, c, s);
+    auto status = oneapi::mkl::blas::column_major::rot(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, n, x, incx, y, incy, c, s);
     ONEMKL_CATCH("ROT")
   }
   void cRot(Context* ctxt, int n, float _Complex* x, int incx, float _Complex* y, int incy,
               const float c, const float _Complex s){
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::rot(ctxt->queue, n,
+    auto status = oneapi::mkl::blas::column_major::rot(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, n,
                     reinterpret_cast<std::complex<float> *>(x), incx,
                     reinterpret_cast<std::complex<float> *>(y), incy,
                     c, static_cast<std::complex<float> >(s));
@@ -363,7 +363,7 @@ namespace H4I::MKLShim
   void csRot(Context* ctxt, int n, float _Complex* x, int incx, float _Complex* y, int incy,
               const float c, const float s){
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::rot(ctxt->queue, n,
+    auto status = oneapi::mkl::blas::column_major::rot(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, n,
                     reinterpret_cast<std::complex<float> *>(x), incx,
                     reinterpret_cast<std::complex<float> *>(y), incy, c, s);
     ONEMKL_CATCH("ROT")
@@ -371,7 +371,7 @@ namespace H4I::MKLShim
   void zRot(Context* ctxt, int n, double _Complex* x, int incx, double _Complex* y, int incy,
               const double c, const double _Complex s){
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::rot(ctxt->queue, n,
+    auto status = oneapi::mkl::blas::column_major::rot(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, n,
                     reinterpret_cast<std::complex<double> *>(x), incx,
                     reinterpret_cast<std::complex<double> *>(y), incy,
                     c, static_cast<std::complex<double> >(s));
@@ -380,7 +380,7 @@ namespace H4I::MKLShim
   void zdRot(Context* ctxt, int n, double _Complex* x, int incx, double _Complex* y, int incy,
               const double c, const double s){
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::rot(ctxt->queue, n,
+    auto status = oneapi::mkl::blas::column_major::rot(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, n,
                     reinterpret_cast<std::complex<double> *>(x), incx,
                     reinterpret_cast<std::complex<double> *>(y), incy, c, s);
     ONEMKL_CATCH("ROT")
@@ -388,17 +388,17 @@ namespace H4I::MKLShim
   //rotg
   void sRotg(Context* ctxt, float* a, float* b, float* c, float* s){
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::rotg(ctxt->queue, a, b, c, s);
+    auto status = oneapi::mkl::blas::column_major::rotg(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, a, b, c, s);
     ONEMKL_CATCH("ROTG")
   }
   void dRotg(Context* ctxt, double* a, double* b, double* c, double* s){
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::rotg(ctxt->queue, a, b, c, s);
+    auto status = oneapi::mkl::blas::column_major::rotg(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, a, b, c, s);
     ONEMKL_CATCH("ROTG")
   }
   void cRotg(Context* ctxt, float _Complex* a, float _Complex* b, float* c, float _Complex* s){
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::rotg(ctxt->queue,
+    auto status = oneapi::mkl::blas::column_major::rotg(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue,
                                                         reinterpret_cast<std::complex<float> *>(a),
                                                         reinterpret_cast<std::complex<float> *>(b), c,
                                                         reinterpret_cast<std::complex<float> *>(s));
@@ -406,7 +406,7 @@ namespace H4I::MKLShim
   }
   void zRotg(Context* ctxt, double _Complex* a, double _Complex* b, double* c, double _Complex* s){
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::rotg(ctxt->queue,
+    auto status = oneapi::mkl::blas::column_major::rotg(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue,
                                                         reinterpret_cast<std::complex<double> *>(a),
                                                         reinterpret_cast<std::complex<double> *>(b), c,
                                                         reinterpret_cast<std::complex<double> *>(s));
@@ -416,25 +416,25 @@ namespace H4I::MKLShim
   void sRotm(Context* ctxt, int64_t n, float *x, int64_t incx,
               float *y, int64_t incy, float* param) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::rotm(ctxt->queue, n, x, incx, y, incy, param);
+    auto status = oneapi::mkl::blas::column_major::rotm(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, n, x, incx, y, incy, param);
     ONEMKL_CATCH("ROTM")
   }
   void dRotm(Context* ctxt, int64_t n, double *x, int64_t incx,
               double *y, int64_t incy, double* param){
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::rotm(ctxt->queue, n, x, incx, y, incy, param);
+    auto status = oneapi::mkl::blas::column_major::rotm(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, n, x, incx, y, incy, param);
     ONEMKL_CATCH("ROTM")
   }
 
   //rotmg
   void sRotmg(Context* ctxt, float *d1, float *d2, float *x1, float y1, float* param) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::rotmg(ctxt->queue, d1, d2, x1, y1, param);
+    auto status = oneapi::mkl::blas::column_major::rotmg(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, d1, d2, x1, y1, param);
     ONEMKL_CATCH("ROTMG")
   }
   void dRotmg(Context* ctxt, double *d1, double *d2, double *x1, double y1, double* param) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::rotmg(ctxt->queue, d1, d2, x1, y1, param);
+    auto status = oneapi::mkl::blas::column_major::rotmg(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, d1, d2, x1, y1, param);
     ONEMKL_CATCH("ROTMG")
   }
 
@@ -447,7 +447,7 @@ namespace H4I::MKLShim
                     const float *x, int64_t incx, float beta, float *y,
                     int64_t incy) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::gbmv(ctxt->queue,
+    auto status = oneapi::mkl::blas::column_major::gbmv(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue,
                                   convert(trans), m, n, kl, ku, alpha, a, lda, x,
                                   incx, beta, y, incy);
     ONEMKL_CATCH("")
@@ -459,7 +459,7 @@ namespace H4I::MKLShim
                     const double *x, int64_t incx, double beta, double *y,
                     int64_t incy) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::gbmv(ctxt->queue, convert(trans),
+    auto status = oneapi::mkl::blas::column_major::gbmv(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(trans),
                                     m, n, kl, ku, alpha, a, lda, x, incx, beta, y, incy);
     ONEMKL_CATCH("")
   }
@@ -470,7 +470,7 @@ namespace H4I::MKLShim
                     const float _Complex *x, int64_t incx, float _Complex beta,
                     float _Complex *y, int64_t incy) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::gbmv(ctxt->queue, convert(trans),
+    auto status = oneapi::mkl::blas::column_major::gbmv(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(trans),
                                     m, n, kl, ku, static_cast<std::complex<float> >(alpha),
                                     reinterpret_cast<const std::complex<float> *>(a),
                                     lda, reinterpret_cast<const std::complex<float> *>(x),
@@ -484,7 +484,7 @@ namespace H4I::MKLShim
                     const double _Complex *x, int64_t incx, double _Complex beta,
                     double _Complex *y, int64_t incy) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::gbmv(ctxt->queue, convert(trans), m,
+    auto status = oneapi::mkl::blas::column_major::gbmv(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(trans), m,
                                         n, kl, ku, static_cast<std::complex<double> >(alpha),
                                         reinterpret_cast<const std::complex<double> *>(a),
                                         lda, reinterpret_cast<const std::complex<double> *>(x), incx,
@@ -498,7 +498,7 @@ namespace H4I::MKLShim
                             int64_t lda, const float *x, int64_t incx, float beta,
                             float *y, int64_t incy) {
     ONEMKL_TRY
-	  auto status = oneapi::mkl::blas::column_major::gemv(ctxt->queue, convert(trans),
+	  auto status = oneapi::mkl::blas::column_major::gemv(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(trans),
                                             m, n, alpha, a, lda, x, incx, beta, y, incy);
     ONEMKL_CATCH("GEMV")
   }
@@ -508,7 +508,7 @@ namespace H4I::MKLShim
                             int64_t lda, const double *x, int64_t incx, double beta,
                             double *y, int64_t incy) {
     ONEMKL_TRY
-	  auto status = oneapi::mkl::blas::column_major::gemv(ctxt->queue, convert(trans),
+	  auto status = oneapi::mkl::blas::column_major::gemv(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(trans),
                                             m, n, alpha, a, lda, x, incx, beta, y, incy);
     ONEMKL_CATCH("GEMV")
   }
@@ -520,7 +520,7 @@ namespace H4I::MKLShim
                             float _Complex beta, float _Complex *y,
                             int64_t incy) {
     ONEMKL_TRY
-	  auto status = oneapi::mkl::blas::column_major::gemv(ctxt->queue, convert(trans), m, n,
+	  auto status = oneapi::mkl::blas::column_major::gemv(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(trans), m, n,
                                             static_cast<std::complex<float> >(alpha),
                                             reinterpret_cast<const std::complex<float> *>(a), lda,
                                             reinterpret_cast<const std::complex<float> *>(x), incx,
@@ -536,7 +536,7 @@ namespace H4I::MKLShim
                             double _Complex beta, double _Complex *y,
                             int64_t incy) {
     ONEMKL_TRY
-	  auto status = oneapi::mkl::blas::column_major::gemv(ctxt->queue, convert(trans), m, n,
+	  auto status = oneapi::mkl::blas::column_major::gemv(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(trans), m, n,
                                             static_cast<std::complex<double> >(alpha),
                                             reinterpret_cast<const std::complex<double> *>(a), lda,
                                             reinterpret_cast<const std::complex<double> *>(x), incx,
@@ -549,7 +549,7 @@ namespace H4I::MKLShim
                             const float *x, int64_t incx, const float *y, int64_t incy,
                             float *a, int64_t lda) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::ger(ctxt->queue, m, n, alpha, x,
+    auto status = oneapi::mkl::blas::column_major::ger(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, m, n, alpha, x,
                                                     incx, y, incy, a, lda);
     ONEMKL_CATCH("GER")
   }
@@ -558,7 +558,7 @@ namespace H4I::MKLShim
                             const double *x, int64_t incx, const double *y, int64_t incy,
                             double *a, int64_t lda) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::ger(ctxt->queue, m, n, alpha, x,
+    auto status = oneapi::mkl::blas::column_major::ger(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, m, n, alpha, x,
                                                     incx, y, incy, a, lda);
     ONEMKL_CATCH("GER")
   }
@@ -567,7 +567,7 @@ namespace H4I::MKLShim
                             const float _Complex *x, int64_t incx, const float _Complex *y, int64_t incy,
                             float _Complex *a, int64_t lda) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::gerc(ctxt->queue, m, n,
+    auto status = oneapi::mkl::blas::column_major::gerc(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, m, n,
                                             static_cast<std::complex<float> >(alpha),
                                             reinterpret_cast<const std::complex<float> *>(x), incx,
                                             reinterpret_cast<const std::complex<float> *>(y), incy,
@@ -579,7 +579,7 @@ namespace H4I::MKLShim
                             const float _Complex *x, int64_t incx, const float _Complex *y, int64_t incy,
                             float _Complex *a, int64_t lda) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::geru(ctxt->queue, m, n,
+    auto status = oneapi::mkl::blas::column_major::geru(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, m, n,
                                             static_cast<std::complex<float> >(alpha),
                                             reinterpret_cast<const std::complex<float> *>(x), incx,
                                             reinterpret_cast<const std::complex<float> *>(y), incy,
@@ -591,7 +591,7 @@ namespace H4I::MKLShim
                             const double _Complex *x, int64_t incx, const double _Complex *y, int64_t incy,
                             double _Complex *a, int64_t lda) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::gerc(ctxt->queue, m, n,
+    auto status = oneapi::mkl::blas::column_major::gerc(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, m, n,
                                           static_cast<std::complex<float> >(alpha),
                                           reinterpret_cast<const std::complex<double> *>(x), incx,
                                           reinterpret_cast<const std::complex<double> *>(y), incy,
@@ -603,7 +603,7 @@ namespace H4I::MKLShim
                             const double _Complex *x, int64_t incx, const double _Complex *y, int64_t incy,
                             double _Complex *a, int64_t lda) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::geru(ctxt->queue, m, n,
+    auto status = oneapi::mkl::blas::column_major::geru(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, m, n,
                                           static_cast<std::complex<float> >(alpha),
                                           reinterpret_cast<const std::complex<double> *>(x), incx,
                                           reinterpret_cast<const std::complex<double> *>(y), incy,
@@ -616,7 +616,7 @@ namespace H4I::MKLShim
                             int64_t lda, const float _Complex *x, int64_t incx, float _Complex beta,
                             float _Complex *y, int64_t incy) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::hbmv(ctxt->queue, convert(uplo), n,
+    auto status = oneapi::mkl::blas::column_major::hbmv(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(uplo), n,
                                           k, static_cast<std::complex<float> >(alpha),
                                           reinterpret_cast<const std::complex<float> *>(a),
                                           lda, reinterpret_cast<const std::complex<float> *>(x),
@@ -630,7 +630,7 @@ namespace H4I::MKLShim
                             int64_t lda, const double _Complex *x, int64_t incx, double _Complex beta,
                             double _Complex *y, int64_t incy) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::hbmv(ctxt->queue, convert(uplo), n,
+    auto status = oneapi::mkl::blas::column_major::hbmv(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(uplo), n,
                                           k, static_cast<std::complex<double> >(alpha),
                                           reinterpret_cast<const std::complex<double> *>(a),
                                           lda, reinterpret_cast<const std::complex<double> *>(x),
@@ -644,7 +644,7 @@ namespace H4I::MKLShim
                             const float _Complex *x, int64_t incx, float _Complex beta,
                             float _Complex *y, int64_t incy) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::hemv(ctxt->queue, convert(uplo), n,
+    auto status = oneapi::mkl::blas::column_major::hemv(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(uplo), n,
                                           static_cast<std::complex<float> >(alpha),
                                           reinterpret_cast<const std::complex<float> *>(a),
                                           lda, reinterpret_cast<const std::complex<float> *>(x), incx,
@@ -658,7 +658,7 @@ namespace H4I::MKLShim
                             const double _Complex *x, int64_t incx, double _Complex beta,
                             double _Complex *y, int64_t incy) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::hemv(ctxt->queue, convert(uplo), n,
+    auto status = oneapi::mkl::blas::column_major::hemv(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(uplo), n,
                                           static_cast<std::complex<double> >(alpha),
                                           reinterpret_cast<const std::complex<double> *>(a),
                                           lda, reinterpret_cast<const std::complex<double> *>(x), incx,
@@ -671,7 +671,7 @@ namespace H4I::MKLShim
                             const float _Complex *x, int64_t incx, float _Complex *a,
                             int64_t lda) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::her(ctxt->queue, convert(uplo), n, alpha,
+    auto status = oneapi::mkl::blas::column_major::her(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(uplo), n, alpha,
                                         reinterpret_cast<const std::complex<float> *>(x), incx,
                                         reinterpret_cast<std::complex<float> *>(a), lda);
     ONEMKL_CATCH("HER")
@@ -681,7 +681,7 @@ namespace H4I::MKLShim
                             const double _Complex *x, int64_t incx, double _Complex *a,
                             int64_t lda) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::her(ctxt->queue, convert(uplo), n, alpha,
+    auto status = oneapi::mkl::blas::column_major::her(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(uplo), n, alpha,
                                         reinterpret_cast<const std::complex<double> *>(x), incx,
                                         reinterpret_cast<std::complex<double> *>(a), lda);
     ONEMKL_CATCH("HER")
@@ -691,7 +691,7 @@ namespace H4I::MKLShim
                             const float _Complex *x, int64_t incx, const float _Complex *y, int64_t incy,
                             float _Complex *a, int64_t lda) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::her2(ctxt->queue, convert(uplo), n,
+    auto status = oneapi::mkl::blas::column_major::her2(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(uplo), n,
                                           static_cast<std::complex<float> >(alpha),
                                           reinterpret_cast<const std::complex<float> *>(x), incx,
                                           reinterpret_cast<const std::complex<float> *>(y), incy,
@@ -703,7 +703,7 @@ namespace H4I::MKLShim
                             const double _Complex *x, int64_t incx, const double _Complex *y, int64_t incy,
                             double _Complex *a, int64_t lda) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::her2(ctxt->queue, convert(uplo), n,
+    auto status = oneapi::mkl::blas::column_major::her2(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(uplo), n,
                                           static_cast<std::complex<double> >(alpha),
                                           reinterpret_cast<const std::complex<double> *>(x), incx,
                                           reinterpret_cast<const std::complex<double> *>(y), incy,
@@ -716,7 +716,7 @@ namespace H4I::MKLShim
                 float _Complex beta, float _Complex *y, int64_t incy)
   {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::hpmv(ctxt->queue, convert(uplo), n,
+    auto status = oneapi::mkl::blas::column_major::hpmv(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(uplo), n,
                                         static_cast<std::complex<float> >(alpha),
                                         reinterpret_cast<const std::complex<float> *>(a),
                                         reinterpret_cast<const std::complex<float> *>(x), incx,
@@ -729,7 +729,7 @@ namespace H4I::MKLShim
                 double _Complex beta, double _Complex *y, int64_t incy)
   {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::hpmv(ctxt->queue, convert(uplo), n,
+    auto status = oneapi::mkl::blas::column_major::hpmv(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(uplo), n,
                                         static_cast<std::complex<double> >(alpha),
                                         reinterpret_cast<const std::complex<double> *>(a),
                                         reinterpret_cast<const std::complex<double> *>(x), incx,
@@ -742,7 +742,7 @@ namespace H4I::MKLShim
                 const float _Complex *x, int64_t incx, float _Complex *a)
   {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::hpr(ctxt->queue, convert(uplo), n,
+    auto status = oneapi::mkl::blas::column_major::hpr(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(uplo), n,
                                         alpha, reinterpret_cast<const std::complex<float> *>(x), incx,
                                         reinterpret_cast<std::complex<float> *>(a));
     ONEMKL_CATCH("HPR")
@@ -751,7 +751,7 @@ namespace H4I::MKLShim
                 const double _Complex *x, int64_t incx, double _Complex *a)
   {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::hpr(ctxt->queue, convert(uplo), n,
+    auto status = oneapi::mkl::blas::column_major::hpr(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(uplo), n,
                                         alpha, reinterpret_cast<const std::complex<double> *>(x), incx,
                                         reinterpret_cast<std::complex<double> *>(a));
     ONEMKL_CATCH("HPR")
@@ -761,7 +761,7 @@ namespace H4I::MKLShim
                 const float _Complex *x, int64_t incx, const float _Complex *y, int64_t incy, float _Complex *a)
   {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::hpr2(ctxt->queue, convert(uplo), n,
+    auto status = oneapi::mkl::blas::column_major::hpr2(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(uplo), n,
                                         static_cast<std::complex<float> >(alpha),
                                         reinterpret_cast<const std::complex<float> *>(x), incx,
                                         reinterpret_cast<const std::complex<float> *>(y), incy,
@@ -772,7 +772,7 @@ namespace H4I::MKLShim
                 const double _Complex *x, int64_t incx, const double _Complex *y, int64_t incy, double _Complex *a)
   {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::hpr2(ctxt->queue, convert(uplo), n,
+    auto status = oneapi::mkl::blas::column_major::hpr2(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(uplo), n,
                                         static_cast<std::complex<double> >(alpha),
                                         reinterpret_cast<const std::complex<double> *>(x), incx,
                                         reinterpret_cast<const std::complex<double> *>(y), incy,
@@ -784,7 +784,7 @@ namespace H4I::MKLShim
                             float alpha, const float *a, int64_t lda, const float *x,
                             int64_t incx, float beta, float *y, int64_t incy) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::sbmv(ctxt->queue, convert(uplo), n, k,
+    auto status = oneapi::mkl::blas::column_major::sbmv(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(uplo), n, k,
                                                     alpha, a, lda, x, incx, beta, y, incy);
     ONEMKL_CATCH("SBMV")
   }
@@ -792,7 +792,7 @@ namespace H4I::MKLShim
                             double alpha, const double *a, int64_t lda, const double *x,
                             int64_t incx, double beta, double *y, int64_t incy) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::sbmv(ctxt->queue, convert(uplo), n, k,
+    auto status = oneapi::mkl::blas::column_major::sbmv(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(uplo), n, k,
                                                     alpha, a, lda, x, incx, beta, y, incy);
     ONEMKL_CATCH("SBMV")
   }
@@ -801,7 +801,7 @@ namespace H4I::MKLShim
                             float alpha, const float *a, const float *x,
                             int64_t incx, float beta, float *y, int64_t incy) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::spmv(ctxt->queue, convert(uplo), n,
+    auto status = oneapi::mkl::blas::column_major::spmv(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(uplo), n,
                                                     alpha, a, x, incx, beta, y, incy);
     ONEMKL_CATCH("SPMV")
   }
@@ -809,7 +809,7 @@ namespace H4I::MKLShim
                             double alpha, const double *a, const double *x,
                             int64_t incx, double beta, double *y, int64_t incy) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::spmv(ctxt->queue, convert(uplo), n,
+    auto status = oneapi::mkl::blas::column_major::spmv(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(uplo), n,
                                                     alpha, a, x, incx, beta, y, incy);
     ONEMKL_CATCH("SPMV")
   }
@@ -817,13 +817,13 @@ namespace H4I::MKLShim
   void sSpr(Context* ctxt, onemklUplo uplo, int64_t n,
                   float alpha, const float *x, int64_t incx, float *a) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::spr(ctxt->queue, convert(uplo), n, alpha, x, incx, a);
+    auto status = oneapi::mkl::blas::column_major::spr(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(uplo), n, alpha, x, incx, a);
     ONEMKL_CATCH("SPR")
   }
   void dSpr(Context* ctxt, onemklUplo uplo, int64_t n,
                   double alpha, const double *x, int64_t incx, double *a) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::spr(ctxt->queue, convert(uplo), n, alpha, x, incx, a);
+    auto status = oneapi::mkl::blas::column_major::spr(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(uplo), n, alpha, x, incx, a);
     ONEMKL_CATCH("SPR")
   }
 
@@ -831,7 +831,7 @@ namespace H4I::MKLShim
                   float alpha, const float *x, int64_t incx,
                   const float *y, int64_t incy, float *a) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::spr2(ctxt->queue, convert(uplo), n, alpha,
+    auto status = oneapi::mkl::blas::column_major::spr2(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(uplo), n, alpha,
                   x, incx, y, incy, a);
     ONEMKL_CATCH("SPR2")
   }
@@ -840,7 +840,7 @@ namespace H4I::MKLShim
                   double alpha, const double *x, int64_t incx,
                   const double *y, int64_t incy, double *a) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::spr2(ctxt->queue, convert(uplo), n, alpha,
+    auto status = oneapi::mkl::blas::column_major::spr2(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(uplo), n, alpha,
                   x, incx, y, incy, a);
     ONEMKL_CATCH("SPR2")
   }
@@ -849,7 +849,7 @@ namespace H4I::MKLShim
                             const float *a, int64_t lda, const float *x, int64_t incx, float beta,
                             float *y, int64_t incy) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::symv(ctxt->queue, convert(uplo), n, alpha,
+    auto status = oneapi::mkl::blas::column_major::symv(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(uplo), n, alpha,
                                                     a, lda, x, incx, beta, y, incy);
     ONEMKL_CATCH("SYMV")
   }
@@ -858,7 +858,7 @@ namespace H4I::MKLShim
                             const double *a, int64_t lda, const double *x, int64_t incx, double beta,
                             double *y, int64_t incy) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::symv(ctxt->queue, convert(uplo), n, alpha,
+    auto status = oneapi::mkl::blas::column_major::symv(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(uplo), n, alpha,
                                                     a, lda, x, incx, beta, y, incy);
     ONEMKL_CATCH("SYMV")
   }
@@ -866,7 +866,7 @@ namespace H4I::MKLShim
   void sSyr(Context* ctxt, onemklUplo uplo, int64_t n, float alpha,
                             const float *x, int64_t incx, float *a, int64_t lda) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::syr(ctxt->queue, convert(uplo), n, alpha,
+    auto status = oneapi::mkl::blas::column_major::syr(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(uplo), n, alpha,
                                                     x, incx, a, lda);
     ONEMKL_CATCH("SYR")
   }
@@ -874,7 +874,7 @@ namespace H4I::MKLShim
   void dSyr(Context* ctxt, onemklUplo uplo, int64_t n, double alpha,
                             const double *x, int64_t incx, double *a, int64_t lda) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::syr(ctxt->queue, convert(uplo), n, alpha,
+    auto status = oneapi::mkl::blas::column_major::syr(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(uplo), n, alpha,
                                                     x, incx, a, lda);
     ONEMKL_CATCH("SYR")
   }
@@ -883,7 +883,7 @@ namespace H4I::MKLShim
                             const float *x, int64_t incx, const float *y, int64_t incy, float *a, int64_t lda)
   {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::syr2(ctxt->queue, convert(uplo), n, alpha, x, incx, y, incy, a, lda);
+    auto status = oneapi::mkl::blas::column_major::syr2(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(uplo), n, alpha, x, incx, y, incy, a, lda);
     ONEMKL_CATCH("SYR2")
   }
   void dSyr2(Context* ctxt, onemklUplo uplo, int64_t n, double alpha,
@@ -891,7 +891,7 @@ namespace H4I::MKLShim
 
   {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::syr2(ctxt->queue, convert(uplo), n, alpha, x, incx, y, incy, a, lda);
+    auto status = oneapi::mkl::blas::column_major::syr2(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(uplo), n, alpha, x, incx, y, incy, a, lda);
     ONEMKL_CATCH("SYR2")
   }
 
@@ -899,7 +899,7 @@ namespace H4I::MKLShim
                             onemklTranspose trans, onemklDiag diag, int64_t n,
                             int64_t k, const float *a, int64_t lda, float *x, int64_t incx) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::tbmv(ctxt->queue, convert(uplo), convert(trans),
+    auto status = oneapi::mkl::blas::column_major::tbmv(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(uplo), convert(trans),
                                                         convert(diag), n, k, a, lda, x, incx);
     ONEMKL_CATCH("TBMV")
   }
@@ -908,7 +908,7 @@ namespace H4I::MKLShim
                             onemklTranspose trans, onemklDiag diag, int64_t n,
                             int64_t k, const double *a, int64_t lda, double *x, int64_t incx) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::tbmv(ctxt->queue, convert(uplo), convert(trans),
+    auto status = oneapi::mkl::blas::column_major::tbmv(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(uplo), convert(trans),
                                                     convert(diag), n, k, a, lda, x, incx);
     ONEMKL_CATCH("TBMV")
   }
@@ -918,7 +918,7 @@ namespace H4I::MKLShim
                               int64_t k, const float _Complex *a, int64_t lda, float _Complex *x,
                               int64_t incx) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::tbmv(ctxt->queue, convert(uplo), convert(trans),
+    auto status = oneapi::mkl::blas::column_major::tbmv(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(uplo), convert(trans),
                                             convert(diag), n, k, reinterpret_cast<const std::complex<float> *>(a),
                                             lda, reinterpret_cast<std::complex<float> *>(x), incx);
     ONEMKL_CATCH("TBMV")
@@ -929,7 +929,7 @@ namespace H4I::MKLShim
                             int64_t k, const double _Complex *a, int64_t lda, double _Complex *x,
                             int64_t incx) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::tbmv(ctxt->queue, convert(uplo), convert(trans),
+    auto status = oneapi::mkl::blas::column_major::tbmv(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(uplo), convert(trans),
                                         convert(diag), n, k, reinterpret_cast<const std::complex<double> *>(a),
                                         lda, reinterpret_cast<std::complex<double> *>(x), incx);
     ONEMKL_CATCH("TBSV")
@@ -939,7 +939,7 @@ namespace H4I::MKLShim
                               onemklTranspose trans, onemklDiag diag, int64_t n,
                               int64_t k, const float *a, int64_t lda, float *x, int64_t incx) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::tbsv(ctxt->queue, convert(uplo), convert(trans),
+    auto status = oneapi::mkl::blas::column_major::tbsv(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(uplo), convert(trans),
                                                         convert(diag), n, k, a, lda, x, incx);
     ONEMKL_CATCH("TBSV")
   }
@@ -948,7 +948,7 @@ namespace H4I::MKLShim
                               onemklTranspose trans, onemklDiag diag, int64_t n,
                               int64_t k, const double *a, int64_t lda, double *x, int64_t incx) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::tbsv(ctxt->queue, convert(uplo), convert(trans),
+    auto status = oneapi::mkl::blas::column_major::tbsv(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(uplo), convert(trans),
                                                     convert(diag), n, k, a, lda, x, incx);
     ONEMKL_CATCH("TBSV")
   }
@@ -958,7 +958,7 @@ namespace H4I::MKLShim
                               int64_t k, const float _Complex *a, int64_t lda, float _Complex *x,
                               int64_t incx) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::tbsv(ctxt->queue, convert(uplo), convert(trans),
+    auto status = oneapi::mkl::blas::column_major::tbsv(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(uplo), convert(trans),
                                             convert(diag), n, k, reinterpret_cast<const std::complex<float> *>(a),
                                             lda, reinterpret_cast<std::complex<float> *>(x), incx);
     ONEMKL_CATCH("TBSV")
@@ -969,7 +969,7 @@ namespace H4I::MKLShim
                               int64_t k, const double _Complex *a, int64_t lda, double _Complex *x,
                               int64_t incx) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::tbsv(ctxt->queue, convert(uplo), convert(trans),
+    auto status = oneapi::mkl::blas::column_major::tbsv(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(uplo), convert(trans),
                                         convert(diag), n, k, reinterpret_cast<const std::complex<double> *>(a),
                                         lda, reinterpret_cast<std::complex<double> *>(x), incx);
     ONEMKL_CATCH("TBSV")
@@ -979,7 +979,7 @@ namespace H4I::MKLShim
                   onemklTranspose trans, onemklDiag diag, int64_t n,
                   const float *a, float *x, int64_t incx) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::tpmv(ctxt->queue, convert(uplo), convert(trans),
+    auto status = oneapi::mkl::blas::column_major::tpmv(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(uplo), convert(trans),
                                                     convert(diag), n, a, x, incx);
     ONEMKL_CATCH("TPMV")
   }
@@ -988,7 +988,7 @@ namespace H4I::MKLShim
                   onemklTranspose trans, onemklDiag diag, int64_t n,
                   const double *a, double *x, int64_t incx) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::tpmv(ctxt->queue, convert(uplo), convert(trans),
+    auto status = oneapi::mkl::blas::column_major::tpmv(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(uplo), convert(trans),
                                                     convert(diag), n, a, x, incx);
     ONEMKL_CATCH("TPMV")
   }
@@ -997,7 +997,7 @@ namespace H4I::MKLShim
                   onemklTranspose trans, onemklDiag diag, int64_t n,
                   const float _Complex *a, float _Complex *x, int64_t incx) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::tpmv(ctxt->queue, convert(uplo), convert(trans),
+    auto status = oneapi::mkl::blas::column_major::tpmv(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(uplo), convert(trans),
                                             convert(diag), n, reinterpret_cast<const std::complex<float> *>(a),
                                             reinterpret_cast<std::complex<float> *>(x), incx);
     ONEMKL_CATCH("TPMV")
@@ -1007,7 +1007,7 @@ namespace H4I::MKLShim
                   onemklTranspose trans, onemklDiag diag, int64_t n,
                   const double _Complex *a, double _Complex *x, int64_t incx) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::tpmv(ctxt->queue, convert(uplo), convert(trans),
+    auto status = oneapi::mkl::blas::column_major::tpmv(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(uplo), convert(trans),
                                         convert(diag), n, reinterpret_cast<const std::complex<double> *>(a),
                                         reinterpret_cast<std::complex<double> *>(x), incx);
     ONEMKL_CATCH("TPMV")
@@ -1017,7 +1017,7 @@ namespace H4I::MKLShim
                   onemklTranspose trans, onemklDiag diag, int64_t m,
                   const float *a, float *x, int64_t incx) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::tpsv(ctxt->queue, convert(uplo), convert(trans),
+    auto status = oneapi::mkl::blas::column_major::tpsv(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(uplo), convert(trans),
                                                     convert(diag), m, a, x, incx);
     ONEMKL_CATCH("TPSV")
   }
@@ -1026,7 +1026,7 @@ namespace H4I::MKLShim
                   onemklTranspose trans, onemklDiag diag, int64_t m,
                 const double *a, double *x, int64_t incx) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::tpsv(ctxt->queue, convert(uplo), convert(trans),
+    auto status = oneapi::mkl::blas::column_major::tpsv(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(uplo), convert(trans),
                                                     convert(diag), m, a, x, incx);
     ONEMKL_CATCH("TPSV")
   }
@@ -1035,7 +1035,7 @@ namespace H4I::MKLShim
                   onemklTranspose trans, onemklDiag diag, int64_t m,
                   const float _Complex *a, float _Complex *x, int64_t incx) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::tpsv(ctxt->queue, convert(uplo), convert(trans),
+    auto status = oneapi::mkl::blas::column_major::tpsv(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(uplo), convert(trans),
                                             convert(diag), m, reinterpret_cast<const std::complex<float> *>(a),
                                             reinterpret_cast<std::complex<float> *>(x), incx);
     ONEMKL_CATCH("TPSV")
@@ -1045,7 +1045,7 @@ namespace H4I::MKLShim
                   onemklTranspose trans, onemklDiag diag, int64_t m,
                   const double _Complex *a, double _Complex *x, int64_t incx) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::tpsv(ctxt->queue, convert(uplo), convert(trans),
+    auto status = oneapi::mkl::blas::column_major::tpsv(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(uplo), convert(trans),
                                         convert(diag), m, reinterpret_cast<const std::complex<double> *>(a),
                                         reinterpret_cast<std::complex<double> *>(x), incx);
     ONEMKL_CATCH("TPSV")
@@ -1056,7 +1056,7 @@ namespace H4I::MKLShim
                               onemklDiag diag, int64_t n, const float *a, int64_t lda, float *x,
                               int64_t incx) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::trmv(ctxt->queue, convert(uplo), convert(trans),
+    auto status = oneapi::mkl::blas::column_major::trmv(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(uplo), convert(trans),
                                         convert(diag), n, a, lda, x, incx);
     ONEMKL_CATCH("TRMV")
   }
@@ -1065,7 +1065,7 @@ namespace H4I::MKLShim
                               onemklDiag diag, int64_t n, const double *a, int64_t lda, double *x,
                               int64_t incx) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::trmv(ctxt->queue, convert(uplo), convert(trans),
+    auto status = oneapi::mkl::blas::column_major::trmv(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(uplo), convert(trans),
                                         convert(diag), n, a, lda, x, incx);
     ONEMKL_CATCH("TRMV")
   }
@@ -1074,7 +1074,7 @@ namespace H4I::MKLShim
                               onemklDiag diag, int64_t n, const float _Complex *a, int64_t lda, float _Complex *x,
                               int64_t incx) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::trmv(ctxt->queue, convert(uplo), convert(trans),
+    auto status = oneapi::mkl::blas::column_major::trmv(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(uplo), convert(trans),
                                         convert(diag), n, reinterpret_cast<const std::complex<float> *>(a),
                                         lda, reinterpret_cast<std::complex<float> *>(x), incx);
     ONEMKL_CATCH("TRMV")
@@ -1084,7 +1084,7 @@ namespace H4I::MKLShim
                               onemklDiag diag, int64_t n, const double _Complex *a, int64_t lda, double _Complex *x,
                               int64_t incx) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::trmv(ctxt->queue, convert(uplo), convert(trans),
+    auto status = oneapi::mkl::blas::column_major::trmv(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(uplo), convert(trans),
                                         convert(diag), n, reinterpret_cast<const std::complex<double> *>(a),
                                         lda, reinterpret_cast<std::complex<double> *>(x), incx);
     ONEMKL_CATCH("TRMV")
@@ -1095,7 +1095,7 @@ namespace H4I::MKLShim
                               onemklDiag diag, int64_t n, const float *a, int64_t lda, float *x,
                               int64_t incx) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::trsv(ctxt->queue, convert(uplo), convert(trans),
+    auto status = oneapi::mkl::blas::column_major::trsv(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(uplo), convert(trans),
                                           convert(diag), n, a, lda, x, incx);
     ONEMKL_CATCH("TRSV")
   }
@@ -1104,7 +1104,7 @@ namespace H4I::MKLShim
                               onemklDiag diag, int64_t n, const double *a, int64_t lda, double *x,
                               int64_t incx) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::trsv(ctxt->queue, convert(uplo), convert(trans),
+    auto status = oneapi::mkl::blas::column_major::trsv(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(uplo), convert(trans),
                                           convert(diag), n, a, lda, x, incx);
     ONEMKL_CATCH("TRSV")
   }
@@ -1113,7 +1113,7 @@ namespace H4I::MKLShim
                               onemklDiag diag, int64_t n, const float  _Complex *a, int64_t lda,
                               float _Complex *x, int64_t incx) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::trsv(ctxt->queue, convert(uplo), convert(trans),
+    auto status = oneapi::mkl::blas::column_major::trsv(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(uplo), convert(trans),
                                           convert(diag), n, reinterpret_cast<const std::complex<float> *>(a),
                                           lda, reinterpret_cast<std::complex<float> *>(x), incx);
     ONEMKL_CATCH("TRSV")
@@ -1123,7 +1123,7 @@ namespace H4I::MKLShim
                               onemklDiag diag, int64_t n, const double _Complex *a, int64_t lda,
                               double _Complex *x, int64_t incx) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::trsv(ctxt->queue, convert(uplo), convert(trans),
+    auto status = oneapi::mkl::blas::column_major::trsv(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(uplo), convert(trans),
                                           convert(diag), n, reinterpret_cast<const std::complex<double> *>(a),
                                           lda, reinterpret_cast<std::complex<double> *>(x), incx);
     ONEMKL_CATCH("TRSV")
@@ -1135,7 +1135,7 @@ namespace H4I::MKLShim
                            const sycl::half *B, int64_t ldb, sycl::half beta, sycl::half *C,
                            int64_t ldc) {
     ONEMKL_TRY
-	  auto status = oneapi::mkl::blas::column_major::gemm(ctxt->queue, convert(transA),
+	  auto status = oneapi::mkl::blas::column_major::gemm(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(transA),
                                           convert(transB), m, n, k, alpha, A,
                                           lda, B, ldb, beta, C, ldc);
     ONEMKL_CATCH("GEMM");
@@ -1147,7 +1147,7 @@ namespace H4I::MKLShim
                             const float *B, int64_t ldb, float beta, float *C,
                             int64_t ldc) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::gemm(ctxt->queue, convert(transA),
+    auto status = oneapi::mkl::blas::column_major::gemm(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(transA),
                                           convert(transB), m, n, k, alpha, A,
                                           lda, B, ldb, beta, C, ldc);
     ONEMKL_CATCH("GEMM");
@@ -1159,7 +1159,7 @@ namespace H4I::MKLShim
                             int64_t lda, const double *B, int64_t ldb,
                             double beta, double *C, int64_t ldc) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::gemm(ctxt->queue, convert(transA),
+    auto status = oneapi::mkl::blas::column_major::gemm(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(transA),
                                           convert(transB), m, n, k, alpha, A,
                                           lda, B, ldb, beta, C, ldc);
     ONEMKL_CATCH("GEMM");
@@ -1174,7 +1174,7 @@ namespace H4I::MKLShim
                             int64_t ldc) {
     ONEMKL_TRY
     auto status = oneapi::mkl::blas::column_major::gemm(
-        ctxt->queue, convert(transA), convert(transB), m, n, k, alpha,
+        reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(transA), convert(transB), m, n, k, alpha,
         reinterpret_cast<const std::complex<float> *>(A), lda,
         reinterpret_cast<const std::complex<float> *>(B), ldb, beta,
         reinterpret_cast<std::complex<float> *>(C), ldc);
@@ -1190,7 +1190,7 @@ namespace H4I::MKLShim
                             int64_t ldc) {
     ONEMKL_TRY
     auto status = oneapi::mkl::blas::column_major::gemm(
-        ctxt->queue, convert(transA), convert(transB), m, n, k, alpha,
+        reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(transA), convert(transB), m, n, k, alpha,
         reinterpret_cast<const std::complex<double> *>(A), lda,
         reinterpret_cast<const std::complex<double> *>(B), ldb, beta,
         reinterpret_cast<std::complex<double> *>(C), ldc);
@@ -1200,7 +1200,7 @@ namespace H4I::MKLShim
   void cHerk(Context* ctxt, onemklUplo uplo, onemklTranspose trans, int64_t n, int64_t k,
                 float alpha, const float _Complex* a, int64_t lda, float beta, float _Complex* c, int64_t ldc) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::herk(ctxt->queue, convert(uplo), convert(trans), n, k,
+    auto status = oneapi::mkl::blas::column_major::herk(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(uplo), convert(trans), n, k,
                 alpha, reinterpret_cast<const std::complex<float> *>(a), lda,
                 beta, reinterpret_cast<std::complex<float> *>(c), ldc);
     ONEMKL_CATCH("HER2K");
@@ -1209,7 +1209,7 @@ namespace H4I::MKLShim
   void zHerk(Context* ctxt, onemklUplo uplo, onemklTranspose trans, int64_t n, int64_t k,
                 double alpha, const double _Complex* a, int64_t lda, double beta, double _Complex* c, int64_t ldc) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::herk(ctxt->queue, convert(uplo), convert(trans), n, k,
+    auto status = oneapi::mkl::blas::column_major::herk(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(uplo), convert(trans), n, k,
                 alpha, reinterpret_cast<const std::complex<double> *>(a), lda,
                 beta, reinterpret_cast<std::complex<double> *>(c), ldc);
     ONEMKL_CATCH("HER2K");
@@ -1219,7 +1219,7 @@ namespace H4I::MKLShim
                 float _Complex alpha, const float _Complex* a, int64_t lda, const float _Complex* b, int64_t ldb,
                 float beta, float _Complex* c, int64_t ldc) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::her2k(ctxt->queue, convert(uplo), convert(trans), n, k,
+    auto status = oneapi::mkl::blas::column_major::her2k(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(uplo), convert(trans), n, k,
                 alpha, reinterpret_cast<const std::complex<float> *>(a), lda,
                 reinterpret_cast<const std::complex<float> *>(b), ldb,
                 beta, reinterpret_cast<std::complex<float> *>(c), ldc);
@@ -1230,7 +1230,7 @@ namespace H4I::MKLShim
                 double _Complex alpha, const double _Complex* a, int64_t lda,  const double _Complex* b, int64_t ldb,
                 double beta, double _Complex* c, int64_t ldc) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::her2k(ctxt->queue, convert(uplo), convert(trans), n, k,
+    auto status = oneapi::mkl::blas::column_major::her2k(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(uplo), convert(trans), n, k,
                 alpha, reinterpret_cast<const std::complex<double> *>(a), lda,
                 reinterpret_cast<const std::complex<double> *>(b), ldb,
                 beta, reinterpret_cast<std::complex<double> *>(c), ldc);
@@ -1241,7 +1241,7 @@ namespace H4I::MKLShim
                 float alpha, const float* a, int64_t lda, const float* b, int64_t ldb,
                 float beta, float* c, int64_t ldc) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::symm(ctxt->queue, convert(side), convert(uplo), m, n,
+    auto status = oneapi::mkl::blas::column_major::symm(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(side), convert(uplo), m, n,
                 alpha, a, lda, b, ldb, beta, c, ldc);
     ONEMKL_CATCH("SYMM");
   }
@@ -1250,7 +1250,7 @@ namespace H4I::MKLShim
                 double alpha, const double* a, int64_t lda, const double* b, int64_t ldb,
                 double beta, double* c, int64_t ldc) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::symm(ctxt->queue, convert(side), convert(uplo), m, n,
+    auto status = oneapi::mkl::blas::column_major::symm(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(side), convert(uplo), m, n,
                 alpha, a, lda, b, ldb, beta, c, ldc);
     ONEMKL_CATCH("SYMM");
   }
@@ -1259,7 +1259,7 @@ namespace H4I::MKLShim
                 float _Complex alpha, const float _Complex* a, int64_t lda, const float _Complex* b, int64_t ldb,
                 float _Complex beta, float _Complex* c, int64_t ldc) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::symm(ctxt->queue, convert(side), convert(uplo), m, n,
+    auto status = oneapi::mkl::blas::column_major::symm(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(side), convert(uplo), m, n,
                 static_cast<std::complex<float>>(alpha), reinterpret_cast<const std::complex<float> *>(a), lda,
                 reinterpret_cast<const std::complex<float> *>(b), ldb,
                 static_cast<const std::complex<float>>(beta), reinterpret_cast<std::complex<float> *>(c), ldc);
@@ -1270,7 +1270,7 @@ namespace H4I::MKLShim
                 double _Complex alpha, const double _Complex* a, int64_t lda, const double _Complex* b, int64_t ldb,
                 double _Complex beta, double _Complex* c, int64_t ldc) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::symm(ctxt->queue, convert(side), convert(uplo), m, n,
+    auto status = oneapi::mkl::blas::column_major::symm(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(side), convert(uplo), m, n,
                 static_cast<std::complex<double>>(alpha), reinterpret_cast<const std::complex<double> *>(a), lda,
                 reinterpret_cast<const std::complex<double> *>(b), ldb,
                 static_cast<std::complex<double>>(beta), reinterpret_cast<std::complex<double> *>(c), ldc);
@@ -1280,7 +1280,7 @@ namespace H4I::MKLShim
   void sSyrk(Context* ctxt, onemklUplo uplo, onemklTranspose trans, int64_t n, int64_t k,
                 float alpha, const float* a, int64_t lda, float beta, float* c, int64_t ldc) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::syrk(ctxt->queue, convert(uplo), convert(trans), n, k,
+    auto status = oneapi::mkl::blas::column_major::syrk(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(uplo), convert(trans), n, k,
                 alpha, a, lda, beta, c, ldc);
     ONEMKL_CATCH("SYRK");
   }
@@ -1288,7 +1288,7 @@ namespace H4I::MKLShim
   void dSyrk(Context* ctxt, onemklUplo uplo, onemklTranspose trans, int64_t n, int64_t k,
                 double alpha, const double* a, int64_t lda, double beta, double* c, int64_t ldc) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::syrk(ctxt->queue, convert(uplo), convert(trans), n, k,
+    auto status = oneapi::mkl::blas::column_major::syrk(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(uplo), convert(trans), n, k,
                 alpha, a, lda, beta, c, ldc);
     ONEMKL_CATCH("SYRK");
   }
@@ -1296,7 +1296,7 @@ namespace H4I::MKLShim
   void cSyrk(Context* ctxt, onemklUplo uplo, onemklTranspose trans, int64_t n, int64_t k,
                 float _Complex alpha, const float _Complex* a, int64_t lda, float _Complex beta, float _Complex* c, int64_t ldc) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::syrk(ctxt->queue, convert(uplo), convert(trans), n, k,
+    auto status = oneapi::mkl::blas::column_major::syrk(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(uplo), convert(trans), n, k,
                 static_cast<std::complex<float>>(alpha), reinterpret_cast<const std::complex<float> *>(a), lda,
                 static_cast<std::complex<float>>(beta), reinterpret_cast<std::complex<float> *>(c), ldc);
     ONEMKL_CATCH("SYRK");
@@ -1305,7 +1305,7 @@ namespace H4I::MKLShim
   void zSyrk(Context* ctxt, onemklUplo uplo, onemklTranspose trans, int64_t n, int64_t k,
                 double _Complex alpha, const double _Complex* a, int64_t lda, double _Complex beta, double _Complex* c, int64_t ldc) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::syrk(ctxt->queue, convert(uplo), convert(trans), n, k,
+    auto status = oneapi::mkl::blas::column_major::syrk(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(uplo), convert(trans), n, k,
                 static_cast<std::complex<double>>(alpha), reinterpret_cast<const std::complex<double> *>(a), lda,
                 static_cast<std::complex<double>>(beta), reinterpret_cast<std::complex<double> *>(c), ldc);
     ONEMKL_CATCH("SYRK");
@@ -1314,7 +1314,7 @@ namespace H4I::MKLShim
   void sSyr2k(Context* ctxt, onemklUplo uplo, onemklTranspose trans, int64_t n, int64_t k,
                 float alpha, const float* a, int64_t lda, const float* b, int64_t ldb, float beta, float* c, int64_t ldc) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::syr2k(ctxt->queue, convert(uplo), convert(trans), n, k,
+    auto status = oneapi::mkl::blas::column_major::syr2k(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(uplo), convert(trans), n, k,
                 alpha, a, lda, b, ldb, beta, c, ldc);
     ONEMKL_CATCH("SYR2K");
   }
@@ -1322,7 +1322,7 @@ namespace H4I::MKLShim
   void dSyr2k(Context* ctxt, onemklUplo uplo, onemklTranspose trans, int64_t n, int64_t k,
                 double alpha, const double* a, int64_t lda, const double* b, int64_t ldb, double beta, double* c, int64_t ldc) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::syr2k(ctxt->queue, convert(uplo), convert(trans), n, k,
+    auto status = oneapi::mkl::blas::column_major::syr2k(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(uplo), convert(trans), n, k,
                 alpha, a, lda, b, ldb, beta, c, ldc);
     ONEMKL_CATCH("SYR2K");
   }
@@ -1331,7 +1331,7 @@ namespace H4I::MKLShim
                 float _Complex alpha, const float _Complex* a, int64_t lda, const float _Complex* b, int64_t ldb,
                 float _Complex beta, float _Complex* c, int64_t ldc) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::syr2k(ctxt->queue, convert(uplo), convert(trans), n, k,
+    auto status = oneapi::mkl::blas::column_major::syr2k(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(uplo), convert(trans), n, k,
                 static_cast<std::complex<float>>(alpha), reinterpret_cast<const std::complex<float> *>(a), lda,
                 reinterpret_cast<const std::complex<float> *>(b), ldb,
                 static_cast<std::complex<float>>(beta), reinterpret_cast<std::complex<float> *>(c), ldc);
@@ -1342,7 +1342,7 @@ namespace H4I::MKLShim
                 double _Complex alpha, const double _Complex* a, int64_t lda, const double _Complex* b, int64_t ldb,
                 double _Complex beta, double _Complex* c, int64_t ldc) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::syr2k(ctxt->queue, convert(uplo), convert(trans), n, k,
+    auto status = oneapi::mkl::blas::column_major::syr2k(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(uplo), convert(trans), n, k,
                 static_cast<std::complex<double>>(alpha), reinterpret_cast<const std::complex<double> *>(a), lda,
                 reinterpret_cast<const std::complex<double> *>(b), ldb,
                 static_cast<std::complex<double>>(beta), reinterpret_cast<std::complex<double> *>(c), ldc);
@@ -1353,7 +1353,7 @@ namespace H4I::MKLShim
                 float _Complex alpha, const float _Complex* a, int64_t lda, const float _Complex* b, int64_t ldb,
                 float _Complex beta, float _Complex* c, int64_t ldc) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::hemm(ctxt->queue, convert(side), convert(uplo), m, n,
+    auto status = oneapi::mkl::blas::column_major::hemm(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(side), convert(uplo), m, n,
                 static_cast<std::complex<float>>(alpha), reinterpret_cast<const std::complex<float> *>(a), lda,
                 reinterpret_cast<const std::complex<float> *>(b), ldb, static_cast<std::complex<float>>(beta),
                 reinterpret_cast<std::complex<float> *>(c), ldc);
@@ -1364,7 +1364,7 @@ namespace H4I::MKLShim
                 double _Complex alpha, const double _Complex* a, int64_t lda, const double _Complex* b, int64_t ldb,
                 double _Complex beta, double _Complex* c, int64_t ldc) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::hemm(ctxt->queue, convert(side), convert(uplo), m, n,
+    auto status = oneapi::mkl::blas::column_major::hemm(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(side), convert(uplo), m, n,
                 static_cast<std::complex<double>>(alpha), reinterpret_cast<const std::complex<double> *>(a), lda,
                 reinterpret_cast<const std::complex<double> *>(b), ldb, static_cast<std::complex<double>>(beta),
                 reinterpret_cast<std::complex<double> *>(c), ldc);
@@ -1374,7 +1374,7 @@ namespace H4I::MKLShim
   void sTrmm(Context* ctxt, onemklSideMode side, onemklUplo uplo, onemklTranspose trans, onemklDiag diag,
                   int64_t m, int64_t n, float alpha, const float *a, int64_t lda, float *b, int64_t ldb) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::trmm(ctxt->queue, convert(side), convert(uplo), convert(trans), convert(diag),
+    auto status = oneapi::mkl::blas::column_major::trmm(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(side), convert(uplo), convert(trans), convert(diag),
                   m, n, alpha, a, lda, b, ldb);
     ONEMKL_CATCH("TRMM");
   }
@@ -1382,7 +1382,7 @@ namespace H4I::MKLShim
   void dTrmm(Context* ctxt, onemklSideMode side, onemklUplo uplo, onemklTranspose trans, onemklDiag diag,
                   int64_t m, int64_t n, double alpha, const double *a, int64_t lda, double *b, int64_t ldb) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::trmm(ctxt->queue, convert(side), convert(uplo), convert(trans), convert(diag),
+    auto status = oneapi::mkl::blas::column_major::trmm(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(side), convert(uplo), convert(trans), convert(diag),
                   m, n, alpha, a, lda, b, ldb);
     ONEMKL_CATCH("TRMM");
   }
@@ -1390,7 +1390,7 @@ namespace H4I::MKLShim
   void cTrmm(Context* ctxt, onemklSideMode side, onemklUplo uplo, onemklTranspose trans, onemklDiag diag,
                   int64_t m, int64_t n, float _Complex alpha, const float _Complex*a, int64_t lda, float _Complex*b, int64_t ldb) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::trmm(ctxt->queue, convert(side), convert(uplo), convert(trans), convert(diag),
+    auto status = oneapi::mkl::blas::column_major::trmm(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(side), convert(uplo), convert(trans), convert(diag),
                   m, n, static_cast<std::complex<float>>(alpha), reinterpret_cast<const std::complex<float> *>(a), lda,
                 reinterpret_cast<std::complex<float> *>(b), ldb);
     ONEMKL_CATCH("TRMM");
@@ -1399,7 +1399,7 @@ namespace H4I::MKLShim
   void zTrmm(Context* ctxt, onemklSideMode side, onemklUplo uplo, onemklTranspose trans, onemklDiag diag,
                   int64_t m, int64_t n, double _Complex alpha, const double _Complex *a, int64_t lda, double _Complex *b, int64_t ldb) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::trmm(ctxt->queue, convert(side), convert(uplo), convert(trans), convert(diag),
+    auto status = oneapi::mkl::blas::column_major::trmm(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(side), convert(uplo), convert(trans), convert(diag),
                   m, n, static_cast<std::complex<double>>(alpha), reinterpret_cast<const std::complex<double> *>(a), lda,
                 reinterpret_cast<std::complex<double> *>(b), ldb);
     ONEMKL_CATCH("TRMM");
@@ -1408,7 +1408,7 @@ namespace H4I::MKLShim
   void sTrsm(Context* ctxt, onemklSideMode side, onemklUplo uplo, onemklTranspose trans, onemklDiag diag,
                   int64_t m, int64_t n, float alpha, const float *a, int64_t lda, float *b, int64_t ldb) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::trsm(ctxt->queue, convert(side), convert(uplo), convert(trans), convert(diag),
+    auto status = oneapi::mkl::blas::column_major::trsm(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(side), convert(uplo), convert(trans), convert(diag),
                   m, n, alpha, a, lda, b, ldb);
     ONEMKL_CATCH("TRSM");
   }
@@ -1416,7 +1416,7 @@ namespace H4I::MKLShim
   void dTrsm(Context* ctxt, onemklSideMode side, onemklUplo uplo, onemklTranspose trans, onemklDiag diag,
                   int64_t m, int64_t n, double alpha, const double *a, int64_t lda, double *b, int64_t ldb) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::trsm(ctxt->queue, convert(side), convert(uplo), convert(trans), convert(diag),
+    auto status = oneapi::mkl::blas::column_major::trsm(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(side), convert(uplo), convert(trans), convert(diag),
                   m, n, alpha, a, lda, b, ldb);
     ONEMKL_CATCH("TRSM");
   }
@@ -1424,7 +1424,7 @@ namespace H4I::MKLShim
   void cTrsm(Context* ctxt, onemklSideMode side, onemklUplo uplo, onemklTranspose trans, onemklDiag diag,
                   int64_t m, int64_t n, float _Complex alpha, const float _Complex*a, int64_t lda, float _Complex*b, int64_t ldb) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::trsm(ctxt->queue, convert(side), convert(uplo), convert(trans), convert(diag),
+    auto status = oneapi::mkl::blas::column_major::trsm(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(side), convert(uplo), convert(trans), convert(diag),
                   m, n, static_cast<std::complex<float>>(alpha), reinterpret_cast<const std::complex<float> *>(a), lda,
                 reinterpret_cast<std::complex<float> *>(b), ldb);
     ONEMKL_CATCH("TRSM");
@@ -1433,7 +1433,7 @@ namespace H4I::MKLShim
   void zTrsm(Context* ctxt, onemklSideMode side, onemklUplo uplo, onemklTranspose trans, onemklDiag diag,
                   int64_t m, int64_t n, double _Complex alpha, const double _Complex *a, int64_t lda, double _Complex *b, int64_t ldb) {
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::trsm(ctxt->queue, convert(side), convert(uplo), convert(trans), convert(diag),
+    auto status = oneapi::mkl::blas::column_major::trsm(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, convert(side), convert(uplo), convert(trans), convert(diag),
                   m, n, static_cast<std::complex<double>>(alpha), reinterpret_cast<const std::complex<double> *>(a), lda,
                 reinterpret_cast<std::complex<double> *>(b), ldb);
     ONEMKL_CATCH("TRSM");

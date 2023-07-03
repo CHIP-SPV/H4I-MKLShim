@@ -3,33 +3,56 @@
 #pragma once
 #include <string>
 #include <array>
+#include <unordered_map>
 
 namespace H4I::MKLShim
 {
 
-constexpr const int nHandles = 4;
-using NativeHandleArray = std::array<uintptr_t, nHandles>;
+// Context encapsulating native objects for current backend.
+class Context
+{
+public:
+    // Supported backends.
+    enum Backend
+    {
+        level0 = 0, // default
+        opencl,
+        last = opencl,
+    };
 
-enum Backend{
-  level0, // default
-  opencl
+    // Nice name for collection of native handles used as context for a given backend.
+    static constexpr int nNativeHandles = 4;
+    using NativeHandleType = uintptr_t;
+    struct NativeHandleArray : public std::array<NativeHandleType, nNativeHandles>
+    {
+        NativeHandleType key(void) const { return (*this)[3]; }
+    };
+
+    // Convert a backend name to the Enum.
+    // May throw an exception if given an unrecognized backend name.
+    static Backend ToBackend(const std::string& name)
+    {
+        static const std::unordered_map<std::string, Backend> map{
+            {"default", Backend::level0},
+            {"level0", Backend::level0},
+            {"opencl", Backend::opencl}
+        };
+
+        return map.at(name);
+    }
+
+    // Create a Context associated with the given backend handles.
+    static Context* Create(const NativeHandleArray& handles, Backend backend);
+
+    Context(void) = default;
+    virtual ~Context(void) { }
+
+    // Determine which backend we're associated with.
+    virtual Backend GetCurrentBackend(void) = 0;
+
+    // Associate ourself with a different set of backend handles.
+    virtual void SetStream(const NativeHandleArray& handles) = 0;
 };
-
-
-// Convert a backend name to the Enum.
-// May throw an exception if given an unrecognized backend name.
-Backend ToBackend(const std::string&);
-
-Backend GetCurrentBackend(void);
-
-// Provide an interface for creating and manipulating
-// Contexts that avoids the caller from seeing the backend-specific
-// implementation.
-struct Context;
-
-Context* Create(const NativeHandleArray& handles, Backend backend);
-void Destroy(Context* context);
-void SetStream(Context* context, const NativeHandleArray& handles);
 
 } // namespace
 

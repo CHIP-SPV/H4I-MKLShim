@@ -7,111 +7,67 @@
 namespace H4I::MKLShim
 {
 
-// Indicates current backend used
-Backend currentBackend;
-
-std::unordered_map<uintptr_t, Context*> Context::knownContexts;
-
-Backend
-GetCurrentBackend(void)
-{
-    return currentBackend;
-}
-
-Backend
-ToBackend(const std::string& name)
-{
-    static const std::unordered_map<std::string, Backend> map{
-        {"level0", Backend::level0},
-        {"opencl", Backend::opencl}
-    };
-
-    return map.at(name);
-}
-
-Context* Update(Context* ctxt, const NativeHandleArray& backendHandles, Backend backend) {
-    // Obtain the handles to the LZ constructs.
-    currentBackend = backend;
-    if(backend == Backend::opencl)
-    {
-        cl_platform_id hPlatformId = (cl_platform_id)backendHandles[0];
-        cl_device_id hDeviceId = (cl_device_id)backendHandles[1];
-        cl_context hContext = (cl_context)backendHandles[2];
-        cl_command_queue hQueue = (cl_command_queue)backendHandles[3];
-
-        // Build SYCL platform/device/queue from the opencl handles.
-        ctxt->platform = sycl::opencl::make_platform((pi_native_handle)hPlatformId);
-        ctxt->device = sycl::opencl::make_device((pi_native_handle)hDeviceId);
-        ctxt->context = sycl::opencl::make_context((pi_native_handle)hContext);
-        ctxt->queue = sycl::opencl::make_queue(ctxt->context, (pi_native_handle)hQueue);
-    } else {
-        auto hDriver  = (ze_driver_handle_t)backendHandles[0];
-        auto hDevice  = (ze_device_handle_t)backendHandles[1];
-        auto hContext = (ze_context_handle_t)backendHandles[2];
-        auto hQueue   = (ze_command_queue_handle_t)backendHandles[3];
-
-        // Build SYCL platform/device/queue from the LZ handles.
-        ctxt->platform = sycl::ext::oneapi::level_zero::make_platform((pi_native_handle)hDriver);
-        ctxt->device = sycl::ext::oneapi::level_zero::make_device(ctxt->platform, (pi_native_handle)hDevice);
-
-        // FIX ME: only 1 device is returned from CHIP-SPV's lzHandles
-        std::vector<sycl::device> sycl_devices(1);
-        sycl_devices[0] = ctxt->device;
-        ctxt->context = sycl::ext::oneapi::level_zero::make_context(sycl_devices, (pi_native_handle)hContext, 1);
-        ctxt->queue = sycl::ext::oneapi::level_zero::make_queue(ctxt->context, ctxt->device, (pi_native_handle)hQueue, 1);
-    }
-    // add context to the table
-    assert(Context::knownContexts.find(backendHandles[3]) == Context::knownContexts.end());
-    Context::knownContexts[backendHandles[3]] = ctxt;
-    return ctxt;
-}
+ContextImpl::KnownBackendMapType ContextImpl::knownBackends;
 
 Context*
-Create(const NativeHandleArray& nativeHandles, Backend backend)
+ContextImpl::Create(const NativeHandleArray& nativeHandles, Backend backend)
 {
-    Context* ctxt = nullptr;
+    std::shared_ptr<SyclBackend> sbe;
 
-    // See if we know about the context already.
-    auto iter = Context::knownContexts.find(nativeHandles[3]);
-    if(iter == Context::knownContexts.end())
+    auto& backendMap = knownBackends[backend];
+
+    // Check if we know about this backend context already.
+    auto iter = backendMap.find(nativeHandles.key());
+    if(iter != backendMap.end())
     {
-        // We don't yet know about the context.
-        ctxt = Update(new Context(), nativeHandles, backend);
+        // We know about this context already.
+        // Just return it rather than creating a new one.
+        sbe = iter->second;
     }
     else
     {
-        ctxt = iter->second;
+        // We don't know about this context yet.
+        // Create one and save it in case we are asked to recreate it later.
+        sbe = MakeBackend(nativeHandles, backend);
+        backendMap[nativeHandles.key()] = sbe;
     }
-    assert(ctxt != nullptr);
-    return ctxt;
+    assert(backendMap.find(nativeHandles.key()) != backendMap.end());
+
+    return new ContextImpl(sbe);
 }
 
-void
-Destroy(Context* ctxt)
+Context*
+Context::Create(const NativeHandleArray& nativeHandles, Backend backend)
+{
+    return ContextImpl::Create(nativeHandles, backend);
+}
+
+ContextImpl::~ContextImpl(void)
 {
     // Fix Me: Since not all resources are owned by Sycl,
     // do we need to deleted Sycl pointers?
     //delete ctxt;
 }
 
+
 void
-SetStream(Context* ctxt, const NativeHandleArray& nativeHandles)
+ContextImpl::SetStream(const NativeHandleArray& nativeHandles)
 {
-    if(ctxt != nullptr)
+    auto myBackend = bedata->GetBackend();
+    auto& myBackendMap = knownBackends[myBackend];
+
+    auto iter = myBackendMap.find(nativeHandles.key());
+    if( iter != myBackendMap.end())
     {
-        auto iter = Context::knownContexts.find(nativeHandles[3]);
-        if( iter != Context::knownContexts.end())
-        {
-            // We've seen this set of handles before.
-            // TODO this is useless - it updates the local pointer
-            // value in this function, not anything in the caller.
-            ctxt = iter->second;
-        }
-        else
-        {
-            // We haven't seen this set of handles before.
-            Update(ctxt, nativeHandles, currentBackend);
-        }
+        // We've seen this set of handles before.
+        // Release our existing backend and associate with the one we found.
+        bedata = iter->second;
+    }
+    else
+    {
+        // We haven't seen this set of handles before.
+        bedata = MakeBackend(nativeHandles, myBackend);
+        myBackendMap[nativeHandles.key()] = bedata;
     }
 }
 
