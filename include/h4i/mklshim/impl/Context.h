@@ -23,84 +23,74 @@ public:
     struct SyclBackend
     {
         Context::Backend backend;
+        Context::NativeHandleType mapKey;
 
         sycl::platform platform;
         sycl::device device;
         sycl::context context;
         sycl::queue queue;
 
-        SyclBackend(Context::Backend _backend,
-                    const sycl::platform& _platform,
-                    const sycl::device& _device,
-                    const sycl::context& _context,
-                    const sycl::queue& _queue)
+        SyclBackend(void) = delete;
+        SyclBackend(Context::Backend _backend, Context::NativeHandleType _mapKey)
           : backend(_backend),
-            platform(_platform),
-            device(_device),
-            context(_context),
-            queue(_queue)
+            mapKey(_mapKey)
         {
+            std::cerr << "In SyclBackend::SyclBackend" << std::endl;
             // Nothing else to do.
         }
 
-        SyclBackend(void) = delete;
+        ~SyclBackend(void)
+        {
+            std::cerr << "In SyclBackend::~SyclBackend" << std::endl;
+        }
+
 
         Backend GetBackend(void) const  { return backend; }
     };
 
     struct LevelZeroSyclBackend : public SyclBackend
     {
-    private:
-        static SyclBackend MakeBaseBackend(const NativeHandleArray& nativeHandles)
+        LevelZeroSyclBackend(const NativeHandleArray& nativeHandles)
+          : SyclBackend(Context::Backend::level0, nativeHandles.key())
         {
-            auto hDriver = reinterpret_cast<pi_native_handle>(nativeHandles[0]);
-            auto hDevice = reinterpret_cast<pi_native_handle>(nativeHandles[1]);
-            auto hContext = reinterpret_cast<pi_native_handle>(nativeHandles[2]);
-            auto hQueue = reinterpret_cast<pi_native_handle>(nativeHandles[3]);
+            auto hDriver = reinterpret_cast<ze_driver_handle_t>(nativeHandles[0]);
+            auto hDevice = reinterpret_cast<ze_device_handle_t>(nativeHandles[1]);
+            auto hContext = reinterpret_cast<ze_context_handle_t>(nativeHandles[2]);
+            auto hQueue = reinterpret_cast<ze_command_queue_handle_t>(nativeHandles[3]);
 
-            auto platform = sycl::ext::oneapi::level_zero::make_platform(hDriver);
-            auto device = sycl::ext::oneapi::level_zero::make_device(platform, hDevice);
+            // Create SYCL objects around native Level Zero backend handles.
+            // Note: we explicitly retain ownership of the context and device handles, 
+            // rather than using the default behavior of transferring ownership to the SYCL runtime.
+            // We do this because chipStar expects to retain ownership.  (TODO - verify this.)
+            platform = sycl::make_platform<sycl::backend::ext_oneapi_level_zero>(hDriver);
+            device = sycl::make_device<sycl::backend::ext_oneapi_level_zero>(hDevice);
 
             // TODO how to handle more than one GPU?
-            // chipStar only returns one device.
+            // chipStar only returns one device with hipGetNativeDeviceHandles().
             std::vector<sycl::device> sycl_devices(1, device);
-            auto context = sycl::ext::oneapi::level_zero::make_context(sycl_devices, hContext, 1);
-            auto queue = sycl::ext::oneapi::level_zero::make_queue(context, device, hQueue);
+            context = sycl::make_context<sycl::backend::ext_oneapi_level_zero>(
+                { hContext, sycl_devices, sycl::ext::oneapi::level_zero::ownership::keep } );
 
-            return SyclBackend(Context::Backend::level0, platform, device, context, queue);
-        }
-
-    public:
-        LevelZeroSyclBackend(const NativeHandleArray& nativeHandles)
-          : SyclBackend(MakeBaseBackend(nativeHandles))
-        {
-            // Nothing else to do.
+            queue = sycl::make_queue<sycl::backend::ext_oneapi_level_zero>(
+                { hQueue, device, sycl::ext::oneapi::level_zero::ownership::keep },
+                context);
         }
     };
 
     struct OpenCLSyclBackend : public SyclBackend
     {
-    private:
-        static SyclBackend MakeBaseBackend(const NativeHandleArray& nativeHandles)
+        OpenCLSyclBackend(const NativeHandleArray& nativeHandles)
+          : SyclBackend(Context::Backend::opencl, nativeHandles.key())
         {
             auto hPlatform = reinterpret_cast<pi_native_handle>(nativeHandles[0]);
             auto hDevice = reinterpret_cast<pi_native_handle>(nativeHandles[1]);
             auto hContext = reinterpret_cast<pi_native_handle>(nativeHandles[2]);
             auto hQueue = reinterpret_cast<pi_native_handle>(nativeHandles[3]);
 
-            auto platform = sycl::opencl::make_platform(hPlatform);
-            auto device = sycl::opencl::make_device(hDevice);
-            auto context = sycl::opencl::make_context(hContext);
-            auto queue = sycl::opencl::make_queue(context, hQueue);
-
-            return SyclBackend(Context::Backend::opencl, platform, device, context, queue);
-        }
-
-    public:
-        OpenCLSyclBackend(const NativeHandleArray& nativeHandles)
-          : SyclBackend(MakeBaseBackend(nativeHandles))
-        {
-            // Nothing else to do.
+            platform = sycl::opencl::make_platform(hPlatform);
+            device = sycl::opencl::make_device(hDevice);
+            context = sycl::opencl::make_context(hContext);
+            queue = sycl::opencl::make_queue(context, hQueue);
         }
     };
 

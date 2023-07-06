@@ -44,9 +44,15 @@ Context::Create(const NativeHandleArray& nativeHandles, Backend backend)
 
 ContextImpl::~ContextImpl(void)
 {
-    // Fix Me: Since not all resources are owned by Sycl,
-    // do we need to deleted Sycl pointers?
-    //delete ctxt;
+    // Remove our backend from the known backend map.
+    // We had better know about this backend context already.
+    auto& backendMap = knownBackends[bedata->backend];
+    auto iter = backendMap.find(bedata->mapKey);
+    assert(iter != backendMap.end());
+    backendMap.erase(iter);
+
+    // Release the backend.
+    bedata.reset();
 }
 
 
