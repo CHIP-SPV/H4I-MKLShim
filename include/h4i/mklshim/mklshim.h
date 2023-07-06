@@ -48,4 +48,5 @@
     __CATCH__(msg)
 
 #define ONEMKL_CATCH_NO_FLUSH(msg) \
+    return size;                   \
     __CATCH__(msg)
