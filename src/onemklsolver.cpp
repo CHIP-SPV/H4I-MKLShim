@@ -913,7 +913,7 @@ namespace H4I::MKLShim
     ONEMKL_CATCH_NO_FLUSH("Chegvd_ScPadSz")
   }
   int64_t Zhegvd_ScPadSz(Context* ctxt, int64_t itype, onemklJob job, onemklUplo uplo, int64_t n, int64_t lda, int64_t ldb){
-    ONEMKL_TRY
+    ONEMKL_TRY_WITH_RET
     auto size = oneapi::mkl::lapack::hegvd_scratchpad_size<std::complex<double>>(reinterpret_cast<ContextImpl*>(ctxt)->bedata->queue, itype, convert(job), convert(uplo), n, lda, ldb);
     ONEMKL_CATCH_NO_FLUSH("Zhegvd_ScPadSz")
   }
