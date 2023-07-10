@@ -3,7 +3,6 @@
 #pragma once
 
 #include <memory>
-#include <array>
 #include <unordered_map>
 #include <sycl/queue.hpp>
 #include <sycl/device.hpp>
@@ -93,7 +92,7 @@ public:
         }
     };
 
-    using KnownBackendMapType = std::array<std::unordered_map<NativeHandleType, std::shared_ptr<SyclBackend>>, Backend::last+1>;
+    using KnownBackendMapType = std::unordered_map<NativeHandleType, std::shared_ptr<SyclBackend>>;
     static KnownBackendMapType knownBackends;
 
     static std::shared_ptr<SyclBackend> MakeBackend(const NativeHandleArray& handles, Backend backend)

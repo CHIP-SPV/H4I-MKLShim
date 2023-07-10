@@ -14,11 +14,9 @@ ContextImpl::FindOrCreateBackend(const NativeHandleArray& nativeHandles, Backend
 {
     std::shared_ptr<SyclBackend> ret;
 
-    auto& backendMap = knownBackends[backend];
-
     // Check if we know about this backend context already.
-    auto iter = backendMap.find(nativeHandles.key());
-    if(iter != backendMap.end())
+    auto iter = knownBackends.find(nativeHandles.key());
+    if(iter != knownBackends.end())
     {
         // We know about this context already.
         // Use the existing Backend rather than creating a new one.
@@ -29,9 +27,9 @@ ContextImpl::FindOrCreateBackend(const NativeHandleArray& nativeHandles, Backend
         // We don't know about this Backend context yet.
         // Create one and save it in case we are asked to recreate it later.
         ret = MakeBackend(nativeHandles, backend);
-        backendMap[nativeHandles.key()] = ret;
+        knownBackends[nativeHandles.key()] = ret;
     }
-    assert(backendMap.find(nativeHandles.key()) != backendMap.end());
+    assert(knownBackends.find(nativeHandles.key()) != knownBackends.end());
 
     return ret;
 }
@@ -53,10 +51,9 @@ ContextImpl::~ContextImpl(void)
 {
     // Remove our backend from the known backend map.
     // We had better know about this backend context already.
-    auto& backendMap = knownBackends[bedata->backend];
-    auto iter = backendMap.find(bedata->mapKey);
-    assert(iter != backendMap.end());
-    backendMap.erase(iter);
+    auto iter = knownBackends.find(bedata->mapKey);
+    assert(iter != knownBackends.end());
+    knownBackends.erase(iter);
 
     // Release the backend.
     bedata.reset();
@@ -76,9 +73,9 @@ ContextImpl::SetStream(const NativeHandleArray& nativeHandles)
     // release the original backend.
     if(bedata->mapKey != origMapKey)
     {
-        auto origBackendIter = knownBackends[bedata->backend].find(origMapKey);
-        assert(origBackendIter != knownBackends[bedata->backend].end());
-        knownBackends[bedata->backend].erase(origBackendIter);
+        auto origBackendIter = knownBackends.find(origMapKey);
+        assert(origBackendIter != knownBackends.end());
+        knownBackends.erase(origBackendIter);
     }
 }
 
