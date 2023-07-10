@@ -9,10 +9,10 @@ namespace H4I::MKLShim
 
 ContextImpl::KnownBackendMapType ContextImpl::knownBackends;
 
-Context*
-ContextImpl::Create(const NativeHandleArray& nativeHandles, Backend backend)
+std::shared_ptr<ContextImpl::SyclBackend>
+ContextImpl::FindOrCreateBackend(const NativeHandleArray& nativeHandles, Backend backend)
 {
-    std::shared_ptr<SyclBackend> sbe;
+    std::shared_ptr<SyclBackend> ret;
 
     auto& backendMap = knownBackends[backend];
 
@@ -21,18 +21,25 @@ ContextImpl::Create(const NativeHandleArray& nativeHandles, Backend backend)
     if(iter != backendMap.end())
     {
         // We know about this context already.
-        // Just return it rather than creating a new one.
-        sbe = iter->second;
+        // Use the existing Backend rather than creating a new one.
+        ret = iter->second;
     }
     else
     {
-        // We don't know about this context yet.
+        // We don't know about this Backend context yet.
         // Create one and save it in case we are asked to recreate it later.
-        sbe = MakeBackend(nativeHandles, backend);
-        backendMap[nativeHandles.key()] = sbe;
+        ret = MakeBackend(nativeHandles, backend);
+        backendMap[nativeHandles.key()] = ret;
     }
     assert(backendMap.find(nativeHandles.key()) != backendMap.end());
 
+    return ret;
+}
+
+Context*
+ContextImpl::Create(const NativeHandleArray& nativeHandles, Backend backend)
+{
+    std::shared_ptr<SyclBackend> sbe = FindOrCreateBackend(nativeHandles, backend);
     return new ContextImpl(sbe);
 }
 
@@ -59,21 +66,19 @@ ContextImpl::~ContextImpl(void)
 void
 ContextImpl::SetStream(const NativeHandleArray& nativeHandles)
 {
-    auto myBackend = bedata->GetBackend();
-    auto& myBackendMap = knownBackends[myBackend];
+    // Save access to our current backend before we (potentially) replace it.
+    auto origMapKey = bedata->mapKey;
 
-    auto iter = myBackendMap.find(nativeHandles.key());
-    if( iter != myBackendMap.end())
+    // Find or create a backend for the given set of native handles.
+    bedata = FindOrCreateBackend(nativeHandles, bedata->backend);
+
+    // If the new backend is not the same as our original one, 
+    // release the original backend.
+    if(bedata->mapKey != origMapKey)
     {
-        // We've seen this set of handles before.
-        // Release our existing backend and associate with the one we found.
-        bedata = iter->second;
-    }
-    else
-    {
-        // We haven't seen this set of handles before.
-        bedata = MakeBackend(nativeHandles, myBackend);
-        myBackendMap[nativeHandles.key()] = bedata;
+        auto origBackendIter = knownBackends[bedata->backend].find(origMapKey);
+        assert(origBackendIter != knownBackends[bedata->backend].end());
+        knownBackends[bedata->backend].erase(origBackendIter);
     }
 }
 

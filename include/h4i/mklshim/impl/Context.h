@@ -35,13 +35,12 @@ public:
           : backend(_backend),
             mapKey(_mapKey)
         {
-            std::cerr << "In SyclBackend::SyclBackend" << std::endl;
             // Nothing else to do.
         }
 
         ~SyclBackend(void)
         {
-            std::cerr << "In SyclBackend::~SyclBackend" << std::endl;
+            // Nothing else to do
         }
 
 
@@ -97,9 +96,6 @@ public:
     using KnownBackendMapType = std::array<std::unordered_map<NativeHandleType, std::shared_ptr<SyclBackend>>, Backend::last+1>;
     static KnownBackendMapType knownBackends;
 
-    // Current SYCL backend.
-    std::shared_ptr<SyclBackend> bedata;
-
     static std::shared_ptr<SyclBackend> MakeBackend(const NativeHandleArray& handles, Backend backend)
     {
         std::shared_ptr<SyclBackend> ret;
@@ -117,6 +113,11 @@ public:
         }
         return ret;
     }
+
+    static std::shared_ptr<SyclBackend> FindOrCreateBackend(const NativeHandleArray& handles, Backend backend);
+
+    // Current SYCL backend.
+    std::shared_ptr<SyclBackend> bedata;
 
 public:
     // Create a Context associated with the given backend handles.
