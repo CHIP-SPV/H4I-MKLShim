@@ -4,6 +4,7 @@
 #include <string>
 #include <array>
 #include <unordered_map>
+#include <cstdint>
 
 namespace H4I::MKLShim
 {
@@ -22,7 +23,7 @@ public:
 
     // Nice name for collection of native handles used as context for a given backend.
     static constexpr int nNativeHandles = 4;
-    using NativeHandleType = uintptr_t;
+    using NativeHandleType = std::uintptr_t;
     struct NativeHandleArray : public std::array<NativeHandleType, nNativeHandles>
     {
         NativeHandleType key(void) const { return (*this)[3]; }
