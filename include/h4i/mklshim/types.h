@@ -54,4 +54,12 @@ struct Context;
     ONEMLK_TRANSPOSE_CONJTRANS
   } onemklTranspose;
 
+// keep track of the four combinations of
+// mkl fft precision (Single or Double) and 
+// starting domain (Real or Complex)
+struct fftDescriptorSR;
+struct fftDescriptorSC;
+struct fftDescriptorDR;
+struct fftDescriptorDC;
+
 } // namespace

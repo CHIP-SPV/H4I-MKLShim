@@ -6,7 +6,8 @@ add_library(MKLShim SHARED
     Context.cpp
     Common.cpp
     onemklblas.cpp
-    onemklsolver.cpp)
+    onemklsolver.cpp
+    onemklfft.cpp)
 target_include_directories(MKLShim
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
@@ -41,6 +42,7 @@ install(FILES
             ${CMAKE_SOURCE_DIR}/include/h4i/mklshim/common.h
             ${CMAKE_SOURCE_DIR}/include/h4i/mklshim/onemklblas.h
             ${CMAKE_SOURCE_DIR}/include/h4i/mklshim/onemklsolver.h
+            ${CMAKE_SOURCE_DIR}/include/h4i/mklshim/onemklfft.h
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/h4i/mklshim/
     )
 
