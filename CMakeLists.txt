@@ -2,7 +2,18 @@
 # See LICENSE.txt in the root of the source distribution for license info.
 
 cmake_minimum_required(VERSION 3.20)
-include (${CMAKE_SOURCE_DIR}/CMake/MKLShimVersion.cmake)
+# make sure that INTEL_COMPILER exists
+if(NOT DEFINED ${INTEL_COMPILER})
+    message(FATAL_ERROR "INTEL_COMPILER must be defined")
+endif()
+set(CMAKE_CXX_COMPILER ${INTEL_COMPILER})
+
+# set the default CMAKE_INSTALL_PREFIX to the current directory/install
+if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+    set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/install" CACHE PATH "..." FORCE)
+endif()
+
+include (${CMAKE_CURRENT_SOURCE_DIR}/CMake/MKLShimVersion.cmake)
 project(MKLShim
     VERSION ${MKLShim_VERSION}
     LANGUAGES CXX)
