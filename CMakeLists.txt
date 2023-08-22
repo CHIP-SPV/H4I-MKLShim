@@ -2,10 +2,28 @@
 # See LICENSE.txt in the root of the source distribution for license info.
 
 cmake_minimum_required(VERSION 3.20)
-include (${CMAKE_SOURCE_DIR}/CMake/MKLShimVersion.cmake)
+
+# set the default CMAKE_INSTALL_PREFIX to the current directory/install
+if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+    set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/install" CACHE PATH "..." FORCE)
+endif()
+
+# print where MKLShim layer will be installed
+message(STATUS "H4I-MKLShim will be installed to: ${CMAKE_INSTALL_PREFIX}")
+
+include (${CMAKE_CURRENT_SOURCE_DIR}/CMake/MKLShimVersion.cmake)
 project(MKLShim
     VERSION ${MKLShim_VERSION}
     LANGUAGES CXX)
+
+# check if INTEL_COMPILER_PATH was passed to CMake invocation, if not, look for icpx in PATH
+if(NOT DEFINED INTEL_COMPILER_PATH)
+    find_program(INTEL_COMPILER_PATH icpx REQUIRED)
+    message(STATUS "Found Intel C++ Compiler: ${INTEL_COMPILER_PATH}")
+endif()
+
+set(CMAKE_CXX_COMPILER ${INTEL_COMPILER_PATH})
+set(CMAKE_CXX_COMPILER_ID "IntelLLVM")
 
 # Define a target capturing common configuration settings.
 # Although we use 'add_library' for this, it is not a library - 
