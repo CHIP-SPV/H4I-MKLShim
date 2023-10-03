@@ -15,10 +15,6 @@ namespace H4I::MKLShim
 
   // create the fft descriptor
   fftDescriptorSR* createFFTDescriptorSR(Context *ctxt, int64_t nx);
-  fftDescriptorSR* createFFTDescriptorSR(Context *ctxt, int64_t nx,
-                                         int64_t istride, int64_t idist,
-                                         int64_t ostride, int64_t odist,
-                                         int64_t batch);
   fftDescriptorSC* createFFTDescriptorSC(Context *ctxt, int64_t nx);
   fftDescriptorDR* createFFTDescriptorDR(Context *ctxt, int64_t nx);
   fftDescriptorDC* createFFTDescriptorDC(Context *ctxt, int64_t nx);
@@ -26,9 +22,7 @@ namespace H4I::MKLShim
   // create the multi-dimensional fft descriptor
   fftDescriptorSR* createFFTDescriptorSR(Context *ctxt, std::vector<std::int64_t> dimensions);
   fftDescriptorSR* createFFTDescriptorSR(Context *ctxt, std::vector<std::int64_t> dimensions,
-                                         int64_t istride, int64_t idist,
-                                         int64_t ostride, int64_t odist,
-                                         int64_t batch);
+                                         int64_t in_strides[], int64_t out_strides[]);
   fftDescriptorSC* createFFTDescriptorSC(Context *ctxt, std::vector<std::int64_t> dimensions);
   fftDescriptorDR* createFFTDescriptorDR(Context *ctxt, std::vector<std::int64_t> dimensions);
   fftDescriptorDC* createFFTDescriptorDC(Context *ctxt, std::vector<std::int64_t> dimensions);

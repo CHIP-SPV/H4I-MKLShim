@@ -39,62 +39,6 @@ namespace H4I::MKLShim
           // ctxt->queue.wait();
       }
 
-      fftDescriptorSR(Context* ctxt, std::int64_t length,
-                      std::int64_t istride, std::int64_t idist,
-                      std::int64_t ostride, std::int64_t odist,
-                      std::int64_t batch) : fft_plan(length)
-      {
-	  // commit the plan
-	  // fft_plan.commit(ctxt->queue);
-	  // wait for everything to complete before continuing
-	  // ctxt->queue.wait();
-
-	  // use the soon-to-be default (can be removed in the future) for storing complex numbers
-	  // fft_plan.set_value(oneapi::mkl::dft::config_param::CONJUGATE_EVEN_STORAGE, DFTI_COMPLEX_COMPLEX);
-	  // commit the plan
-          // fft_plan.commit(ctxt->queue);
-          // wait for everything to complete before continuing
-          // ctxt->queue.wait();
-
-          // set layouts
-          if (idist > 0)
-          {
-              fft_plan.set_value(oneapi::mkl::dft::config_param::FWD_DISTANCE, idist);
-          }
-          if (istride > 0)
-          {
-              int64_t in_strides[2] = {(int64_t)0, istride};
-              // fft_plan.set_value(oneapi::mkl::dft::config_param::INPUT_STRIDES, in_strides);
-          }
-           
-          if (odist > 0)
-          {
-              fft_plan.set_value(oneapi::mkl::dft::config_param::BWD_DISTANCE, odist);
-          }
-          if (ostride > 0)
-          {
-              int64_t out_strides[2] = {(int64_t)0, ostride};
-              // fft_plan.set_value(oneapi::mkl::dft::config_param::OUTPUT_STRIDES, out_strides)
-          }
-
-          // set the number of transforms to perform
-          if (batch > 1) 
-            {
-              // fft_plan.set_value(oneapi::mkl::dft::config_param::NUMBER_OF_TRANSFORMS, (int64_t)batch);
-            }
-
-          // fft_plan.set_value(oneapi::mkl::dft::config_param::NUMBER_OF_TRANSFORMS, 2);
-          // fft_plan.set_value(oneapi::mkl::dft::config_param::FWD_DISTANCE, 1);
-          // fft_plan.set_value(oneapi::mkl::dft::config_param::BWD_DISTANCE, 1);
-          
-
-          // commit the changes
-          fft_plan.commit(ctxt->queue);
-
-          // wait for everything to complete before continuing
-          ctxt->queue.wait();
-      }
-
       // descriptor for multi-dimensional transforms
       fftDescriptorSR(Context* ctxt, std::vector<std::int64_t> dimensions) : fft_plan(dimensions)
       {
@@ -114,50 +58,13 @@ namespace H4I::MKLShim
 
       // descriptor for multi-dimensional transforms
       fftDescriptorSR(Context* ctxt, std::vector<std::int64_t> dimensions,
-                      std::int64_t istride, std::int64_t idist,
-                      std::int64_t ostride, std::int64_t odist,
-                      std::int64_t batch) : fft_plan(dimensions)
+                      std::int64_t in_strides[], std::int64_t out_strides[]) : fft_plan(dimensions)
       {
-          // commit the plan
-          fft_plan.commit(ctxt->queue);
-          // wait for everything to complete before continuing
-          ctxt->queue.wait();
+          // set these before the initial commit or get a FFT_INVALID_DESCRIPTOR exception at runtime
+          fft_plan.set_value(oneapi::mkl::dft::config_param::INPUT_STRIDES, in_strides);
+          fft_plan.set_value(oneapi::mkl::dft::config_param::OUTPUT_STRIDES, out_strides);
+          fft_plan.set_value(oneapi::mkl::dft::config_param::CONJUGATE_EVEN_STORAGE, DFTI_COMPLEX_COMPLEX);
 
-	  // use the soon-to-be default (can be removed in the future) for storing complex numbers
-          // fft_plan.set_value(oneapi::mkl::dft::config_param::CONJUGATE_EVEN_STORAGE, DFTI_COMPLEX_COMPLEX);
-          // commit the plan
-          // fft_plan.commit(ctxt->queue);
-          // wait for everything to complete before continuing
-          // ctxt->queue.wait();
-
-          // set layouts
-          if (idist > 0)
-          {
-              // fft_plan.set_value(oneapi::mkl::dft::config_param::FWD_DISTANCE, idist);
-          }
-          if (istride > 0)
-          {
-              int64_t in_strides[2] = {(int64_t)0, istride};
-              // fft_plan.set_value(oneapi::mkl::dft::config_param::INPUT_STRIDES, in_strides);
-          }
-
-          if (odist > 0)
-          {
-              // fft_plan.set_value(oneapi::mkl::dft::config_param::BWD_DISTANCE, odist);
-          }
-          if (ostride > 0)
-          {
-              int64_t out_strides[2] = {(int64_t)0, ostride};
-              // fft_plan.set_value(oneapi::mkl::dft::config_param::OUTPUT_STRIDES, out_strides)
-          }
-
-          // set the number of transforms to perform
-          if (batch > 1)
-            {
-              // fft_plan.set_value(oneapi::mkl::dft::config_param::NUMBER_OF_TRANSFORMS, batch);
-            }
-
-          // commit the changes
           fft_plan.commit(ctxt->queue);
 
           // wait for everything to complete before continuing
@@ -422,17 +329,6 @@ namespace H4I::MKLShim
      return d;
   }
 
-  fftDescriptorSR* createFFTDescriptorSR(Context* ctxt, int64_t length,
-                                         int64_t istride, int64_t idist,
-                                         int64_t ostride, int64_t odist,
-                                         int64_t batch) {
-     auto d = new fftDescriptorSR(ctxt, length,
-                                  istride, idist,
-                                  ostride, odist,
-                                  batch);
-     return d;
-  }
-
   fftDescriptorSC* createFFTDescriptorSC(Context* ctxt, int64_t length) {
      auto d = new fftDescriptorSC(ctxt, length);
      return d;
@@ -455,13 +351,9 @@ namespace H4I::MKLShim
   }
 
   fftDescriptorSR* createFFTDescriptorSR(Context* ctxt, std::vector<std::int64_t> dimensions,
-                                         int64_t istride, int64_t idist,
-                                         int64_t ostride, int64_t odist,
-                                         int64_t batch) {
+                                         int64_t in_strides[], int64_t out_strides[]) {
      auto d = new fftDescriptorSR(ctxt, dimensions,
-                                  istride, idist,
-                                  ostride, odist,
-                                  batch);
+                                  in_strides, out_strides);
      return d;
   }
 
