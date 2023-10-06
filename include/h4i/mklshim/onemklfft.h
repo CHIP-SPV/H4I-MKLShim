@@ -24,8 +24,14 @@ namespace H4I::MKLShim
   fftDescriptorSR* createFFTDescriptorSR(Context *ctxt, std::vector<std::int64_t> dimensions,
                                          int64_t in_strides[], int64_t out_strides[]);
   fftDescriptorSC* createFFTDescriptorSC(Context *ctxt, std::vector<std::int64_t> dimensions);
+  fftDescriptorSC* createFFTDescriptorSC(Context *ctxt, std::vector<std::int64_t> dimensions,
+                                         int64_t in_strides[], int64_t out_strides[]);
   fftDescriptorDR* createFFTDescriptorDR(Context *ctxt, std::vector<std::int64_t> dimensions);
+  fftDescriptorDR* createFFTDescriptorDR(Context *ctxt, std::vector<std::int64_t> dimensions,
+                                         int64_t in_strides[], int64_t out_strides[]);
   fftDescriptorDC* createFFTDescriptorDC(Context *ctxt, std::vector<std::int64_t> dimensions);
+  fftDescriptorDC* createFFTDescriptorDC(Context *ctxt, std::vector<std::int64_t> dimensions,
+                                         int64_t in_strides[], int64_t out_strides[]);
 
   // destroy descriptors
   void destroyFFTDescriptorSR(Context *ctxt, fftDescriptorSR *descSR);
@@ -43,6 +49,7 @@ namespace H4I::MKLShim
                           int64_t input_stride, int64_t fwd_distance,
                           int64_t output_stride, int64_t bwd_distance,
                           int64_t number_of_transforms);
+
   void setFFTPlanValuesDR(Context *ctxt, fftDescriptorDR *descDR,
                           int64_t input_stride, int64_t fwd_distance,
                           int64_t output_stride, int64_t bwd_distance,
@@ -55,8 +62,10 @@ namespace H4I::MKLShim
   
 
   // Single precision, Real starting domain
-  void fftExecR2C(Context *ctxt, fftDescriptorSR *descSR, float *idata, float _Complex *odata);
-  void fftExecC2R(Context *ctxt, fftDescriptorSR *descSR, float _Complex *idata, float *odata);
+  void fftExecR2C(Context *ctxt, fftDescriptorSR *descSR, float *idata, float _Complex *odata,
+                  int64_t reset_placement, int64_t reset_r_strides, int64_t r_strides[]);
+  void fftExecC2R(Context *ctxt, fftDescriptorSR *descSR, float _Complex *idata, float *odata,
+                  int64_t reset_placement, int64_t reset_r_strides, int64_t r_strides[]);
 
   // Single precision, Complex starting domain
   void fftExecC2Cforward(Context *ctxt, 
@@ -69,8 +78,10 @@ namespace H4I::MKLShim
                           float _Complex *odata);
 
   // Double precision, Real starting domain
-  void fftExecD2Z(Context *ctxt, fftDescriptorDR *descDR, double *idata, double _Complex *odata);
-  void fftExecZ2D(Context *ctxt, fftDescriptorDR *descDR, double _Complex *idata, double *odata);
+  void fftExecD2Z(Context *ctxt, fftDescriptorDR *descDR, double *idata, double _Complex *odata,
+                  int64_t reset_placement, int64_t reset_r_strides, int64_t r_strides[]);
+  void fftExecZ2D(Context *ctxt, fftDescriptorDR *descDR, double _Complex *idata, double *odata,
+                  int64_t reset_placement, int64_t reset_r_strides, int64_t r_strides[]);
 
   // Double precision, Complex starting domain
   void fftExecZ2Zforward(Context *ctxt,
