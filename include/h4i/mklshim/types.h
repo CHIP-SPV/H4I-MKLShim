@@ -1,9 +1,16 @@
 // Copyright 2021-2023 UT-Battelle
 // See LICENSE.txt in the root of the source distribution for license info.
 #pragma once
+#include <stdint.h>
 
 namespace H4I::MKLShim
 {
+
+struct MKL_VERSION {
+  uint32_t major;
+  uint32_t minor;
+  uint32_t patch;
+};
 
 enum Operation
 {

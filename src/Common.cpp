@@ -63,4 +63,15 @@ namespace H4I::MKLShim
       case ONEMKL_GEN_P: return oneapi::mkl::generate::p;
     }
   }
+
+  MKL_VERSION get_mkl_version() {
+    MKL_VERSION mkl_version;
+    MKLVersion version;
+    mkl_get_version(&version);
+
+    mkl_version.major = version.MajorVersion;
+    mkl_version.minor = version.MinorVersion;
+    mkl_version.patch = version.UpdateVersion;
+    return mkl_version;
+  }
 } // namespace
