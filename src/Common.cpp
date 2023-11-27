@@ -74,4 +74,27 @@ namespace H4I::MKLShim
     mkl_version.patch = version.UpdateVersion;
     return mkl_version;
   }
+
+  bool is_mkl_verion_gt_2023_0_2 = false; // Indicates current mkl version >= 2023.0.2
+
+  bool is_mkl_eq_higher_2023_0_2() { return is_mkl_verion_gt_2023_0_2;}
+
+  void updateMKLVersion() {
+      H4I::MKLShim::MKL_VERSION mkl_version = H4I::MKLShim::get_mkl_version();
+      if (mkl_version.major > 2023){
+          is_mkl_verion_gt_2023_0_2 = true;
+          return;
+      } else if(mkl_version.major == 2023) {
+          if (mkl_version.minor > 0) {
+              is_mkl_verion_gt_2023_0_2 = true;
+              return;
+          } else if (mkl_version.minor == 0){
+              if (mkl_version.patch >= 2){
+                  is_mkl_verion_gt_2023_0_2 = true;
+                  return;
+              }
+          }
+      }
+      is_mkl_verion_gt_2023_0_2 = false;
+  }
 } // namespace

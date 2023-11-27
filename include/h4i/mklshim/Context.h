@@ -24,6 +24,6 @@ Context* Update(Context* ctxt, unsigned long const* backendHandles, int numOfHan
 void Destroy(Context* context);
 
 MKL_VERSION get_mkl_version();
-
+bool is_mkl_eq_higher_2023_0_2();
 } // namespace
 
