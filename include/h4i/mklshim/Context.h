@@ -23,5 +23,7 @@ Context* Create(unsigned long const* lzHandles, int numOfHandles, const char* ba
 Context* Update(Context* ctxt, unsigned long const* backendHandles, int numOfHandles, const char* backendName);
 void Destroy(Context* context);
 
+MKL_VERSION get_mkl_version();
+bool is_mkl_eq_higher_2023_0_2();
 } // namespace
 

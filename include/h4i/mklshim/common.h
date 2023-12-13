@@ -12,4 +12,6 @@ namespace H4I::MKLShim
   oneapi::mkl::jobsvd convert(signed char j);
   oneapi::mkl::job convert(onemklJob j);
   oneapi::mkl::generate convert(onemklGen g);
+
+  void updateMKLVersion();
 } // namespace

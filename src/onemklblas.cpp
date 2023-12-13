@@ -261,26 +261,45 @@ namespace H4I::MKLShim
   void dAmax(Context* ctxt, int64_t n, const double *x,
                             int64_t incx, int64_t *result){
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::iamax(ctxt->queue, n, x, incx, result);
+    sycl::event status;
+    if(is_mkl_eq_higher_2023_0_2())
+      status = oneapi::mkl::blas::column_major::iamax(ctxt->queue, n, x, incx, result, oneapi::mkl::index_base::one);
+    else
+      status = oneapi::mkl::blas::column_major::iamax(ctxt->queue, n, x, incx, result);
     ONEMKL_CATCH("MAX")
   }
   void sAmax(Context* ctxt, int64_t n, const float  *x,
                             int64_t incx, int64_t *result){
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::iamax(ctxt->queue, n, x, incx, result);
+    sycl::event status;
+    if(is_mkl_eq_higher_2023_0_2()){
+      status = oneapi::mkl::blas::column_major::iamax(ctxt->queue, n, x, incx, result, oneapi::mkl::index_base::one);
+    } else{
+      status = oneapi::mkl::blas::column_major::iamax(ctxt->queue, n, x, incx, result);
+    }
     ONEMKL_CATCH("MAX")
   }
   void zAmax(Context* ctxt, int64_t n, const double _Complex *x,
                             int64_t incx, int64_t *result){
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::iamax(ctxt->queue, n,
+    sycl::event status;
+    if(is_mkl_eq_higher_2023_0_2())
+      status = oneapi::mkl::blas::column_major::iamax(ctxt->queue, n,
+                              reinterpret_cast<const std::complex<double> *>(x), incx, result, oneapi::mkl::index_base::one);
+    else
+      status = oneapi::mkl::blas::column_major::iamax(ctxt->queue, n,
                               reinterpret_cast<const std::complex<double> *>(x), incx, result);
     ONEMKL_CATCH("MAX")
   }
   void cAmax(Context* ctxt, int64_t n, const float _Complex *x,
                             int64_t incx, int64_t *result){
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::iamax(ctxt->queue, n,
+    sycl::event status;
+    if(is_mkl_eq_higher_2023_0_2())
+      status = oneapi::mkl::blas::column_major::iamax(ctxt->queue, n,
+                              reinterpret_cast<const std::complex<float> *>(x), incx, result, oneapi::mkl::index_base::one);
+    else
+      status = oneapi::mkl::blas::column_major::iamax(ctxt->queue, n,
                               reinterpret_cast<const std::complex<float> *>(x), incx, result);
     ONEMKL_CATCH("MAX")
   }
@@ -288,23 +307,41 @@ namespace H4I::MKLShim
   // amin
   void dAmin(Context* ctxt, int64_t n, const double *x, int64_t incx, int64_t *result){
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::iamin(ctxt->queue, n, x, incx, result);
+    sycl::event status;
+    if(is_mkl_eq_higher_2023_0_2())
+      status = oneapi::mkl::blas::column_major::iamin(ctxt->queue, n, x, incx, result, oneapi::mkl::index_base::one);
+    else
+      status = oneapi::mkl::blas::column_major::iamin(ctxt->queue, n, x, incx, result);
     ONEMKL_CATCH("AMIN")
   }
   void sAmin(Context* ctxt, int64_t n, const float  *x, int64_t incx, int64_t *result){
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::iamin(ctxt->queue, n, x, incx, result);
+    sycl::event status;
+    if(is_mkl_eq_higher_2023_0_2())
+      status = oneapi::mkl::blas::column_major::iamin(ctxt->queue, n, x, incx, result, oneapi::mkl::index_base::one);
+    else
+      status = oneapi::mkl::blas::column_major::iamin(ctxt->queue, n, x, incx, result);
     ONEMKL_CATCH("AMIN")
   }
   void zAmin(Context* ctxt, int64_t n, const double _Complex *x, int64_t incx, int64_t *result){
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::iamin(ctxt->queue, n,
+    sycl::event status;
+    if(is_mkl_eq_higher_2023_0_2())
+      status = oneapi::mkl::blas::column_major::iamin(ctxt->queue, n,
+                            reinterpret_cast<const std::complex<double> *>(x), incx, result, oneapi::mkl::index_base::one);
+    else
+      status = oneapi::mkl::blas::column_major::iamin(ctxt->queue, n,
                             reinterpret_cast<const std::complex<double> *>(x), incx, result);
     ONEMKL_CATCH("AMIN")
   }
   void cAmin(Context* ctxt, int64_t n, const float _Complex *x, int64_t incx, int64_t *result){
     ONEMKL_TRY
-    auto status = oneapi::mkl::blas::column_major::iamin(ctxt->queue, n,
+    sycl::event status;
+    if(is_mkl_eq_higher_2023_0_2())
+      status = oneapi::mkl::blas::column_major::iamin(ctxt->queue, n,
+                            reinterpret_cast<const std::complex<float> *>(x), incx, result, oneapi::mkl::index_base::one);
+    else
+      status = oneapi::mkl::blas::column_major::iamin(ctxt->queue, n,
                             reinterpret_cast<const std::complex<float> *>(x), incx, result);
     ONEMKL_CATCH("AMIN")
   }
