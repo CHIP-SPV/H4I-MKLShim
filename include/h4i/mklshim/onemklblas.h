@@ -356,6 +356,18 @@ namespace H4I::MKLShim
                             double _Complex beta, double _Complex *C,
                             int64_t ldc);
 
+  void sGemmEx(Context* ctxt, onemklTranspose transA, onemklTranspose transB,
+                              int64_t m, int64_t n, int64_t k, float alpha,
+                              const void *A, onemklDatatype_t Atype, int64_t lda,
+                              const void *B, onemklDatatype_t Btype, int64_t ldb, float beta,
+                              void *C, onemklDatatype_t Ctype, int64_t ldc);
+
+  void sGemmBatchedEx(Context* ctxt, onemklTranspose transA, onemklTranspose transB,
+              int64_t m, int64_t n, int64_t k, float alpha,
+              const void *A, onemklDatatype_t Atype, int64_t lda,int64_t stridea,
+              const void *B, onemklDatatype_t Btype, int64_t ldb, int64_t strideb, float beta,
+              void *C, onemklDatatype_t Ctype, int64_t ldc, int64_t stridec, int64_t batch_count);
+
   void cHerk(Context* ctxt, onemklUplo uplo, onemklTranspose trans, int64_t n, int64_t k,
                   float alpha, const float _Complex* a, int64_t lda, float beta, float _Complex* c, int64_t ldc);
   void zHerk(Context* ctxt, onemklUplo uplo, onemklTranspose trans, int64_t n, int64_t k,
@@ -426,4 +438,16 @@ namespace H4I::MKLShim
   void zTrsm(Context* ctxt, onemklSideMode side, onemklUplo uplo, onemklTranspose trans, onemklDiag diag,
                   int64_t m, int64_t n, double _Complex alpha, const double _Complex *a, int64_t lda, double _Complex *b, int64_t ldb);
 
+  void sGeam(Context* ctxt, onemklTranspose transA, onemklTranspose transB, int64_t m, int64_t n,
+                  float alpha, const float *A, int64_t lda, float beta, const float *B, int64_t ldb,
+                  float *C, int64_t ldc);
+  void dGeam(Context* ctxt, onemklTranspose transA, onemklTranspose transB, int64_t m, int64_t n,
+                  double alpha, const double *A, int64_t lda, double beta, const double *B, int64_t ldb,
+                  double *C, int64_t ldc);
+  void cGeam(Context* ctxt, onemklTranspose transA, onemklTranspose transB, int64_t m, int64_t n,
+                  float _Complex alpha, const float _Complex *A, int64_t lda, float _Complex beta, const float _Complex *B, int64_t ldb,
+                  float _Complex *C, int64_t ldc);
+  void zGeam(Context* ctxt, onemklTranspose transA, onemklTranspose transB, int64_t m, int64_t n,
+                  double _Complex alpha, const double _Complex *A, int64_t lda, double _Complex beta, const double _Complex *B, int64_t ldb,
+                  double _Complex *C, int64_t ldc);
 } // namespace
