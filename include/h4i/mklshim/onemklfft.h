@@ -14,24 +14,36 @@ namespace H4I::MKLShim
 
 
   // create the fft descriptor
-  fftDescriptorSR* createFFTDescriptorSR(Context *ctxt, int64_t nx);
-  fftDescriptorSC* createFFTDescriptorSC(Context *ctxt, int64_t nx);
-  fftDescriptorDR* createFFTDescriptorDR(Context *ctxt, int64_t nx);
-  fftDescriptorDC* createFFTDescriptorDC(Context *ctxt, int64_t nx);
+  fftDescriptorSR* createFFTDescriptorSR(Context *ctxt, int64_t nx,
+                                         int placement);
+  fftDescriptorSC* createFFTDescriptorSC(Context *ctxt, int64_t nx,
+                                         int placement);
+  fftDescriptorDR* createFFTDescriptorDR(Context *ctxt, int64_t nx,
+                                         int placement);
+  fftDescriptorDC* createFFTDescriptorDC(Context *ctxt, int64_t nx,
+                                         int placement);
 
   // create the multi-dimensional fft descriptor
-  fftDescriptorSR* createFFTDescriptorSR(Context *ctxt, std::vector<std::int64_t> dimensions);
   fftDescriptorSR* createFFTDescriptorSR(Context *ctxt, std::vector<std::int64_t> dimensions,
-                                         int64_t in_strides[], int64_t out_strides[]);
-  fftDescriptorSC* createFFTDescriptorSC(Context *ctxt, std::vector<std::int64_t> dimensions);
+                                         int placement);
+  fftDescriptorSR* createFFTDescriptorSR(Context *ctxt, std::vector<std::int64_t> dimensions,
+                                         int64_t in_strides[], int64_t out_strides[],
+                                         int placement);
   fftDescriptorSC* createFFTDescriptorSC(Context *ctxt, std::vector<std::int64_t> dimensions,
-                                         int64_t in_strides[], int64_t out_strides[]);
-  fftDescriptorDR* createFFTDescriptorDR(Context *ctxt, std::vector<std::int64_t> dimensions);
+                                         int placement);
+  fftDescriptorSC* createFFTDescriptorSC(Context *ctxt, std::vector<std::int64_t> dimensions,
+                                         int64_t in_strides[], int64_t out_strides[],
+                                         int placement);
   fftDescriptorDR* createFFTDescriptorDR(Context *ctxt, std::vector<std::int64_t> dimensions,
-                                         int64_t in_strides[], int64_t out_strides[]);
-  fftDescriptorDC* createFFTDescriptorDC(Context *ctxt, std::vector<std::int64_t> dimensions);
+                                         int placement);
+  fftDescriptorDR* createFFTDescriptorDR(Context *ctxt, std::vector<std::int64_t> dimensions,
+                                         int64_t in_strides[], int64_t out_strides[],
+                                         int placement);
   fftDescriptorDC* createFFTDescriptorDC(Context *ctxt, std::vector<std::int64_t> dimensions,
-                                         int64_t in_strides[], int64_t out_strides[]);
+                                         int placement);
+  fftDescriptorDC* createFFTDescriptorDC(Context *ctxt, std::vector<std::int64_t> dimensions,
+                                         int64_t in_strides[], int64_t out_strides[],
+                                         int placement);
 
   // destroy descriptors
   void destroyFFTDescriptorSR(Context *ctxt, fftDescriptorSR *descSR);

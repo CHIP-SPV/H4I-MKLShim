@@ -24,57 +24,74 @@ namespace H4I::MKLShim
   struct fftDescriptorSR
   {
       // descriptor for 1d transforms
-      fftDescriptorSR(Context* ctxt, std::int64_t length) : fft_plan(length)
+      fftDescriptorSR(Context* ctxt, std::int64_t length,
+                      int placement) : fft_plan(length)
       {
-          // commit the plan
-          fft_plan.commit(ctxt->queue);
-          // wait for everything to complete before continuing
-          ctxt->queue.wait();
+          // set placement
+          if (placement == 1)
+          {
+              fft_plan.set_value(oneapi::mkl::dft::config_param::PLACEMENT, DFTI_INPLACE);
+          }
+          else
+          {
+             fft_plan.set_value(oneapi::mkl::dft::config_param::PLACEMENT, DFTI_NOT_INPLACE);
+          }
 
           // use the soon-to-be default (can be removed in the future) for storing complex numbers
           // fft_plan.set_value(oneapi::mkl::dft::config_param::CONJUGATE_EVEN_STORAGE, DFTI_COMPLEX_COMPLEX);
-          // commit the plan
-          // fft_plan.commit(ctxt->queue);
-          // wait for everything to complete before continuing
-          // ctxt->queue.wait();
-      }
-
-      // descriptor for multi-dimensional transforms
-      fftDescriptorSR(Context* ctxt, std::vector<std::int64_t> dimensions) : fft_plan(dimensions)
-      {
+          
           // commit the plan
           fft_plan.commit(ctxt->queue);
-          // wait for everything to complete before continuing
-          ctxt->queue.wait();
-
-          // use the soon-to-be default (can be removed in the future) for storing complex numbers
-          // fft_plan.set_value(oneapi::mkl::dft::config_param::CONJUGATE_EVEN_STORAGE, DFTI_COMPLEX_COMPLEX);
-          // commit the plan
-          // fft_plan.commit(ctxt->queue);
-          // wait for everything to complete before continuing
-          // ctxt->queue.wait();
-
       }
 
       // descriptor for multi-dimensional transforms
       fftDescriptorSR(Context* ctxt, std::vector<std::int64_t> dimensions,
-                      std::int64_t in_strides[], std::int64_t out_strides[]) : fft_plan(dimensions)
+                      int placement) : fft_plan(dimensions)
       {
+          // set placement
+          if (placement == 1)
+          {   
+              fft_plan.set_value(oneapi::mkl::dft::config_param::PLACEMENT, DFTI_INPLACE);
+          }
+          else
+          {
+             fft_plan.set_value(oneapi::mkl::dft::config_param::PLACEMENT, DFTI_NOT_INPLACE);
+          }
+
+          // use the soon-to-be default (can be removed in the future) for storing complex numbers
+          // fft_plan.set_value(oneapi::mkl::dft::config_param::CONJUGATE_EVEN_STORAGE, DFTI_COMPLEX_COMPLEX);
+
+          // commit the plan
+          fft_plan.commit(ctxt->queue);
+      }
+
+      // descriptor for multi-dimensional transforms
+      fftDescriptorSR(Context* ctxt, std::vector<std::int64_t> dimensions,
+                      std::int64_t in_strides[], std::int64_t out_strides[],
+                      int placement) : fft_plan(dimensions)
+      {
+          // set placement
+          if (placement == 1)
+          {   
+              fft_plan.set_value(oneapi::mkl::dft::config_param::PLACEMENT, DFTI_INPLACE);
+          }
+          else
+          {
+             fft_plan.set_value(oneapi::mkl::dft::config_param::PLACEMENT, DFTI_NOT_INPLACE);
+          }
+
           // set these before the initial commit or get a FFT_INVALID_DESCRIPTOR exception at runtime
           fft_plan.set_value(oneapi::mkl::dft::config_param::INPUT_STRIDES, in_strides);
           fft_plan.set_value(oneapi::mkl::dft::config_param::OUTPUT_STRIDES, out_strides);
           fft_plan.set_value(oneapi::mkl::dft::config_param::CONJUGATE_EVEN_STORAGE, DFTI_COMPLEX_COMPLEX);
 
           fft_plan.commit(ctxt->queue);
-
-          // wait for everything to complete before continuing
-          ctxt->queue.wait();
       }
 
       // execute R2C ... is it better to do this in the struct?
       void fftR2C(Context *ctxt, float *idata)
       {
-          ctxt->queue.wait();
+          // ctxt->queue.wait();
           return;
       }
 
@@ -88,49 +105,67 @@ namespace H4I::MKLShim
   struct fftDescriptorSC
   {
       // descriptor for 1d transforms
-      fftDescriptorSC(Context* ctxt, std::int64_t length) : fft_plan(length)
+      fftDescriptorSC(Context* ctxt, std::int64_t length,
+                      int placement) : fft_plan(length)
       {
+          // set placement
+          if (placement == 1)
+          {   
+              fft_plan.set_value(oneapi::mkl::dft::config_param::PLACEMENT, DFTI_INPLACE);
+          }
+          else
+          {
+             fft_plan.set_value(oneapi::mkl::dft::config_param::PLACEMENT, DFTI_NOT_INPLACE);
+          }
+
+          // use the soon-to-be default (can be removed in the future) for storing complex numbers
+          // fft_plan.set_value(oneapi::mkl::dft::config_param::CONJUGATE_EVEN_STORAGE, DFTI_COMPLEX_COMPLEX);
+
           // commit the plan
           fft_plan.commit(ctxt->queue);
-          // wait for everything to complete before continuing
-          ctxt->queue.wait();
-
-	  // use the soon-to-be default (can be removed in the future) for storing complex numbers
-          // fft_plan.set_value(oneapi::mkl::dft::config_param::CONJUGATE_EVEN_STORAGE, DFTI_COMPLEX_COMPLEX);
-          // commit the plan
-          // fft_plan.commit(ctxt->queue);
-          // wait for everything to complete before continuing
-          // ctxt->queue.wait();
       }
 
       // descriptor for multi-dimensional transforms
-      fftDescriptorSC(Context* ctxt, std::vector<std::int64_t> dimensions) : fft_plan(dimensions)
+      fftDescriptorSC(Context* ctxt, std::vector<std::int64_t> dimensions,
+                      int placement) : fft_plan(dimensions)
       {
+          // set placement
+          if (placement == 1)
+          {   
+              fft_plan.set_value(oneapi::mkl::dft::config_param::PLACEMENT, DFTI_INPLACE);
+          }
+          else
+          {
+             fft_plan.set_value(oneapi::mkl::dft::config_param::PLACEMENT, DFTI_NOT_INPLACE);
+          }
+
+          // use the soon-to-be default (can be removed in the future) for storing complex numbers
+          // fft_plan.set_value(oneapi::mkl::dft::config_param::CONJUGATE_EVEN_STORAGE, DFTI_COMPLEX_COMPLEX);
+
           // commit the plan
           fft_plan.commit(ctxt->queue);
-          // wait for everything to complete before continuing
-          ctxt->queue.wait();
-
-	  // use the soon-to-be default (can be removed in the future) for storing complex numbers
-          // fft_plan.set_value(oneapi::mkl::dft::config_param::CONJUGATE_EVEN_STORAGE, DFTI_COMPLEX_COMPLEX);
-          // commit the plan
-          // fft_plan.commit(ctxt->queue);
-          // wait for everything to complete before continuing
-          // ctxt->queue.wait();
       }
 
       fftDescriptorSC(Context* ctxt, std::vector<std::int64_t> dimensions,
-                      std::int64_t in_strides[], std::int64_t out_strides[]) : fft_plan(dimensions)
+                      std::int64_t in_strides[], std::int64_t out_strides[],
+                      int placement) : fft_plan(dimensions)
       {
+          // set placement
+          if (placement == 1)
+          {   
+              fft_plan.set_value(oneapi::mkl::dft::config_param::PLACEMENT, DFTI_INPLACE);
+          }
+          else
+          {
+             fft_plan.set_value(oneapi::mkl::dft::config_param::PLACEMENT, DFTI_NOT_INPLACE);
+          }
+
           // set these before the initial commit or get a FFT_INVALID_DESCRIPTOR exception at runtime
           fft_plan.set_value(oneapi::mkl::dft::config_param::INPUT_STRIDES, in_strides);
           fft_plan.set_value(oneapi::mkl::dft::config_param::OUTPUT_STRIDES, out_strides);
           fft_plan.set_value(oneapi::mkl::dft::config_param::CONJUGATE_EVEN_STORAGE, DFTI_COMPLEX_COMPLEX);
 
           fft_plan.commit(ctxt->queue);
-
-          // wait for everything to complete before continuing
-          ctxt->queue.wait();
       }
 
       oneapi::mkl::dft::descriptor<oneapi::mkl::dft::precision::SINGLE,
@@ -143,49 +178,67 @@ namespace H4I::MKLShim
   struct fftDescriptorDR
   {
       // descriptor for 1d transforms
-      fftDescriptorDR(Context* ctxt, std::int64_t length) : fft_plan(length)
+      fftDescriptorDR(Context* ctxt, std::int64_t length,
+                      int placement) : fft_plan(length)
       {
+          // set placement
+          if (placement == 1)
+          {   
+              fft_plan.set_value(oneapi::mkl::dft::config_param::PLACEMENT, DFTI_INPLACE);
+          }
+          else
+          {
+             fft_plan.set_value(oneapi::mkl::dft::config_param::PLACEMENT, DFTI_NOT_INPLACE);
+          }
+
+          // use the soon-to-be default (can be removed in the future) for storing complex numbers
+          // fft_plan.set_value(oneapi::mkl::dft::config_param::CONJUGATE_EVEN_STORAGE, DFTI_COMPLEX_COMPLEX);
+
           // commit the plan
           fft_plan.commit(ctxt->queue);
-          // wait for everything to complete before continuing
-          ctxt->queue.wait();
-
-	  // use the soon-to-be default (can be removed in the future) for storing complex numbers
-          // fft_plan.set_value(oneapi::mkl::dft::config_param::CONJUGATE_EVEN_STORAGE, DFTI_COMPLEX_COMPLEX);
-          // commit the plan
-          // fft_plan.commit(ctxt->queue);
-          // wait for everything to complete before continuing
-          // ctxt->queue.wait();
       }
 
       // descriptor for multi-dimensional transforms
-      fftDescriptorDR(Context* ctxt, std::vector<std::int64_t> dimensions) : fft_plan(dimensions)
+      fftDescriptorDR(Context* ctxt, std::vector<std::int64_t> dimensions,
+                      int placement) : fft_plan(dimensions)
       {
+          // set placement
+          if (placement == 1)
+          {   
+              fft_plan.set_value(oneapi::mkl::dft::config_param::PLACEMENT, DFTI_INPLACE);
+          }
+          else
+          {
+             fft_plan.set_value(oneapi::mkl::dft::config_param::PLACEMENT, DFTI_NOT_INPLACE);
+          }
+
+          // use the soon-to-be default (can be removed in the future) for storing complex numbers
+          // fft_plan.set_value(oneapi::mkl::dft::config_param::CONJUGATE_EVEN_STORAGE, DFTI_COMPLEX_COMPLEX);
+
           // commit the plan
           fft_plan.commit(ctxt->queue);
-          // wait for everything to complete before continuing
-          ctxt->queue.wait();
-
-	  // use the soon-to-be default (can be removed in the future) for storing complex numbers
-          // fft_plan.set_value(oneapi::mkl::dft::config_param::CONJUGATE_EVEN_STORAGE, DFTI_COMPLEX_COMPLEX);
-          // commit the plan
-          // fft_plan.commit(ctxt->queue);
-          // wait for everything to complete before continuing
-          // ctxt->queue.wait();
       }
 
       fftDescriptorDR(Context* ctxt, std::vector<std::int64_t> dimensions,
-                      std::int64_t in_strides[], std::int64_t out_strides[]) : fft_plan(dimensions)
+                      std::int64_t in_strides[], std::int64_t out_strides[],
+                      int placement) : fft_plan(dimensions)
       {
+          // set placement
+          if (placement == 1)
+          {   
+              fft_plan.set_value(oneapi::mkl::dft::config_param::PLACEMENT, DFTI_INPLACE);
+          }
+          else
+          {
+             fft_plan.set_value(oneapi::mkl::dft::config_param::PLACEMENT, DFTI_NOT_INPLACE);
+          }
+
           // set these before the initial commit or get a FFT_INVALID_DESCRIPTOR exception at runtime
           fft_plan.set_value(oneapi::mkl::dft::config_param::INPUT_STRIDES, in_strides);
           fft_plan.set_value(oneapi::mkl::dft::config_param::OUTPUT_STRIDES, out_strides);
           fft_plan.set_value(oneapi::mkl::dft::config_param::CONJUGATE_EVEN_STORAGE, DFTI_COMPLEX_COMPLEX);
 
           fft_plan.commit(ctxt->queue);
-
-          // wait for everything to complete before continuing
-          ctxt->queue.wait();
       }
 
       oneapi::mkl::dft::descriptor<oneapi::mkl::dft::precision::DOUBLE,
@@ -198,49 +251,67 @@ namespace H4I::MKLShim
   struct fftDescriptorDC
   {
       // descriptor for 1d transforms
-      fftDescriptorDC(Context* ctxt, std::int64_t length) : fft_plan(length)
+      fftDescriptorDC(Context* ctxt, std::int64_t length,
+                      int placement) : fft_plan(length)
       {
+          // set placement
+          if (placement == 1)
+          {   
+              fft_plan.set_value(oneapi::mkl::dft::config_param::PLACEMENT, DFTI_INPLACE);
+          }
+          else
+          {
+             fft_plan.set_value(oneapi::mkl::dft::config_param::PLACEMENT, DFTI_NOT_INPLACE);
+          }
+
+          // use the soon-to-be default (can be removed in the future) for storing complex numbers
+          // fft_plan.set_value(oneapi::mkl::dft::config_param::CONJUGATE_EVEN_STORAGE, DFTI_COMPLEX_COMPLEX);
+
           // commit the plan
           fft_plan.commit(ctxt->queue);
-          // wait for everything to complete before continuing
-          ctxt->queue.wait();
-
-	  // use the soon-to-be default (can be removed in the future) for storing complex numbers
-          // fft_plan.set_value(oneapi::mkl::dft::config_param::CONJUGATE_EVEN_STORAGE, DFTI_COMPLEX_COMPLEX);
-          // commit the plan
-          // fft_plan.commit(ctxt->queue);
-          // wait for everything to complete before continuing
-          // ctxt->queue.wait();
       }
 
       // descriptor for multi-dimensional transforms
-      fftDescriptorDC(Context* ctxt, std::vector<std::int64_t> dimensions) : fft_plan(dimensions)
+      fftDescriptorDC(Context* ctxt, std::vector<std::int64_t> dimensions,
+                      int placement) : fft_plan(dimensions)
       {
+          // set placement
+          if (placement == 1)
+          {   
+              fft_plan.set_value(oneapi::mkl::dft::config_param::PLACEMENT, DFTI_INPLACE);
+          }
+          else
+          {
+             fft_plan.set_value(oneapi::mkl::dft::config_param::PLACEMENT, DFTI_NOT_INPLACE);
+          }
+
+          // use the soon-to-be default (can be removed in the future) for storing complex numbers
+          // fft_plan.set_value(oneapi::mkl::dft::config_param::CONJUGATE_EVEN_STORAGE, DFTI_COMPLEX_COMPLEX);
+
           // commit the plan
           fft_plan.commit(ctxt->queue);
-          // wait for everything to complete before continuing
-          ctxt->queue.wait();
-
-	  // use the soon-to-be default (can be removed in the future) for storing complex numbers
-          // fft_plan.set_value(oneapi::mkl::dft::config_param::CONJUGATE_EVEN_STORAGE, DFTI_COMPLEX_COMPLEX);
-          // commit the plan
-          // fft_plan.commit(ctxt->queue);
-          // wait for everything to complete before continuing
-          // ctxt->queue.wait();
       }
 
       fftDescriptorDC(Context* ctxt, std::vector<std::int64_t> dimensions,
-                      std::int64_t in_strides[], std::int64_t out_strides[]) : fft_plan(dimensions)
+                      std::int64_t in_strides[], std::int64_t out_strides[],
+                      int placement) : fft_plan(dimensions)
       {
+          // set placement
+          if (placement == 1)
+          {   
+              fft_plan.set_value(oneapi::mkl::dft::config_param::PLACEMENT, DFTI_INPLACE);
+          }
+          else
+          {
+             fft_plan.set_value(oneapi::mkl::dft::config_param::PLACEMENT, DFTI_NOT_INPLACE);
+          }
+
           // set these before the initial commit or get a FFT_INVALID_DESCRIPTOR exception at runtime
           fft_plan.set_value(oneapi::mkl::dft::config_param::INPUT_STRIDES, in_strides);
           fft_plan.set_value(oneapi::mkl::dft::config_param::OUTPUT_STRIDES, out_strides);
           fft_plan.set_value(oneapi::mkl::dft::config_param::CONJUGATE_EVEN_STORAGE, DFTI_COMPLEX_COMPLEX);
 
           fft_plan.commit(ctxt->queue);
-
-          // wait for everything to complete before continuing
-          ctxt->queue.wait();
       }
 
       oneapi::mkl::dft::descriptor<oneapi::mkl::dft::precision::DOUBLE,
@@ -260,8 +331,6 @@ namespace H4I::MKLShim
   // simple plan check for the SR plan ... will be removed
   void checkFFTPlan(Context *ctxt, fftDescriptorSR *desc)
   {
-     // ctxt->queue.wait();
-
      int64_t value = 0;
      float rvalue = 0.0;
      desc->fft_plan.get_value(oneapi::mkl::dft::config_param::FORWARD_DOMAIN, &value);
@@ -289,15 +358,15 @@ namespace H4I::MKLShim
      desc->fft_plan.get_value(oneapi::mkl::dft::config_param::BACKWARD_SCALE, &rvalue);
      std::cout << "in checkFFTPlan : BACKWARD_SCALE = " << rvalue << std::endl;
 
-     // ctxt->queue.wait();
+     desc->fft_plan.get_value(oneapi::mkl::dft::config_param::PLACEMENT, &value);
+     std::cout << "in checkFFTPlan : PLACEMENT = " << value << std::endl;
+
      // desc->fft_plan.set_value(oneapi::mkl::dft::config_param::NUMBER_OF_TRANSFORMS, 2);
-     // ctxt->queue.wait();
      // desc->fft_plan.commit(ctxt->queue);
 
      // desc->fft_plan.get_value(oneapi::mkl::dft::config_param::NUMBER_OF_TRANSFORMS, &value);
      // std::cout << "in checkFFTPlan : NUMBER_OF_TRANSFORMS = " << value << std::endl;
 #endif
-     ctxt->queue.wait();
 
      return;
   }
@@ -305,8 +374,6 @@ namespace H4I::MKLShim
   // simple plan check for the SR plan ... will be removed
   void checkFFTPlan(Context *ctxt, fftDescriptorSC *desc)
   {
-     // ctxt->queue.wait();
-          
      int64_t value = 0;
      float rvalue = 0.0;
      desc->fft_plan.get_value(oneapi::mkl::dft::config_param::FORWARD_DOMAIN, &value);
@@ -334,15 +401,12 @@ namespace H4I::MKLShim
      desc->fft_plan.get_value(oneapi::mkl::dft::config_param::BACKWARD_SCALE, &rvalue);
      std::cout << "in checkFFTPlan : BACKWARD_SCALE = " << rvalue << std::endl;
 
-     // ctxt->queue.wait();
      // desc->fft_plan.set_value(oneapi::mkl::dft::config_param::NUMBER_OF_TRANSFORMS, 2);
-     // ctxt->queue.wait();
      // desc->fft_plan.commit(ctxt->queue);
 
      // desc->fft_plan.get_value(oneapi::mkl::dft::config_param::NUMBER_OF_TRANSFORMS, &value);
      // std::cout << "in checkFFTPlan : NUMBER_OF_TRANSFORMS = " << value << std::endl;
 #endif
-     ctxt->queue.wait();
 
      return;
   }
@@ -353,85 +417,100 @@ namespace H4I::MKLShim
       std::cout << "in testFFTPlan : Nbytes = " << Nbytes << "   device info =  " <<
              ctxt->queue.get_device().get_info<sycl::info::device::name>() << std::endl;
       // ctxt->queue.memcpy(odata, idata, Nbytes);
-      ctxt->queue.wait();
+      // ctxt->queue.wait();
 
-      oneapi::mkl::dft::compute_forward(descSR->fft_plan, idata);
-      ctxt->queue.wait();
+      oneapi::mkl::dft::compute_forward(descSR->fft_plan, idata).wait();
 
       // ctxt->queue.memcpy(odata, idata, Nbytes);
-      ctxt->queue.wait();
+      // ctxt->queue.wait();
 
       return;
   }
 
 
   // create the 1d fft descriptors
-  fftDescriptorSR* createFFTDescriptorSR(Context* ctxt, int64_t length) {
-     auto d = new fftDescriptorSR(ctxt, length);
+  fftDescriptorSR* createFFTDescriptorSR(Context* ctxt, int64_t length,
+                                         int placement) {
+     auto d = new fftDescriptorSR(ctxt, length, placement);
      return d;
   }
 
-  fftDescriptorSC* createFFTDescriptorSC(Context* ctxt, int64_t length) {
-     auto d = new fftDescriptorSC(ctxt, length);
+  fftDescriptorSC* createFFTDescriptorSC(Context* ctxt, int64_t length,
+                                         int placement) {
+     auto d = new fftDescriptorSC(ctxt, length, placement);
      return d;
   }
 
-  fftDescriptorDR* createFFTDescriptorDR(Context* ctxt, int64_t length) {
-     auto d = new fftDescriptorDR(ctxt, length);
+  fftDescriptorDR* createFFTDescriptorDR(Context* ctxt, int64_t length,
+                                         int placement) {
+     auto d = new fftDescriptorDR(ctxt, length, placement);
      return d;
   }
 
-  fftDescriptorDC* createFFTDescriptorDC(Context* ctxt, int64_t length) {
-     auto d = new fftDescriptorDC(ctxt, length);
+  fftDescriptorDC* createFFTDescriptorDC(Context* ctxt, int64_t length,
+                                         int placement) {
+     auto d = new fftDescriptorDC(ctxt, length, placement);
      return d;
   }
 
   // create the multi-dimensional fft descriptors
-  fftDescriptorSR* createFFTDescriptorSR(Context* ctxt, std::vector<std::int64_t> dimensions) {
-     auto d = new fftDescriptorSR(ctxt, dimensions);
+  fftDescriptorSR* createFFTDescriptorSR(Context* ctxt, std::vector<std::int64_t> dimensions,
+                                         int placement) {
+     auto d = new fftDescriptorSR(ctxt, dimensions, placement);
      return d;
   }
 
   fftDescriptorSR* createFFTDescriptorSR(Context* ctxt, std::vector<std::int64_t> dimensions,
-                                         int64_t in_strides[], int64_t out_strides[]) {
+                                         int64_t in_strides[], int64_t out_strides[],
+                                         int placement) {
      auto d = new fftDescriptorSR(ctxt, dimensions,
-                                  in_strides, out_strides);
-     return d;
-  }
-
-  fftDescriptorSC* createFFTDescriptorSC(Context* ctxt, std::vector<std::int64_t> dimensions) {
-     auto d = new fftDescriptorSC(ctxt, dimensions);
+                                  in_strides, out_strides,
+                                  placement);
      return d;
   }
 
   fftDescriptorSC* createFFTDescriptorSC(Context* ctxt, std::vector<std::int64_t> dimensions,
-                                         int64_t in_strides[], int64_t out_strides[]) {
-     auto d = new fftDescriptorSC(ctxt, dimensions,
-                                  in_strides, out_strides);
+                                         int placement) {
+     auto d = new fftDescriptorSC(ctxt, dimensions, placement);
      return d;
   }
 
-  fftDescriptorDR* createFFTDescriptorDR(Context* ctxt, std::vector<std::int64_t> dimensions) {
-     auto d = new fftDescriptorDR(ctxt, dimensions);
+  fftDescriptorSC* createFFTDescriptorSC(Context* ctxt, std::vector<std::int64_t> dimensions,
+                                         int64_t in_strides[], int64_t out_strides[],
+                                         int placement) {
+     auto d = new fftDescriptorSC(ctxt, dimensions,
+                                  in_strides, out_strides,
+                                  placement);
      return d;
   }
 
   fftDescriptorDR* createFFTDescriptorDR(Context* ctxt, std::vector<std::int64_t> dimensions,
-                                         int64_t in_strides[], int64_t out_strides[]) {
-     auto d = new fftDescriptorDR(ctxt, dimensions,
-                                  in_strides, out_strides);
+                                         int placement) {
+     auto d = new fftDescriptorDR(ctxt, dimensions, placement);
      return d;
   }
 
-  fftDescriptorDC* createFFTDescriptorDC(Context* ctxt, std::vector<std::int64_t> dimensions) {
-     auto d = new fftDescriptorDC(ctxt, dimensions);
+  fftDescriptorDR* createFFTDescriptorDR(Context* ctxt, std::vector<std::int64_t> dimensions,
+                                         int64_t in_strides[], int64_t out_strides[],
+                                         int placement) {
+     auto d = new fftDescriptorDR(ctxt, dimensions,
+                                  in_strides, out_strides,
+                                  placement);
      return d;
   }
 
   fftDescriptorDC* createFFTDescriptorDC(Context* ctxt, std::vector<std::int64_t> dimensions,
-                                         int64_t in_strides[], int64_t out_strides[]) {
+                                         int placement) {
+     auto d = new fftDescriptorDC(ctxt, dimensions, placement);
+     return d;
+  }
+
+  fftDescriptorDC* createFFTDescriptorDC(Context* ctxt, std::vector<std::int64_t> dimensions,
+                                         int64_t in_strides[], int64_t out_strides[],
+                                         int placement) {
      auto d = new fftDescriptorDC(ctxt, dimensions,
-                                  in_strides, out_strides);
+                                  in_strides, out_strides,
+                                  placement);
      return d;
   }
 
@@ -469,8 +548,6 @@ namespace H4I::MKLShim
       // this is set for 1D batched transforms INITIALLY until I understand 
       // how to use the inembed and onembed arrays from hipfft
 
-      ctxt->queue.wait();
-
       // set layout
       int64_t in_strides[2] = {(int64_t)0, input_stride};
       int64_t out_strides[2] = {(int64_t)0, output_stride};
@@ -486,9 +563,6 @@ namespace H4I::MKLShim
       // commit the changes
       descSR->fft_plan.commit(ctxt->queue);
 
-      // wait for completion
-      ctxt->queue.wait();
-
       return;
   }
 
@@ -500,8 +574,6 @@ namespace H4I::MKLShim
       // this is set for 1D batched transforms INITIALLY until I understand 
       // how to use the inembed and onembed arrays from hipfft
      
-      ctxt->queue.wait();
-
       // set layout
       int64_t in_strides[2] = {(int64_t)0, input_stride};
       int64_t out_strides[2] = {(int64_t)0, output_stride}; 
@@ -517,9 +589,6 @@ namespace H4I::MKLShim
       // commit the changes
       descSC->fft_plan.commit(ctxt->queue);
 
-      // wait for completion
-      ctxt->queue.wait();
-
       return;
   }
 
@@ -530,8 +599,6 @@ namespace H4I::MKLShim
   {
       // this is set for 1D batched transforms INITIALLY until I understand 
       // how to use the inembed and onembed arrays from hipfft
-
-      ctxt->queue.wait();
 
       // set layout
       int64_t in_strides[2] = {(int64_t)0, input_stride};
@@ -548,9 +615,6 @@ namespace H4I::MKLShim
       // commit the changes
       descDR->fft_plan.commit(ctxt->queue);
 
-      // wait for completion
-      ctxt->queue.wait();
-
       return;
   }
 
@@ -561,8 +625,6 @@ namespace H4I::MKLShim
   {
       // this is set for 1D batched transforms INITIALLY until I understand 
       // how to use the inembed and onembed arrays from hipfft
-
-      ctxt->queue.wait();
 
       // set layout
       int64_t in_strides[2] = {(int64_t)0, input_stride};
@@ -579,9 +641,6 @@ namespace H4I::MKLShim
       // commit the changes
       descDC->fft_plan.commit(ctxt->queue);
 
-      // wait for completion
-      ctxt->queue.wait();
-
       return;
   }
 
@@ -589,12 +648,9 @@ namespace H4I::MKLShim
   void fftExecR2C(Context *ctxt, fftDescriptorSR *descSR, float *idata, float _Complex *odata,
                   int64_t reset_placement, int64_t reset_r_strides, int64_t r_strides[])
   {
-      ctxt->queue.wait();
-
       // get the fft placement
       int64_t value = 0;
       descSR->fft_plan.get_value(oneapi::mkl::dft::config_param::PLACEMENT, &value);
-      ctxt->queue.wait();
 
       if (reset_placement == 1) // need to swap placements
       {
@@ -620,25 +676,28 @@ namespace H4I::MKLShim
           descSR->fft_plan.commit(ctxt->queue);
       }
 
-      ctxt->queue.wait();
-      
       if (idata == (float*)odata)
       {
 	  // std::cout << "in fftExecR2C : in-place transform " << std::endl;
+          // auto event = oneapi::mkl::dft::compute_forward(descSR->fft_plan,
+          //                                                idata);
+          // event.wait();
+
           oneapi::mkl::dft::compute_forward(descSR->fft_plan,
-                                            idata);
-	  ctxt->queue.wait();
+                                            idata).wait();
       }
       else
       {
           // std::cout << "in fftExecR2C : not-in-place transform " << std::endl;
-          oneapi::mkl::dft::compute_forward(descSR->fft_plan,
-                                            idata, 
-			                    reinterpret_cast<std::complex<float> *>(odata));
-	  ctxt->queue.wait();
-      }
+          // auto event = oneapi::mkl::dft::compute_forward(descSR->fft_plan,
+          //                                                idata, 
+          //                                                reinterpret_cast<std::complex<float> *>(odata));
+          // event.wait();
 
-      ctxt->queue.wait();
+          oneapi::mkl::dft::compute_forward(descSR->fft_plan,
+                                            idata,
+                                            reinterpret_cast<std::complex<float> *>(odata)).wait();
+      }
 
       return;
   }
@@ -646,11 +705,8 @@ namespace H4I::MKLShim
   void fftExecC2R(Context *ctxt, fftDescriptorSR *descSR, float _Complex *idata, float *odata,
                   int64_t reset_placement, int64_t reset_r_strides, int64_t r_strides[])
   {
-      ctxt->queue.wait();
-
       int64_t value = 0;
       descSR->fft_plan.get_value(oneapi::mkl::dft::config_param::PLACEMENT, &value);
-      ctxt->queue.wait();
 
       if (reset_placement == 1) // need to swap placements
       {
@@ -676,25 +732,19 @@ namespace H4I::MKLShim
           descSR->fft_plan.commit(ctxt->queue);
       }
 
-      ctxt->queue.wait();
-
       if ((float*)idata == odata)
       {
           // std::cout << "in fftExecC2R : in-place transform " << std::endl;
 	  oneapi::mkl::dft::compute_backward(descSR->fft_plan,
-			                     reinterpret_cast<std::complex<float> *>(idata));
-          ctxt->queue.wait();
+			                     reinterpret_cast<std::complex<float> *>(idata)).wait();
       }
       else
       {
           // std::cout << "in fftExecC2R : not-in-place transform " << std::endl;
 	  oneapi::mkl::dft::compute_backward(descSR->fft_plan, 
 			                     reinterpret_cast<std::complex<float> *>(idata),
-					     odata);
-          ctxt->queue.wait();
+					     odata).wait();
       }
-
-      ctxt->queue.wait();
 
       return;
   }
@@ -705,11 +755,8 @@ namespace H4I::MKLShim
                          float _Complex *idata,
                          float _Complex *odata)
   {
-      ctxt->queue.wait();
-
       int64_t value = 0;
       descSC->fft_plan.get_value(oneapi::mkl::dft::config_param::PLACEMENT, &value);
-      ctxt->queue.wait();
 
       if (idata == odata)
       {
@@ -719,15 +766,11 @@ namespace H4I::MKLShim
           {
               std::cout << "         setting PLACEMENT as in-place \n";
               descSC->fft_plan.set_value(oneapi::mkl::dft::config_param::PLACEMENT, DFTI_INPLACE);
-              ctxt->queue.wait();
               descSC->fft_plan.commit(ctxt->queue);
-              ctxt->queue.wait();
           }
 
           oneapi::mkl::dft::compute_forward(descSC->fft_plan,
-                                            reinterpret_cast<std::complex<float> *>(idata));
-
-          ctxt->queue.wait();
+                                            reinterpret_cast<std::complex<float> *>(idata)).wait();
       }
       else
       {
@@ -737,18 +780,13 @@ namespace H4I::MKLShim
           {
               std::cout << "         setting PLACEMENT as not-in-place \n";
               descSC->fft_plan.set_value(oneapi::mkl::dft::config_param::PLACEMENT, DFTI_NOT_INPLACE);
-              ctxt->queue.wait();
               descSC->fft_plan.commit(ctxt->queue);
-              ctxt->queue.wait();
           }
 
           oneapi::mkl::dft::compute_forward(descSC->fft_plan,
                                             reinterpret_cast<std::complex<float> *>(idata),
-                                            reinterpret_cast<std::complex<float> *>(odata));
-          ctxt->queue.wait();
+                                            reinterpret_cast<std::complex<float> *>(odata)).wait();
       }
-
-      ctxt->queue.wait();
 
       return;
   }
@@ -758,11 +796,8 @@ namespace H4I::MKLShim
                           float _Complex *idata,
                           float _Complex *odata)
   {   
-      ctxt->queue.wait();
-  
       int64_t value = 0;
       descSC->fft_plan.get_value(oneapi::mkl::dft::config_param::PLACEMENT, &value);
-      ctxt->queue.wait();
 
       if (idata == odata)
       {
@@ -772,15 +807,11 @@ namespace H4I::MKLShim
           {
               std::cout << "         setting PLACEMENT as in-place \n";
               descSC->fft_plan.set_value(oneapi::mkl::dft::config_param::PLACEMENT, DFTI_INPLACE);
-              ctxt->queue.wait();
               descSC->fft_plan.commit(ctxt->queue);
-              ctxt->queue.wait();
           }
 
           oneapi::mkl::dft::compute_backward(descSC->fft_plan,
-                                             reinterpret_cast<std::complex<float> *>(idata));
-
-          ctxt->queue.wait();
+                                             reinterpret_cast<std::complex<float> *>(idata)).wait();
       }
       else
       {
@@ -790,19 +821,13 @@ namespace H4I::MKLShim
           {
               std::cout << "         setting PLACEMENT as not-in-place \n";
               descSC->fft_plan.set_value(oneapi::mkl::dft::config_param::PLACEMENT, DFTI_NOT_INPLACE);
-              ctxt->queue.wait();
               descSC->fft_plan.commit(ctxt->queue);
-              ctxt->queue.wait();
           }
 
               oneapi::mkl::dft::compute_backward(descSC->fft_plan,
                                                  reinterpret_cast<std::complex<float> *>(idata),
-                                                 reinterpret_cast<std::complex<float> *>(odata));
-
-          ctxt->queue.wait();
+                                                 reinterpret_cast<std::complex<float> *>(odata)).wait();
       }
-
-      ctxt->queue.wait();
 
       return;
   }
@@ -811,11 +836,8 @@ namespace H4I::MKLShim
   void fftExecD2Z(Context *ctxt, fftDescriptorDR *descDR, double *idata, double _Complex *odata,
                   int64_t reset_placement, int64_t reset_r_strides, int64_t r_strides[])
   {
-      ctxt->queue.wait();
-
       int64_t value = 0;
       descDR->fft_plan.get_value(oneapi::mkl::dft::config_param::PLACEMENT, &value);
-      ctxt->queue.wait();
 
       if (reset_placement == 1) // need to swap placements
       {
@@ -841,25 +863,19 @@ namespace H4I::MKLShim
           descDR->fft_plan.commit(ctxt->queue);
       }
 
-      ctxt->queue.wait();
-
       if (idata == (double*)odata)
       {
           // std::cout << "in fftExecD2Z : in-place transform " << std::endl;
           oneapi::mkl::dft::compute_forward(descDR->fft_plan,
-                                            idata);
-          ctxt->queue.wait();
+                                            idata).wait();
       }
       else
       {
           // std::cout << "in fftExecD2Z : not-in-place transform " << std::endl;
           oneapi::mkl::dft::compute_forward(descDR->fft_plan,
                                             idata,
-                                            reinterpret_cast<std::complex<double> *>(odata));
-          ctxt->queue.wait();
+                                            reinterpret_cast<std::complex<double> *>(odata)).wait();
       }
-
-      ctxt->queue.wait();
 
       return;
   }
@@ -867,11 +883,8 @@ namespace H4I::MKLShim
   void fftExecZ2D(Context *ctxt, fftDescriptorDR *descDR, double _Complex *idata, double *odata,
                   int64_t reset_placement, int64_t reset_r_strides, int64_t r_strides[])
   {
-      ctxt->queue.wait();
-
       int64_t value = 0;
       descDR->fft_plan.get_value(oneapi::mkl::dft::config_param::PLACEMENT, &value);
-      ctxt->queue.wait();
 
       if (reset_placement == 1) // need to swap placements
       {
@@ -897,25 +910,19 @@ namespace H4I::MKLShim
           descDR->fft_plan.commit(ctxt->queue);
       }
 
-      ctxt->queue.wait();
-      
       if ((double*)idata == odata)
       {
           // std::cout << "in fftExecZ2D : in-place transform " << std::endl;
           oneapi::mkl::dft::compute_backward(descDR->fft_plan,
-                                             reinterpret_cast<std::complex<double> *>(idata));
-          ctxt->queue.wait();
+                                             reinterpret_cast<std::complex<double> *>(idata)).wait();
       }
       else
       {
           // std::cout << "in fftExecZ2D : not-in-place transform " << std::endl;
           oneapi::mkl::dft::compute_backward(descDR->fft_plan,
                                              reinterpret_cast<std::complex<double> *>(idata),
-                                             odata);
-          ctxt->queue.wait();
+                                             odata).wait();
       }
-
-      ctxt->queue.wait();
 
       return;
   }
@@ -925,11 +932,8 @@ namespace H4I::MKLShim
                          double _Complex *idata,
                          double _Complex *odata)
   {
-      ctxt->queue.wait();
-
       int64_t value = 0;
       descDC->fft_plan.get_value(oneapi::mkl::dft::config_param::PLACEMENT, &value);
-      ctxt->queue.wait();
 
       if (idata == odata)
       {
@@ -939,15 +943,11 @@ namespace H4I::MKLShim
           {
               std::cout << "         setting PLACEMENT as in-place \n";
               descDC->fft_plan.set_value(oneapi::mkl::dft::config_param::PLACEMENT, DFTI_INPLACE);
-              ctxt->queue.wait();
               descDC->fft_plan.commit(ctxt->queue);
-              ctxt->queue.wait();
           }
 
           oneapi::mkl::dft::compute_forward(descDC->fft_plan,
-                                            reinterpret_cast<std::complex<double> *>(idata));
-
-          ctxt->queue.wait();
+                                            reinterpret_cast<std::complex<double> *>(idata)).wait();
       }
       else
       {
@@ -957,18 +957,13 @@ namespace H4I::MKLShim
           {
               std::cout << "         setting PLACEMENT as not-in-place \n";
               descDC->fft_plan.set_value(oneapi::mkl::dft::config_param::PLACEMENT, DFTI_NOT_INPLACE);
-              ctxt->queue.wait();
               descDC->fft_plan.commit(ctxt->queue);
-              ctxt->queue.wait();
           }
 
           oneapi::mkl::dft::compute_forward(descDC->fft_plan,
                                             reinterpret_cast<std::complex<double> *>(idata),
-                                            reinterpret_cast<std::complex<double> *>(odata));
-          ctxt->queue.wait();
+                                            reinterpret_cast<std::complex<double> *>(odata)).wait();
       }
-
-      ctxt->queue.wait();
 
       return;
   }
@@ -978,11 +973,8 @@ namespace H4I::MKLShim
                           double _Complex *idata,
                           double _Complex *odata)
   {
-      ctxt->queue.wait();
-
       int64_t value = 0;
       descDC->fft_plan.get_value(oneapi::mkl::dft::config_param::PLACEMENT, &value);
-      ctxt->queue.wait();
 
       if (idata == odata)
       {
@@ -992,15 +984,11 @@ namespace H4I::MKLShim
           {
               std::cout << "         setting PLACEMENT as in-place \n";
               descDC->fft_plan.set_value(oneapi::mkl::dft::config_param::PLACEMENT, DFTI_INPLACE);
-              ctxt->queue.wait();
               descDC->fft_plan.commit(ctxt->queue);
-              ctxt->queue.wait();
           }
 
           oneapi::mkl::dft::compute_backward(descDC->fft_plan,
-                                             reinterpret_cast<std::complex<double> *>(idata));
-
-          ctxt->queue.wait();
+                                             reinterpret_cast<std::complex<double> *>(idata)).wait();
       }
       else
       {
@@ -1010,19 +998,13 @@ namespace H4I::MKLShim
           {
               std::cout << "         setting PLACEMENT as not-in-place \n";
               descDC->fft_plan.set_value(oneapi::mkl::dft::config_param::PLACEMENT, DFTI_NOT_INPLACE);
-              ctxt->queue.wait();
               descDC->fft_plan.commit(ctxt->queue);
-              ctxt->queue.wait();
           }
 
               oneapi::mkl::dft::compute_backward(descDC->fft_plan,
                                                  reinterpret_cast<std::complex<double> *>(idata),
-                                                 reinterpret_cast<std::complex<double> *>(odata));
-
-          ctxt->queue.wait();
+                                                 reinterpret_cast<std::complex<double> *>(odata)).wait();
       }
-
-      ctxt->queue.wait();
 
       return; 
   }
