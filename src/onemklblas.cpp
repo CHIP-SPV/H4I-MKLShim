@@ -1233,6 +1233,71 @@ namespace H4I::MKLShim
         reinterpret_cast<std::complex<double> *>(C), ldc);
     ONEMKL_CATCH("GEMM");
   }
+  void sGemmEx(Context* ctxt, onemklTranspose transA, onemklTranspose transB,
+              int64_t m, int64_t n, int64_t k, float alpha,
+              const void *A, onemklDatatype_t Atype, int64_t lda,
+              const void *B, onemklDatatype_t Btype, int64_t ldb, float beta,
+              void *C, onemklDatatype_t Ctype, int64_t ldc) {
+    ONEMKL_TRY
+    sycl::event status;
+    if  (Atype == ONEMKL_R_16F && Btype == ONEMKL_R_16F && Ctype == ONEMKL_R_16F){
+    status = oneapi::mkl::blas::column_major::gemm(ctxt->queue, convert(transA),
+                                          convert(transB), m, n, k, alpha, reinterpret_cast<const sycl::half *>(A),
+                                          lda, reinterpret_cast<const sycl::half *>(B), ldb, beta,
+                                          reinterpret_cast<sycl::half *>(C), ldc);
+    } else if (Atype == ONEMKL_R_16F && Btype == ONEMKL_R_16F && Ctype == ONEMKL_R_32F) {
+    status = oneapi::mkl::blas::column_major::gemm(ctxt->queue, convert(transA),
+                                          convert(transB), m, n, k, alpha, reinterpret_cast<const sycl::half *>(A),
+                                          lda, reinterpret_cast<const sycl::half *>(B), ldb, beta,
+                                          reinterpret_cast<float *>(C), ldc);
+    } else if(Atype == ONEMKL_R_16B && Btype == ONEMKL_R_16B && Ctype == ONEMKL_R_16B) {
+    status = oneapi::mkl::blas::column_major::gemm(ctxt->queue, convert(transA),
+                                          convert(transB), m, n, k, alpha, reinterpret_cast<const oneapi::mkl::bfloat16 *>(A),
+                                          lda, reinterpret_cast<const oneapi::mkl::bfloat16 *>(B), ldb, beta,
+                                          reinterpret_cast<oneapi::mkl::bfloat16 *>(C), ldc);
+    } else if(Atype == ONEMKL_R_16B && Btype == ONEMKL_R_16B && Ctype == ONEMKL_R_32F) {
+    status = oneapi::mkl::blas::column_major::gemm(ctxt->queue, convert(transA),
+                                          convert(transB), m, n, k, alpha, reinterpret_cast<const oneapi::mkl::bfloat16 *>(A),
+                                          lda, reinterpret_cast<const oneapi::mkl::bfloat16 *>(B), ldb, beta,
+                                          reinterpret_cast<float *>(C), ldc);
+    } else if(Atype == ONEMKL_R_8I && Btype == ONEMKL_R_8I && Ctype == ONEMKL_R_32F) {
+    status = oneapi::mkl::blas::column_major::gemm(ctxt->queue, convert(transA),
+                                          convert(transB), m, n, k, alpha, reinterpret_cast<const int8_t *>(A),
+                                          lda, reinterpret_cast<const int8_t *>(B), ldb, beta,
+                                          reinterpret_cast<float *>(C), ldc);
+    } else if(Atype == ONEMKL_R_32F && Btype == ONEMKL_R_32F && Ctype == ONEMKL_R_32F) {
+    status = oneapi::mkl::blas::column_major::gemm(ctxt->queue, convert(transA),
+                                          convert(transB), m, n, k, alpha, reinterpret_cast<const float *>(A),
+                                          lda, reinterpret_cast<const float *>(B), ldb, beta,
+                                          reinterpret_cast<float *>(C), ldc);
+    }
+    ONEMKL_CATCH("SGEMM-EX");
+  }
+
+  void sGemmBatchedEx(Context* ctxt, onemklTranspose transA, onemklTranspose transB,
+              int64_t m, int64_t n, int64_t k, float alpha,
+              const void *A, onemklDatatype_t Atype, int64_t lda,int64_t stridea,
+              const void *B, onemklDatatype_t Btype, int64_t ldb, int64_t strideb, float beta,
+              void *C, onemklDatatype_t Ctype, int64_t ldc, int64_t stridec, int64_t batch_count) {
+    ONEMKL_TRY
+    sycl::event status;
+
+    int64_t grp_size = 1;
+    auto tA = convert(transA);
+    auto tB = convert(transB);
+    if  (Atype == ONEMKL_R_16F && Btype == ONEMKL_R_16F && Ctype == ONEMKL_R_16F){
+    status = oneapi::mkl::blas::column_major::gemm_batch(ctxt->queue, tA,
+                                          tB, m, n, k, alpha, reinterpret_cast<const sycl::half *>(A),
+                                          lda, stridea, reinterpret_cast<const sycl::half *>(B), ldb, strideb, beta,
+                                          reinterpret_cast<float *>(C), ldc, stridec, batch_count);
+    } else if(Atype == ONEMKL_R_32F && Btype == ONEMKL_R_32F && Ctype == ONEMKL_R_32F) {
+    status = oneapi::mkl::blas::column_major::gemm_batch(ctxt->queue, tA,
+                                          tB, m, n, k, alpha, reinterpret_cast<const float *>(A),
+                                          lda, stridea, reinterpret_cast<const float *>(B), ldb, strideb, beta,
+                                          reinterpret_cast<float *>(C), ldc, stridec, batch_count);
+    }
+    ONEMKL_CATCH("SGEMMBATCHED-EX");
+  }
 
   void cHerk(Context* ctxt, onemklUplo uplo, onemklTranspose trans, int64_t n, int64_t k,
                 float alpha, const float _Complex* a, int64_t lda, float beta, float _Complex* c, int64_t ldc) {
@@ -1474,6 +1539,43 @@ namespace H4I::MKLShim
                   m, n, static_cast<std::complex<double>>(alpha), reinterpret_cast<const std::complex<double> *>(a), lda,
                 reinterpret_cast<std::complex<double> *>(b), ldb);
     ONEMKL_CATCH("TRSM");
+  }
+
+  void sGeam(Context* ctxt, onemklTranspose transA, onemklTranspose transB, int64_t m, int64_t n,
+                  float alpha, const float *A, int64_t lda, float beta, const float *B, int64_t ldb,
+                  float *C, int64_t ldc){
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::omatadd(ctxt->queue,convert(transA), convert(transB), m, n,
+                  alpha, A, lda, beta, B, ldb, C, ldc);
+    ONEMKL_CATCH("sgeam");
+  }
+  void dGeam(Context* ctxt, onemklTranspose transA, onemklTranspose transB, int64_t m, int64_t n,
+                  double alpha, const double *A, int64_t lda, double beta, const double *B, int64_t ldb,
+                  double *C, int64_t ldc){
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::omatadd(ctxt->queue,convert(transA), convert(transB), m, n,
+                  alpha, A, lda, beta, B, ldb, C, ldc);
+    ONEMKL_CATCH("dgeam");
+  }
+  void cGeam(Context* ctxt, onemklTranspose transA, onemklTranspose transB, int64_t m, int64_t n,
+                  float _Complex alpha, const float _Complex *A, int64_t lda, float _Complex beta, const float _Complex *B, int64_t ldb,
+                  float _Complex *C, int64_t ldc){
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::omatadd(ctxt->queue,convert(transA), convert(transB), m, n,
+                  static_cast<std::complex<float>>(alpha), reinterpret_cast<const std::complex<float> *>(A), lda,
+                  static_cast<std::complex<float>>(beta), reinterpret_cast<const std::complex<float> *>(B), ldb,
+                  reinterpret_cast<std::complex<float> *>(C), ldc);
+    ONEMKL_CATCH("cgeam");
+  }
+  void zGeam(Context* ctxt, onemklTranspose transA, onemklTranspose transB, int64_t m, int64_t n,
+                  double _Complex alpha, const double _Complex *A, int64_t lda, double _Complex beta, const double _Complex *B, int64_t ldb,
+                  double _Complex *C, int64_t ldc){
+    ONEMKL_TRY
+    auto status = oneapi::mkl::blas::column_major::omatadd(ctxt->queue,convert(transA), convert(transB), m, n,
+                  static_cast<std::complex<double>>(alpha), reinterpret_cast<const std::complex<double> *>(A), lda,
+                  static_cast<std::complex<double>>(beta), reinterpret_cast<const std::complex<double> *>(B), ldb,
+                  reinterpret_cast<std::complex<double> *>(C), ldc);
+    ONEMKL_CATCH("zgeam");
   }
 
 }// end of namespace

@@ -62,11 +62,32 @@ struct Context;
   } onemklTranspose;
 
 // keep track of the four combinations of
-// mkl fft precision (Single or Double) and 
+// mkl fft precision (Single or Double) and
 // starting domain (Real or Complex)
 struct fftDescriptorSR;
 struct fftDescriptorSC;
 struct fftDescriptorDR;
 struct fftDescriptorDC;
+
+  typedef enum
+  {
+      ONEMKL_R_16F,
+      ONEMKL_R_32F,
+      ONEMKL_R_64F,
+      ONEMKL_C_16F,
+      ONEMKL_C_32F,
+      ONEMKL_C_64F,
+      ONEMKL_R_8I,
+      ONEMKL_R_8U,
+      ONEMKL_R_32I,
+      ONEMKL_R_32U,
+      ONEMKL_C_8I,
+      ONEMKL_C_8U,
+      ONEMKL_C_32I,
+      ONEMKL_C_32U,
+      ONEMKL_R_16B,
+      ONEMKL_C_16B,
+      ONEMKL_DATATYPE_INVALID
+  } onemklDatatype_t;
 
 } // namespace
