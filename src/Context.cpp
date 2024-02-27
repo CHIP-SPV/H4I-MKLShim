@@ -42,7 +42,12 @@ Context* Update(Context* ctxt, unsigned long const* backendHandles, int numOfHan
         std::vector<sycl::device> sycl_devices(1);
         sycl_devices[0] = ctxt->device;
         ctxt->context = sycl::ext::oneapi::level_zero::make_context(sycl_devices, (pi_native_handle)hContext, 1);
-        ctxt->queue = sycl::ext::oneapi::level_zero::make_queue(ctxt->context, ctxt->device, (pi_native_handle)hQueue, 1);
+        
+        #if __INTEL_LLVM_COMPILER >= 20240000
+            ctxt->queue = sycl::ext::oneapi::level_zero::make_queue(ctxt->context, ctxt->device, (pi_native_handle)hQueue false, 1, sycl::property::queue::in_order());
+        #else
+            ctxt->queue = sycl::ext::oneapi::level_zero::make_queue(ctxt->context, ctxt->device, (pi_native_handle)hQueue, 1);
+        #endif    
     }
     // add context to the table
     context_tbl[backendHandles[3]] = ctxt;
