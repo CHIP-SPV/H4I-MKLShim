@@ -16,26 +16,28 @@ Context* Update(Context* ctxt, unsigned long const* backendHandles, int numOfHan
     std::string strBackend(backendName);
     if (strBackend == "opencl") {
         currentBackend = opencl;
-        cl_platform_id hPlatformId = (cl_platform_id)backendHandles[0];
-        cl_device_id hDeviceId = (cl_device_id)backendHandles[1];
-        cl_context hContext = (cl_context)backendHandles[2];
-        cl_command_queue hQueue = (cl_command_queue)backendHandles[3];
+        int idxOffset = numOfHandles == 5 ? 1 : 0;
+        cl_platform_id hPlatformId = (cl_platform_id)backendHandles[idxOffset + 0];
+        cl_device_id hDeviceId = (cl_device_id)backendHandles[idxOffset + 1];
+        cl_context hContext = (cl_context)backendHandles[idxOffset + 2];
+        cl_command_queue hQueue = (cl_command_queue)backendHandles[idxOffset + 3];
 
         // Build SYCL platform/device/queue from the opencl handles.
         ctxt->platform = sycl::opencl::make_platform((pi_native_handle)hPlatformId);
         ctxt->device = sycl::opencl::make_device((pi_native_handle)hDeviceId);
         ctxt->context = sycl::opencl::make_context((pi_native_handle)hContext);
         ctxt->queue = sycl::opencl::make_queue(ctxt->context, (pi_native_handle)hQueue);
-    } else (strBackend == "level0") {
+    } else if(strBackend == "level0") {
         currentBackend = level0;
-        auto hDriver  = (ze_driver_handle_t)backendHandles[0];
-        auto hDevice  = (ze_device_handle_t)backendHandles[1];
-        auto hContext = (ze_context_handle_t)backendHandles[2];
-        auto hQueue   = (ze_command_queue_handle_t)backendHandles[3];
+        int idxOffset = numOfHandles == 5 ? 1 : 0;
+        auto hDriver  = (ze_driver_handle_t)backendHandles[idxOffset + 0];
+        auto hDevice  = (ze_device_handle_t)backendHandles[idxOffset + 1];
+        auto hContext = (ze_context_handle_t)backendHandles[idxOffset + 2];
+        auto hQueue   = (ze_command_queue_handle_t)backendHandles[idxOffset + 3];
 
         ze_command_list_handle_t hCommandList = 0;
         if (numOfHandles > 4)
-            hCommandList = (ze_command_list_handle_t)backendHandles[4];
+            hCommandList = (ze_command_list_handle_t)backendHandles[idxOffset + 4];
 
         bool isImmCmdList = (hCommandList != nullptr);
 
