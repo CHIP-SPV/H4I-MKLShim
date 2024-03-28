@@ -14,7 +14,7 @@ std::unordered_map<uintptr_t, Context*> context_tbl;
 Context* Update(Context* ctxt, unsigned long const* backendHandles, int numOfHandles, const char* backendName) {
     // Obtain the handles to the LZ constructs.
     std::string strBackend(backendName);
-    int idxOffset = numOfHandles == 5 ? 1 : 0;
+    int idxOffset = (numOfHandles == 6 ? 1 : 0);
     if (strBackend == "opencl") {
         currentBackend = opencl;
         cl_platform_id hPlatformId = (cl_platform_id)backendHandles[idxOffset + 0];
