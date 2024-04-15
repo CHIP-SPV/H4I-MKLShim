@@ -14,8 +14,9 @@ std::unordered_map<uintptr_t, Context*> context_tbl;
 Context* Update(Context* ctxt, unsigned long const* backendHandles, int numOfHandles, const char* backendName) {
     // Obtain the handles to the LZ constructs.
     std::string strBackend(backendName);
-    int idxOffset = (numOfHandles == 6 ? 1 : 0);
+    
     if (strBackend == "opencl") {
+        int idxOffset = (numOfHandles == 5 ? 1 : 0);
         currentBackend = opencl;
         cl_platform_id hPlatformId = (cl_platform_id)backendHandles[idxOffset + 0];
         cl_device_id hDeviceId = (cl_device_id)backendHandles[idxOffset + 1];
@@ -28,6 +29,7 @@ Context* Update(Context* ctxt, unsigned long const* backendHandles, int numOfHan
         ctxt->context = sycl::opencl::make_context((pi_native_handle)hContext);
         ctxt->queue = sycl::opencl::make_queue(ctxt->context, (pi_native_handle)hQueue);
     } else if(strBackend == "level0") {
+        int idxOffset = (numOfHandles == 6 ? 1 : 0);
         currentBackend = level0;
         auto hDriver  = (ze_driver_handle_t)backendHandles[idxOffset + 0];
         auto hDevice  = (ze_device_handle_t)backendHandles[idxOffset + 1];
