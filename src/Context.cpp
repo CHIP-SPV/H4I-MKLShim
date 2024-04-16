@@ -16,12 +16,11 @@ Context* Update(Context* ctxt, unsigned long const* backendHandles, int numOfHan
     std::string strBackend(backendName);
     
     if (strBackend == "opencl") {
-        int idxOffset = (numOfHandles == 5 ? 1 : 0);
         currentBackend = opencl;
-        cl_platform_id hPlatformId = (cl_platform_id)backendHandles[idxOffset + 0];
-        cl_device_id hDeviceId = (cl_device_id)backendHandles[idxOffset + 1];
-        cl_context hContext = (cl_context)backendHandles[idxOffset + 2];
-        cl_command_queue hQueue = (cl_command_queue)backendHandles[idxOffset + 3];
+        cl_platform_id hPlatformId = (cl_platform_id)backendHandles[0];
+        cl_device_id hDeviceId = (cl_device_id)backendHandles[1];
+        cl_context hContext = (cl_context)backendHandles[2];
+        cl_command_queue hQueue = (cl_command_queue)backendHandles[3];
 
         // Build SYCL platform/device/queue from the opencl handles.
         ctxt->platform = sycl::opencl::make_platform((pi_native_handle)hPlatformId);
@@ -29,16 +28,15 @@ Context* Update(Context* ctxt, unsigned long const* backendHandles, int numOfHan
         ctxt->context = sycl::opencl::make_context((pi_native_handle)hContext);
         ctxt->queue = sycl::opencl::make_queue(ctxt->context, (pi_native_handle)hQueue);
     } else if(strBackend == "level0") {
-        int idxOffset = (numOfHandles == 6 ? 1 : 0);
         currentBackend = level0;
-        auto hDriver  = (ze_driver_handle_t)backendHandles[idxOffset + 0];
-        auto hDevice  = (ze_device_handle_t)backendHandles[idxOffset + 1];
-        auto hContext = (ze_context_handle_t)backendHandles[idxOffset + 2];
-        auto hQueue   = (ze_command_queue_handle_t)backendHandles[idxOffset + 3];
+        auto hDriver  = (ze_driver_handle_t)backendHandles[0];
+        auto hDevice  = (ze_device_handle_t)backendHandles[1];
+        auto hContext = (ze_context_handle_t)backendHandles[2];
+        auto hQueue   = (ze_command_queue_handle_t)backendHandles[3];
 
         ze_command_list_handle_t hCommandList = 0;
-        if (numOfHandles > 4)
-            hCommandList = (ze_command_list_handle_t)backendHandles[idxOffset + 4];
+        if (numOfHandles == 5)
+            hCommandList = (ze_command_list_handle_t)backendHandles[numOfHandles-1];
 
         bool isImmCmdList = (hCommandList != nullptr);
 
@@ -72,10 +70,16 @@ Context* Update(Context* ctxt, unsigned long const* backendHandles, int numOfHan
 Context*
 Create(unsigned long const* nativeHandles, int numOfHandles, const char* backendName)
 {
+    // Error check
+    // In case of OpenCl backend  number of handles will be 4, for level0 it will be 5
+    if (numOfHandles < 4 || numOfHandles > 5) {
+        std::cerr << "Error: Invalid handles\n";
+        return nullptr;
+    }
     Context *ctxt;
-    int ctx_index = (numOfHandles == 5) ? 3 : 2;  // In old native handle call context handle used to be at '2' but on new it is '3'
-    if (numOfHandles > 3 && (context_tbl.find(nativeHandles[ctx_index]) != context_tbl.end())) {
-        ctxt = context_tbl[nativeHandles[ctx_index]];
+    int queue_handle_index = 3;
+    if (context_tbl.find(nativeHandles[queue_handle_index]) != context_tbl.end()) {
+        ctxt = context_tbl[nativeHandles[queue_handle_index]];
     } else {
         ctxt = Update(new Context(), nativeHandles, numOfHandles, backendName);
     }
