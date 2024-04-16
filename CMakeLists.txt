@@ -3,8 +3,15 @@
 
 cmake_minimum_required(VERSION 3.20)
 
+# Check if this is the top-level project
+if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+    set(STANDALONE_BUILD ON)
+else()
+    set(STANDALONE_BUILD OFF)
+endif()
+
 # set the default CMAKE_INSTALL_PREFIX to the current directory/install
-if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+if(STANDALONE_BUILD AND CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/install" CACHE PATH "..." FORCE)
 endif()
 

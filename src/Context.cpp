@@ -13,8 +13,8 @@ std::unordered_map<uintptr_t, Context*> context_tbl;
 
 Context* Update(Context* ctxt, unsigned long const* backendHandles, int numOfHandles, const char* backendName) {
     // Obtain the handles to the LZ constructs.
-    assert(nHandles == 4);
     std::string strBackend(backendName);
+    
     if (strBackend == "opencl") {
         currentBackend = opencl;
         cl_platform_id hPlatformId = (cl_platform_id)backendHandles[0];
@@ -27,12 +27,18 @@ Context* Update(Context* ctxt, unsigned long const* backendHandles, int numOfHan
         ctxt->device = sycl::opencl::make_device((pi_native_handle)hDeviceId);
         ctxt->context = sycl::opencl::make_context((pi_native_handle)hContext);
         ctxt->queue = sycl::opencl::make_queue(ctxt->context, (pi_native_handle)hQueue);
-    } else {
+    } else if(strBackend == "level0") {
         currentBackend = level0;
         auto hDriver  = (ze_driver_handle_t)backendHandles[0];
         auto hDevice  = (ze_device_handle_t)backendHandles[1];
         auto hContext = (ze_context_handle_t)backendHandles[2];
         auto hQueue   = (ze_command_queue_handle_t)backendHandles[3];
+
+        ze_command_list_handle_t hCommandList = 0;
+        if (numOfHandles == 5)
+            hCommandList = (ze_command_list_handle_t)backendHandles[numOfHandles-1];
+
+        bool isImmCmdList = (hCommandList != nullptr);
 
         // Build SYCL platform/device/queue from the LZ handles.
         ctxt->platform = sycl::ext::oneapi::level_zero::make_platform((pi_native_handle)hDriver);
@@ -42,7 +48,19 @@ Context* Update(Context* ctxt, unsigned long const* backendHandles, int numOfHan
         std::vector<sycl::device> sycl_devices(1);
         sycl_devices[0] = ctxt->device;
         ctxt->context = sycl::ext::oneapi::level_zero::make_context(sycl_devices, (pi_native_handle)hContext, 1);
-        ctxt->queue = sycl::ext::oneapi::level_zero::make_queue(ctxt->context, ctxt->device, (pi_native_handle)hQueue, 1);
+        
+        #if __INTEL_LLVM_COMPILER >= 20240000
+            if (isImmCmdList) {
+                ctxt->queue = sycl::ext::oneapi::level_zero::make_queue(ctxt->context, ctxt->device, (pi_native_handle)hCommandList, true, 1, sycl::property::queue::in_order());
+            } else {
+                ctxt->queue = sycl::ext::oneapi::level_zero::make_queue(ctxt->context, ctxt->device, (pi_native_handle)hQueue, false, 1, sycl::property::queue::in_order());
+            }
+        #else
+            ctxt->queue = sycl::ext::oneapi::level_zero::make_queue(ctxt->context, ctxt->device, (pi_native_handle)hQueue, 1);
+        #endif    
+    } else {
+        std::cerr << "Unsupported backend: " << backendName << std::endl;
+        std::abort();
     }
     // add context to the table
     context_tbl[backendHandles[3]] = ctxt;
@@ -52,9 +70,16 @@ Context* Update(Context* ctxt, unsigned long const* backendHandles, int numOfHan
 Context*
 Create(unsigned long const* nativeHandles, int numOfHandles, const char* backendName)
 {
+    // Error check
+    // In case of OpenCl backend  number of handles will be 4, for level0 it will be 5
+    if (numOfHandles < 4 || numOfHandles > 5) {
+        std::cerr << "Error: Invalid handles\n";
+        return nullptr;
+    }
     Context *ctxt;
-    if (numOfHandles == 4 && (context_tbl.find(nativeHandles[3]) != context_tbl.end())) {
-        ctxt = context_tbl[nativeHandles[3]];
+    int queue_handle_index = 3;
+    if (context_tbl.find(nativeHandles[queue_handle_index]) != context_tbl.end()) {
+        ctxt = context_tbl[nativeHandles[queue_handle_index]];
     } else {
         ctxt = Update(new Context(), nativeHandles, numOfHandles, backendName);
     }
