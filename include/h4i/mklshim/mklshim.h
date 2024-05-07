@@ -37,6 +37,7 @@
     }
 
 #define ONEMKL_CATCH(msg) \
+    status.wait_and_throw(); \
     __FORCE_MKL_FLUSH__(status); \
     __CATCH__(msg)
 
