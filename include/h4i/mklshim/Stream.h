@@ -9,7 +9,6 @@ namespace H4I::MKLShim
 {
 
 constexpr const int nHandles = 4;
-void SetStream(Context* context, const std::array<uintptr_t, nHandles>& handles);
-
+void SetStream(Context* ctxt, unsigned long const* backendHandles, int numOfHandles, const char* backendName);
 } // namespace
 
