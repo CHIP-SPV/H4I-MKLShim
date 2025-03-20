@@ -1,6 +1,6 @@
 // Copyright 2021-2023 UT-Battelle
 // See LICENSE.txt in the root of the source distribution for license info.
-#include <CL/sycl.hpp>
+#include <sycl/sycl.hpp>
 #include <level_zero/ze_api.h>
 #include <sycl/ext/oneapi/backend/level_zero.hpp>
 #include "oneapi/mkl.hpp"
@@ -11,16 +11,15 @@ namespace H4I::MKLShim
 {
 
 void
-SetStream(Context* ctxt, const std::array<uintptr_t, nHandles>& nativeHandles)
+SetStream(Context* ctxt, unsigned long const* backendHandles, int numOfHandles, const char* backendName)
 {
     if(ctxt != nullptr)
     {
-        if (context_tbl.find(nativeHandles[3]) != context_tbl.end()) {
-            ctxt = context_tbl[nativeHandles[3]];
+        if (context_tbl.find(backendHandles[3]) != context_tbl.end()) {
+            ctxt = context_tbl[backendHandles[3]];
         } else {
             // new context hence update corresponding sycl queue and other structures .....
-            std::string backendName = (currentBackend == level0) ? "level0" : "opencl";
-            Update(ctxt, nativeHandles.data(), nativeHandles.size(), backendName.c_str());
+            Update(ctxt, backendHandles, numOfHandles, backendName);
         }
     }
 }
