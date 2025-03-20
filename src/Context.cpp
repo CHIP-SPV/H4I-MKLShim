@@ -4,6 +4,10 @@
 #include "h4i/mklshim/mklshim.h"
 #include "h4i/mklshim/impl/Context.h"
 #include "h4i/mklshim/common.h"
+// For MKL 2025
+#if __INTEL_LLVM_COMPILER >= 20250000
+#include <sycl/backend.hpp>
+#endif
 namespace H4I::MKLShim
 {
 
@@ -23,10 +27,19 @@ Context* Update(Context* ctxt, unsigned long const* backendHandles, int numOfHan
         cl_command_queue hQueue = (cl_command_queue)backendHandles[3];
 
         // Build SYCL platform/device/queue from the opencl handles.
+#if __INTEL_LLVM_COMPILER >= 20250000
+        // MKL 2025 uses UR API
+        ctxt->platform = sycl::detail::make_platform((ur_native_handle_t)hPlatformId, sycl::backend::opencl);
+        ctxt->device = sycl::detail::make_device((ur_native_handle_t)hDeviceId, sycl::backend::opencl);
+        ctxt->context = sycl::detail::make_context((ur_native_handle_t)hContext, {}, sycl::backend::opencl, false);
+        ctxt->queue = sycl::detail::make_queue((ur_native_handle_t)hQueue, false, ctxt->context, &ctxt->device, false, {}, {}, sycl::backend::opencl);
+#else
+        // MKL 2024 and earlier use PI API
         ctxt->platform = sycl::opencl::make_platform((pi_native_handle)hPlatformId);
         ctxt->device = sycl::opencl::make_device((pi_native_handle)hDeviceId);
         ctxt->context = sycl::opencl::make_context((pi_native_handle)hContext);
         ctxt->queue = sycl::opencl::make_queue(ctxt->context, (pi_native_handle)hQueue);
+#endif
     } else if(strBackend == "level0") {
         currentBackend = level0;
         auto hDriver  = (ze_driver_handle_t)backendHandles[0];
@@ -41,6 +54,25 @@ Context* Update(Context* ctxt, unsigned long const* backendHandles, int numOfHan
         bool isImmCmdList = (hCommandList != nullptr);
 
         // Build SYCL platform/device/queue from the LZ handles.
+#if __INTEL_LLVM_COMPILER >= 20250000
+        // MKL 2025 uses UR API
+        ctxt->platform = sycl::detail::make_platform((ur_native_handle_t)hDriver, sycl::backend::ext_oneapi_level_zero);
+        ctxt->device = sycl::detail::make_device((ur_native_handle_t)hDevice, sycl::backend::ext_oneapi_level_zero);
+
+        // FIX ME: only 1 device is returned from CHIP-SPV's lzHandles
+        std::vector<sycl::device> sycl_devices(1);
+        sycl_devices[0] = ctxt->device;
+        ctxt->context = sycl::detail::make_context((ur_native_handle_t)hContext, {}, sycl::backend::ext_oneapi_level_zero, false, sycl_devices);
+        
+        if (isImmCmdList) {
+            ctxt->queue = sycl::detail::make_queue((ur_native_handle_t)hCommandList, true, ctxt->context, &ctxt->device, false, 
+                                                  {sycl::property::queue::in_order()}, {}, sycl::backend::ext_oneapi_level_zero);
+        } else {
+            ctxt->queue = sycl::detail::make_queue((ur_native_handle_t)hQueue, false, ctxt->context, &ctxt->device, false, 
+                                                  {sycl::property::queue::in_order()}, {}, sycl::backend::ext_oneapi_level_zero);
+        }
+#elif __INTEL_LLVM_COMPILER >= 20240000
+        // MKL 2024 uses PI API with updated make_queue signature
         ctxt->platform = sycl::ext::oneapi::level_zero::make_platform((pi_native_handle)hDriver);
         ctxt->device = sycl::ext::oneapi::level_zero::make_device(ctxt->platform, (pi_native_handle)hDevice);
 
@@ -49,15 +81,23 @@ Context* Update(Context* ctxt, unsigned long const* backendHandles, int numOfHan
         sycl_devices[0] = ctxt->device;
         ctxt->context = sycl::ext::oneapi::level_zero::make_context(sycl_devices, (pi_native_handle)hContext, 1);
         
-        #if __INTEL_LLVM_COMPILER >= 20240000
-            if (isImmCmdList) {
-                ctxt->queue = sycl::ext::oneapi::level_zero::make_queue(ctxt->context, ctxt->device, (pi_native_handle)hCommandList, true, 1, sycl::property::queue::in_order());
-            } else {
-                ctxt->queue = sycl::ext::oneapi::level_zero::make_queue(ctxt->context, ctxt->device, (pi_native_handle)hQueue, false, 1, sycl::property::queue::in_order());
-            }
-        #else
-            ctxt->queue = sycl::ext::oneapi::level_zero::make_queue(ctxt->context, ctxt->device, (pi_native_handle)hQueue, 1);
-        #endif    
+        if (isImmCmdList) {
+            ctxt->queue = sycl::ext::oneapi::level_zero::make_queue(ctxt->context, ctxt->device, (pi_native_handle)hCommandList, true, 1, sycl::property::queue::in_order());
+        } else {
+            ctxt->queue = sycl::ext::oneapi::level_zero::make_queue(ctxt->context, ctxt->device, (pi_native_handle)hQueue, false, 1, sycl::property::queue::in_order());
+        }
+#else
+        // MKL 2023 and earlier use PI API with older make_queue signature
+        ctxt->platform = sycl::ext::oneapi::level_zero::make_platform((pi_native_handle)hDriver);
+        ctxt->device = sycl::ext::oneapi::level_zero::make_device(ctxt->platform, (pi_native_handle)hDevice);
+
+        // FIX ME: only 1 device is returned from CHIP-SPV's lzHandles
+        std::vector<sycl::device> sycl_devices(1);
+        sycl_devices[0] = ctxt->device;
+        ctxt->context = sycl::ext::oneapi::level_zero::make_context(sycl_devices, (pi_native_handle)hContext, 1);
+        
+        ctxt->queue = sycl::ext::oneapi::level_zero::make_queue(ctxt->context, ctxt->device, (pi_native_handle)hQueue, 1);
+#endif
     } else {
         std::cerr << "Unsupported backend: " << backendName << std::endl;
         std::abort();
@@ -98,4 +138,3 @@ Destroy(Context* ctxt)
 }
 
 } // namespace
-
