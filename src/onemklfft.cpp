@@ -515,8 +515,76 @@ namespace H4I::MKLShim
                           double _Complex *odata)
   {
       ctxt->queue.wait();
-      return; 
+
+      int64_t value = 0;
+      descDC->fft_plan.get_value(oneapi::mkl::dft::config_param::PLACEMENT, &value);
+      ctxt->queue.wait();
+
+      if (idata == odata)
+      {
+          if (value != DFTI_INPLACE)
+          {
+              descDC->fft_plan.set_value(oneapi::mkl::dft::config_param::PLACEMENT, DFTI_INPLACE);
+              ctxt->queue.wait();
+              descDC->fft_plan.commit(ctxt->queue);
+              ctxt->queue.wait();
+          }
+
+          try {
+              oneapi::mkl::dft::compute_backward(descDC->fft_plan, 
+                                               reinterpret_cast<std::complex<double> *>(idata));
+              ctxt->queue.wait();
+          } catch (sycl::exception const& e) {
+              std::cerr << "fftExecZ2Zbackward compute failed: " << e.what() << std::endl;
+          }
+      }
+      else
+      {
+          if (value != DFTI_NOT_INPLACE)
+          {
+              descDC->fft_plan.set_value(oneapi::mkl::dft::config_param::PLACEMENT, DFTI_NOT_INPLACE);
+              ctxt->queue.wait();
+              descDC->fft_plan.commit(ctxt->queue);
+              ctxt->queue.wait();
+          }
+
+          try {
+              oneapi::mkl::dft::compute_backward(descDC->fft_plan, 
+                                               reinterpret_cast<std::complex<double> *>(idata),
+                                               reinterpret_cast<std::complex<double> *>(odata));
+              ctxt->queue.wait();
+          } catch (sycl::exception const& e) {
+              std::cerr << "fftExecZ2Zbackward compute failed: " << e.what() << std::endl;
+          }
+      }
+
+      ctxt->queue.wait();
+      return;
   }
 
+  // Implementations of destroy functions
+  void destroyFFTDescriptorSR(Context *ctxt, fftDescriptorSR *descSR) {
+    if (descSR != nullptr) {
+      delete descSR;
+    }
+  }
+
+  void destroyFFTDescriptorSC(Context *ctxt, fftDescriptorSC *descSC) {
+    if (descSC != nullptr) {
+      delete descSC;
+    }
+  }
+
+  void destroyFFTDescriptorDR(Context *ctxt, fftDescriptorDR *descDR) {
+    if (descDR != nullptr) {
+      delete descDR;
+    }
+  }
+
+  void destroyFFTDescriptorDC(Context *ctxt, fftDescriptorDC *descDC) {
+    if (descDC != nullptr) {
+      delete descDC;
+    }
+  }
 
 }// end of namespace
