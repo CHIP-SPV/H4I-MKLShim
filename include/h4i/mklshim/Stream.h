@@ -8,7 +8,6 @@
 namespace H4I::MKLShim
 {
 
-constexpr const int nHandles = 4;
-void SetStream(Context* ctxt, unsigned long const* backendHandles, int numOfHandles, const char* backendName);
+void SetStream(Context* ctxt, unsigned long const* handles, int numOfHandles);
 } // namespace
 
