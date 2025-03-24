@@ -65,5 +65,5 @@ find_package(MKL CONFIG REQUIRED)
 message(STATUS "Known MKL Targets: ${MKL_IMPORTED_TARGETS}")
 
 add_subdirectory(src)
-#add_subdirectory(test)
+add_subdirectory(test)
 
