@@ -4,10 +4,24 @@
 #include "h4i/mklshim/mklshim.h"
 #include "h4i/mklshim/impl/Context.h"
 #include "h4i/mklshim/common.h"
-// For MKL 2025
-#if __INTEL_LLVM_COMPILER >= 20250000
-#include <sycl/backend.hpp>
+
+// Check if UR API is available
+#if INTEL_MKL_VERSION >= 20250000
+  #include <sycl/backend.hpp>
+  // Check if ur_native_handle_t is defined
+  #ifdef ur_native_handle_t
+    #define HAS_UR_API 1
+  #else
+    #define HAS_UR_API 0
+  #endif
+#elif INTEL_MKL_VERSION >= 20230000
+  #include <sycl/ext/oneapi/backend/level_zero.hpp>
+  #define HAS_UR_API 0
+#else
+  #include <CL/sycl/backend/level_zero.hpp>
+  #define HAS_UR_API 0
 #endif
+
 namespace H4I::MKLShim
 {
 
@@ -29,7 +43,7 @@ Context* Update(Context* ctxt, unsigned long const* handles, int numOfHandles) {
         cl_command_queue hQueue = (cl_command_queue)handles[QUEUE];
 
         // Build SYCL platform/device/queue from the opencl handles.
-#if __INTEL_LLVM_COMPILER >= 20250000
+#if HAS_UR_API
         // MKL 2025 uses UR API
         ctxt->platform = sycl::detail::make_platform((ur_native_handle_t)hPlatformId, sycl::backend::opencl);
         ctxt->device = sycl::detail::make_device((ur_native_handle_t)hDeviceId, sycl::backend::opencl);
@@ -56,7 +70,7 @@ Context* Update(Context* ctxt, unsigned long const* handles, int numOfHandles) {
         bool isImmCmdList = (hCommandList != nullptr);
 
         // Build SYCL platform/device/queue from the LZ handles.
-#if __INTEL_LLVM_COMPILER >= 20250000
+#if HAS_UR_API
         // MKL 2025 uses UR API
         ctxt->platform = sycl::detail::make_platform((ur_native_handle_t)hDriver, sycl::backend::ext_oneapi_level_zero);
         ctxt->device = sycl::detail::make_device((ur_native_handle_t)hDevice, sycl::backend::ext_oneapi_level_zero);
