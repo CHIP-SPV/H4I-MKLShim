@@ -6,7 +6,7 @@ add_executable(mklshim_context_test context_test.cpp)
 target_link_libraries(mklshim_context_test PRIVATE MKLShim hip::host)
 target_include_directories(mklshim_context_test PRIVATE 
                           ${CMAKE_BINARY_DIR}/include 
-                          ${CMAKE_SOURCE_DIR}/H4I-MKLShim/include)
+                          ${CMAKE_SOURCE_DIR}/include)
 
 # Add tests to CTest
 add_test(NAME h4i-mklshim_context_test COMMAND mklshim_context_test) 
