@@ -32,7 +32,10 @@ endif()
 set(CMAKE_CXX_COMPILER ${INTEL_COMPILER_PATH})
 set(CMAKE_CXX_COMPILER_ID "IntelLLVM")
 
-# Define a target capturing common configuration settings.
+if(STANDALONE_BUILD)
+    find_package(hip CONFIG REQUIRED)
+endif()
+
 # Although we use 'add_library' for this, it is not a library - 
 # just a CMake target with a collection of properties set the
 # way we want.
@@ -65,5 +68,5 @@ find_package(MKL CONFIG REQUIRED)
 message(STATUS "Known MKL Targets: ${MKL_IMPORTED_TARGETS}")
 
 add_subdirectory(src)
-#add_subdirectory(test)
+add_subdirectory(test)
 

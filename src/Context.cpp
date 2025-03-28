@@ -4,10 +4,24 @@
 #include "h4i/mklshim/mklshim.h"
 #include "h4i/mklshim/impl/Context.h"
 #include "h4i/mklshim/common.h"
-// For MKL 2025
-#if __INTEL_LLVM_COMPILER >= 20250000
-#include <sycl/backend.hpp>
+
+// Check if UR API is available
+#if INTEL_MKL_VERSION >= 20250000
+  #include <sycl/backend.hpp>
+  // Check if ur_native_handle_t is defined
+  #ifdef ur_native_handle_t
+    #define HAS_UR_API 1
+  #else
+    #define HAS_UR_API 0
+  #endif
+#elif INTEL_MKL_VERSION >= 20230000
+  #include <sycl/ext/oneapi/backend/level_zero.hpp>
+  #define HAS_UR_API 0
+#else
+  #include <CL/sycl/backend/level_zero.hpp>
+  #define HAS_UR_API 0
 #endif
+
 namespace H4I::MKLShim
 {
 
@@ -15,19 +29,21 @@ namespace H4I::MKLShim
 Backend currentBackend;
 std::unordered_map<uintptr_t, Context*> context_tbl;
 
-Context* Update(Context* ctxt, unsigned long const* backendHandles, int numOfHandles, const char* backendName) {
+Context* Update(Context* ctxt, unsigned long const* handles, int numOfHandles) {
     // Obtain the handles to the LZ constructs.
+    const char* backendName = (const char*)handles[BACKEND_NAME];
+    
     std::string strBackend(backendName);
     
     if (strBackend == "opencl") {
         currentBackend = opencl;
-        cl_platform_id hPlatformId = (cl_platform_id)backendHandles[0];
-        cl_device_id hDeviceId = (cl_device_id)backendHandles[1];
-        cl_context hContext = (cl_context)backendHandles[2];
-        cl_command_queue hQueue = (cl_command_queue)backendHandles[3];
+        cl_platform_id hPlatformId = (cl_platform_id)handles[PLATFORM_DRIVER];
+        cl_device_id hDeviceId = (cl_device_id)handles[DEVICE];
+        cl_context hContext = (cl_context)handles[CONTEXT];
+        cl_command_queue hQueue = (cl_command_queue)handles[QUEUE];
 
         // Build SYCL platform/device/queue from the opencl handles.
-#if __INTEL_LLVM_COMPILER >= 20250000
+#if HAS_UR_API
         // MKL 2025 uses UR API
         ctxt->platform = sycl::detail::make_platform((ur_native_handle_t)hPlatformId, sycl::backend::opencl);
         ctxt->device = sycl::detail::make_device((ur_native_handle_t)hDeviceId, sycl::backend::opencl);
@@ -42,19 +58,19 @@ Context* Update(Context* ctxt, unsigned long const* backendHandles, int numOfHan
 #endif
     } else if(strBackend == "level0") {
         currentBackend = level0;
-        auto hDriver  = (ze_driver_handle_t)backendHandles[0];
-        auto hDevice  = (ze_device_handle_t)backendHandles[1];
-        auto hContext = (ze_context_handle_t)backendHandles[2];
-        auto hQueue   = (ze_command_queue_handle_t)backendHandles[3];
+        auto hDriver  = (ze_driver_handle_t)handles[PLATFORM_DRIVER];
+        auto hDevice  = (ze_device_handle_t)handles[DEVICE];
+        auto hContext = (ze_context_handle_t)handles[CONTEXT];
+        auto hQueue   = (ze_command_queue_handle_t)handles[QUEUE];
 
         ze_command_list_handle_t hCommandList = 0;
-        if (numOfHandles == 5)
-            hCommandList = (ze_command_list_handle_t)backendHandles[numOfHandles-1];
+        if (numOfHandles == 6)
+            hCommandList = (ze_command_list_handle_t)handles[COMMAND_LIST];
 
         bool isImmCmdList = (hCommandList != nullptr);
 
         // Build SYCL platform/device/queue from the LZ handles.
-#if __INTEL_LLVM_COMPILER >= 20250000
+#if HAS_UR_API
         // MKL 2025 uses UR API
         ctxt->platform = sycl::detail::make_platform((ur_native_handle_t)hDriver, sycl::backend::ext_oneapi_level_zero);
         ctxt->device = sycl::detail::make_device((ur_native_handle_t)hDevice, sycl::backend::ext_oneapi_level_zero);
@@ -103,25 +119,24 @@ Context* Update(Context* ctxt, unsigned long const* backendHandles, int numOfHan
         std::abort();
     }
     // add context to the table
-    context_tbl[backendHandles[3]] = ctxt;
+    context_tbl[handles[QUEUE]] = ctxt;
     return ctxt;
 }
 
 Context*
-Create(unsigned long const* nativeHandles, int numOfHandles, const char* backendName)
+Create(unsigned long const* handles, int numOfHandles)
 {
     // Error check
-    // In case of OpenCl backend  number of handles will be 4, for level0 it will be 5
-    if (numOfHandles < 4 || numOfHandles > 5) {
+    // Number of handles must be at least 5 (backendName + 4 handles)
+    if (numOfHandles < 5 || numOfHandles > 6) {
         std::cerr << "Error: Invalid handles\n";
         return nullptr;
     }
     Context *ctxt;
-    int queue_handle_index = 3;
-    if (context_tbl.find(nativeHandles[queue_handle_index]) != context_tbl.end()) {
-        ctxt = context_tbl[nativeHandles[queue_handle_index]];
+    if (context_tbl.find(handles[QUEUE]) != context_tbl.end()) {
+        ctxt = context_tbl[handles[QUEUE]];
     } else {
-        ctxt = Update(new Context(), nativeHandles, numOfHandles, backendName);
+        ctxt = Update(new Context(), handles, numOfHandles);
     }
 
     // Get MKL version

@@ -11,15 +11,15 @@ namespace H4I::MKLShim
 {
 
 void
-SetStream(Context* ctxt, unsigned long const* backendHandles, int numOfHandles, const char* backendName)
+SetStream(Context* ctxt, unsigned long const* handles, int numOfHandles)
 {
     if(ctxt != nullptr)
     {
-        if (context_tbl.find(backendHandles[3]) != context_tbl.end()) {
-            ctxt = context_tbl[backendHandles[3]];
+        if (context_tbl.find(handles[QUEUE]) != context_tbl.end()) {
+            ctxt = context_tbl[handles[QUEUE]];
         } else {
             // new context hence update corresponding sycl queue and other structures .....
-            Update(ctxt, backendHandles, numOfHandles, backendName);
+            Update(ctxt, handles, numOfHandles);
         }
     }
 }

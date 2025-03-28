@@ -10,6 +10,16 @@ enum Backend{
   opencl
 };
 
+// Handle indices in the handles array
+enum HandleIndex {
+  BACKEND_NAME = 0,
+  PLATFORM_DRIVER = 1,
+  DEVICE = 2,
+  CONTEXT = 3,
+  QUEUE = 4,
+  COMMAND_LIST = 5  // Optional, only for level0 with immediate command lists
+};
+
 struct Context;
 
 // Since shim supports multiple backends hence this indicates current backend is in use
@@ -19,8 +29,8 @@ extern Backend currentBackend;
 // This helps synchronization between two libraries e.g. hipSolver and hipBlas
 extern std::unordered_map<uintptr_t, Context*> context_tbl;
 
-Context* Create(unsigned long const* lzHandles, int numOfHandles, const char* backendName);
-Context* Update(Context* ctxt, unsigned long const* backendHandles, int numOfHandles, const char* backendName);
+Context* Create(unsigned long const* handles, int numOfHandles);
+Context* Update(Context* ctxt, unsigned long const* handles, int numOfHandles);
 void Destroy(Context* context);
 
 MKL_VERSION get_mkl_version();
