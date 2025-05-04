@@ -127,13 +127,13 @@ namespace H4I::MKLShim
   int64_t Dgetrs_ScPadSz(Context* ctxt, onemklTranspose trans, int64_t n, int64_t nrhs, int64_t lda, int64_t ldb);
   int64_t Cgetrs_ScPadSz(Context* ctxt, onemklTranspose trans, int64_t n, int64_t nrhs, int64_t lda, int64_t ldb);
   int64_t Zgetrs_ScPadSz(Context* ctxt, onemklTranspose trans, int64_t n, int64_t nrhs, int64_t lda, int64_t ldb);
-  void Sgetrs(Context* ctxt, onemklTranspose trans, int64_t n, int64_t nrhs, float* A, int64_t lda, std::int64_t *ipiv,
+  void Sgetrs(Context* ctxt, onemklTranspose trans, int64_t n, int64_t nrhs, float* A, int64_t lda, int64_t *ipiv,
               float* B, int64_t ldb, float* scratchpad, int64_t scratchpad_size);
-  void Dgetrs(Context* ctxt, onemklTranspose trans, int64_t n, int64_t nrhs, double* A, int64_t lda, std::int64_t *ipiv,
+  void Dgetrs(Context* ctxt, onemklTranspose trans, int64_t n, int64_t nrhs, double* A, int64_t lda, int64_t *ipiv,
               double* B, int64_t ldb, double* scratchpad, int64_t scratchpad_size);
-  void Cgetrs(Context* ctxt, onemklTranspose trans, int64_t n, int64_t nrhs, float _Complex* A, int64_t lda, std::int64_t *ipiv,
+  void Cgetrs(Context* ctxt, onemklTranspose trans, int64_t n, int64_t nrhs, float _Complex* A, int64_t lda, int64_t *ipiv,
               float _Complex* B, int64_t ldb, float _Complex* scratchpad, int64_t scratchpad_size);
-  void Zgetrs(Context* ctxt, onemklTranspose trans, int64_t n, int64_t nrhs, double _Complex* A, int64_t lda, std::int64_t *ipiv,
+  void Zgetrs(Context* ctxt, onemklTranspose trans, int64_t n, int64_t nrhs, double _Complex* A, int64_t lda, int64_t *ipiv,
               double _Complex* B, int64_t ldb, double _Complex* scratchpad, int64_t scratchpad_size);
 
   //potrf
