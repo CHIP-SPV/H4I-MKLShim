@@ -83,10 +83,10 @@ Context* Update(Context* ctxt, unsigned long const* handles, int numOfHandles) {
 						   sycl::device::get_devices());
         
         if (isImmCmdList) {
-            ctxt->queue = sycl::detail::make_queue((ur_native_handle_t)hCommandList, true, ctxt->context, &ctxt->device, false, 
+            ctxt->queue = sycl::detail::make_queue((ur_native_handle_t)hCommandList, true, ctxt->context, &ctxt->device, true, 
                                                   {sycl::property::queue::in_order()}, {}, sycl::backend::ext_oneapi_level_zero);
         } else {
-            ctxt->queue = sycl::detail::make_queue((ur_native_handle_t)hQueue, false, ctxt->context, &ctxt->device, false, 
+            ctxt->queue = sycl::detail::make_queue((ur_native_handle_t)hQueue, false, ctxt->context, &ctxt->device, true, 
                                                   {sycl::property::queue::in_order()}, {}, sycl::backend::ext_oneapi_level_zero);
         }
 #elif __INTEL_LLVM_COMPILER >= 20240000
