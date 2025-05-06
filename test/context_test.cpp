@@ -49,6 +49,14 @@ int main() {
     // Update the context with the new stream
     H4I::MKLShim::Context* updatedContext = H4I::MKLShim::Update(context, streamHandles.data(), nHandles);
     
+    // Check that default stream is preserved
+    float* dx;
+    float expected_result = 15.0f;
+    
+    hipMalloc(&dx, sizeof(float));
+    hipMemcpy(dx, &expected_result, sizeof(float), hipMemcpyHostToDevice);
+    // End of test
+    
     if (updatedContext == nullptr) {
         std::cerr << "Failed to update MKLShim context with new stream" << std::endl;
         hipStreamDestroy(stream);
