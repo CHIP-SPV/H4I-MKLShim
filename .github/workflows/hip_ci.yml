@@ -6,9 +6,13 @@ on:
   pull_request:
     branches: [ "develop" ]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref || github.run_id }}
+  cancel-in-progress: true
+
 jobs:
   build_and_test:
-    runs-on: [self-hosted, X86]
+    runs-on: [self-hosted, X64]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -16,9 +20,12 @@ jobs:
       - name: oneapi/2024.1.0
         shell: bash
         run: |
+          source /home/pvelesko/install/modules/init/bash
+          module use /home/pvelesko/modulefiles
           module load llvm/20.0 HIP/chipStar/main oneapi/2024.1.0
           mkdir build
           cd build
           cmake ..
-          make
-          ctest --output-on-failure
+          make -j$(nproc)
+          CHIP_BE=opencl ctest --output-on-failure -j$(nproc)
+          CHIP_BE=level0 ctest --output-on-failure -j$(nproc)
