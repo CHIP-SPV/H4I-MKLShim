@@ -1,2 +1,3 @@
 spack*.txt
 spack-build*/
+build*

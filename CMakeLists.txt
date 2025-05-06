@@ -67,6 +67,7 @@ set(MKL_THREADING sequential)
 find_package(MKL CONFIG REQUIRED)
 message(STATUS "Known MKL Targets: ${MKL_IMPORTED_TARGETS}")
 
+enable_testing()
 add_subdirectory(src)
 add_subdirectory(test)
 
