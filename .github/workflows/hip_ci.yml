@@ -26,5 +26,6 @@ jobs:
           mkdir build
           cd build
           cmake ..
-          make
-          ctest --output-on-failure
+          make -j$(nproc)
+          CHIP_BE=opencl ctest --output-on-failure -j$(nproc)
+          CHIP_BE=level0 ctest --output-on-failure -j$(nproc)
