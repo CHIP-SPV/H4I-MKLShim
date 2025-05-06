@@ -10,3 +10,5 @@ target_include_directories(mklshim_context_test PRIVATE
 
 # Add tests to CTest
 add_test(NAME h4i-mklshim_context_test COMMAND mklshim_context_test) 
+set_tests_properties(h4i-mklshim_context_test PROPERTIES 
+    PASS_REGULAR_EXPRESSION "All tests passed successfully!")

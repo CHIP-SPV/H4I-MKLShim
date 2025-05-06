@@ -61,13 +61,38 @@ int main() {
     // Check MKL version
     H4I::MKLShim::MKL_VERSION version = H4I::MKLShim::get_mkl_version();
     std::cout << "MKL Version: " << version.major << "." << version.minor << "." << version.patch << std::endl;
+
+    // Check if MKL version is >= 2023.0.2
+    bool is_recent_mkl = H4I::MKLShim::is_mkl_eq_higher_2023_0_2();
+    std::cout << "MKL version is_mkl_eq_higher_2023_0_2: " << (is_recent_mkl ? "true" : "false") << std::endl;
     
     // Clean up
     hipStreamDestroy(stream);
     
+    // Test SetStream with a new stream
+    hipStream_t stream2;
+    hipStatus = hipStreamCreate(&stream2);
+    if (hipStatus != hipSuccess) {
+        std::cerr << "Failed to create HIP stream for SetStream test" << std::endl;
+        H4I::MKLShim::Destroy(updatedContext);
+        return EXIT_FAILURE;
+    }
+
+    // Get native handles for the new stream (stream2)
+    hipGetBackendNativeHandles(reinterpret_cast<uintptr_t>(stream2), 0, &nHandles);
+    std::vector<unsigned long> streamHandles2(nHandles);
+    hipGetBackendNativeHandles(reinterpret_cast<uintptr_t>(stream2), streamHandles2.data(), 0);
+
+    // Set the stream for the context
+    H4I::MKLShim::SetStream(updatedContext, streamHandles2.data(), nHandles);
+    std::cout << "Successfully called SetStream for MKLShim context with a new stream" << std::endl;
+
+    // Clean up the second stream
+    hipStreamDestroy(stream2);
+
     // Test destruction
-    H4I::MKLShim::Destroy(context);
-    
+    H4I::MKLShim::Destroy(updatedContext);
+
     std::cout << "All tests passed successfully!" << std::endl;
     return EXIT_SUCCESS;
 } 
