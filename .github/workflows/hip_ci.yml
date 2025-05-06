@@ -1,0 +1,24 @@
+name: HIP CI Build and Test
+
+on:
+  push:
+    branches: [ "develop" ]
+  pull_request:
+    branches: [ "develop" ]
+
+jobs:
+  build_and_test:
+    runs-on: [self-hosted, X86]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: oneapi/2024.1.0
+        shell: bash
+        run: |
+          module load llvm/20.0 HIP/chipStar/main oneapi/2024.1.0
+          mkdir build
+          cd build
+          cmake ..
+          make
+          ctest --output-on-failure
