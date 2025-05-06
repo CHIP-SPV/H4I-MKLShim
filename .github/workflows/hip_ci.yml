@@ -20,6 +20,7 @@ jobs:
       - name: oneapi/2024.1.0
         shell: bash
         run: |
+          source /home/pvelesko/install/modules/init/bash
           module load llvm/20.0 HIP/chipStar/main oneapi/2024.1.0
           mkdir build
           cd build
