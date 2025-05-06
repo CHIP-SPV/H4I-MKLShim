@@ -21,6 +21,7 @@ jobs:
         shell: bash
         run: |
           source /home/pvelesko/install/modules/init/bash
+          module use /home/pvelesko/modulefiles
           module load llvm/20.0 HIP/chipStar/main oneapi/2024.1.0
           mkdir build
           cd build

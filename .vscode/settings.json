@@ -1,0 +1,13 @@
+{
+    "files.associations": {
+        "random": "cpp",
+        "array": "cpp",
+        "string": "cpp",
+        "string_view": "cpp",
+        "iterator": "cpp",
+        "vector": "cpp",
+        "compare": "cpp",
+        "cstdint": "cpp",
+        "iostream": "cpp"
+    }
+}
