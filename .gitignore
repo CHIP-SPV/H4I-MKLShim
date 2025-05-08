@@ -1,3 +1,4 @@
 spack*.txt
 spack-build*/
 build*
+.vscode/settings.json
