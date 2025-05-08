@@ -1,4 +1,4 @@
-name: HIP CI Build and Test
+name: H4I-MKLShim Install
 
 on:
   push:

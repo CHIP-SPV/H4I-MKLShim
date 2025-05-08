@@ -1,10 +1,10 @@
-name: HIP CI Build and Test
+name: H4I-MKLShim CI
 
 on:
   pull_request:
     branches: [ "develop" ]
   workflow_dispatch:
-    
+
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref || github.run_id }}
