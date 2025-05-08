@@ -1,7 +1,7 @@
 name: HIP CI Build and Test
 
 on:
-  pull_request:
+  push:
     branches: [ "develop" ]
 
 concurrency:
@@ -21,13 +21,12 @@ jobs:
           source /home/pvelesko/install/modules/init/bash
           module use /home/pvelesko/modulefiles
           module purge
-          module load llvm/20.0 HIP/chipStar/main oneapi/2024.1.0
+          module load llvm/19.0 HIP/chipStar/main oneapi/2024.1.0
           mkdir build
           cd build
-          cmake ..
+          cmake .. -DCMAKE_INSTALL_PREFIX=/home/pvelesko/install/HIP/H4I-MKLShim/oneapi-2024.1.0
           make -j$(nproc)
-          CHIP_BE=opencl ctest --output-on-failure -j$(nproc)
-          CHIP_BE=level0 ctest --output-on-failure -j$(nproc)
+          make install
 
       - name: oneapi/2025.0.4
         shell: bash
@@ -35,11 +34,10 @@ jobs:
           source /home/pvelesko/install/modules/init/bash
           module use /home/pvelesko/modulefiles
           module purge
-          module load llvm/20.0 HIP/chipStar/main oneapi/2025.0.4
+          module load llvm/19.0 HIP/chipStar/main/oneapi/02025.0.4
           rm -rf build
           mkdir build
           cd build
-          cmake ..
+          cmake .. -DCMAKE_INSTALL_PREFIX=/home/pvelesko/install/HIP/H4I-MKLShim/oneapi-2025.0.4
           make -j$(nproc)
-          CHIP_BE=opencl ctest --output-on-failure -j$(nproc)
-          CHIP_BE=level0 ctest --output-on-failure -j$(nproc)
+          make install
