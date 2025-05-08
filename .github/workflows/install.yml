@@ -35,7 +35,7 @@ jobs:
           source /home/pvelesko/install/modules/init/bash
           module use /home/pvelesko/modulefiles
           module purge
-          module load llvm/19.0 HIP/chipStar/main/oneapi/02025.0.4
+          module load llvm/19.0 HIP/chipStar/main/oneapi/2025.0.4
           rm -rf build
           mkdir build
           cd build
