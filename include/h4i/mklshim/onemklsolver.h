@@ -136,6 +136,81 @@ namespace H4I::MKLShim
   void Zgetrs(Context* ctxt, onemklTranspose trans, int64_t n, int64_t nrhs, double _Complex* A, int64_t lda, int64_t *ipiv,
               double _Complex* B, int64_t ldb, double _Complex* scratchpad, int64_t scratchpad_size);
 
+  //getrf_batch (Group Version)
+  /** Calculate scratchpad size for Sgetrf_batch
+   * @param ctxt MKLShim context
+   * @param group_count Number of groups 
+   * @param m Array of matrix row dimensions for each group
+   * @param n Array of matrix column dimensions for each group
+   * @param lda Array of leading dimensions for each group
+   * @param group_sizes Array specifying number of matrices in each group
+   */
+  int64_t Sgetrf_batch_ScPadSz(Context* ctxt, int64_t group_count, int64_t* m, int64_t* n, int64_t* lda, int64_t* group_sizes);
+  int64_t Dgetrf_batch_ScPadSz(Context* ctxt, int64_t group_count, int64_t* m, int64_t* n, int64_t* lda, int64_t* group_sizes);
+  int64_t Cgetrf_batch_ScPadSz(Context* ctxt, int64_t group_count, int64_t* m, int64_t* n, int64_t* lda, int64_t* group_sizes);
+  int64_t Zgetrf_batch_ScPadSz(Context* ctxt, int64_t group_count, int64_t* m, int64_t* n, int64_t* lda, int64_t* group_sizes);
+  void Sgetrf_batch(Context* ctxt, int64_t* m, int64_t* n, float** A, int64_t* lda, int64_t** ipiv, int64_t group_count,
+                    int64_t* group_sizes, float* scratchpad, int64_t scratchpad_size);
+  void Dgetrf_batch(Context* ctxt, int64_t* m, int64_t* n, double** A, int64_t* lda, int64_t** ipiv, int64_t group_count,
+                    int64_t* group_sizes, double* scratchpad, int64_t scratchpad_size);
+  void Cgetrf_batch(Context* ctxt, int64_t* m, int64_t* n, float _Complex** A, int64_t* lda, int64_t** ipiv, int64_t group_count,
+                    int64_t* group_sizes, float _Complex* scratchpad, int64_t scratchpad_size);
+  void Zgetrf_batch(Context* ctxt, int64_t* m, int64_t* n, double _Complex** A, int64_t* lda, int64_t** ipiv, int64_t group_count,
+                    int64_t* group_sizes, double _Complex* scratchpad, int64_t scratchpad_size);
+
+  //getri_batch (Group Version)
+  /** Calculate scratchpad size for Sgetri_batch
+   * @param ctxt MKLShim context
+   * @param group_count Number of groups
+   * @param n Array of matrix dimensions for each group (square matrices)
+   * @param lda Array of leading dimensions for each group
+   * @param group_sizes Array specifying number of matrices in each group
+   */
+  int64_t Sgetri_batch_ScPadSz(Context* ctxt, int64_t group_count, int64_t* n, int64_t* lda, int64_t* group_sizes);
+  int64_t Dgetri_batch_ScPadSz(Context* ctxt, int64_t group_count, int64_t* n, int64_t* lda, int64_t* group_sizes);
+  int64_t Cgetri_batch_ScPadSz(Context* ctxt, int64_t group_count, int64_t* n, int64_t* lda, int64_t* group_sizes);
+  int64_t Zgetri_batch_ScPadSz(Context* ctxt, int64_t group_count, int64_t* n, int64_t* lda, int64_t* group_sizes);
+  void Sgetri_batch(Context* ctxt, int64_t* n, float** A, int64_t* lda, int64_t** ipiv, int64_t group_count,
+                    int64_t* group_sizes, float* scratchpad, int64_t scratchpad_size);
+  void Dgetri_batch(Context* ctxt, int64_t* n, double** A, int64_t* lda, int64_t** ipiv, int64_t group_count,
+                    int64_t* group_sizes, double* scratchpad, int64_t scratchpad_size);
+  void Cgetri_batch(Context* ctxt, int64_t* n, float _Complex** A, int64_t* lda, int64_t** ipiv, int64_t group_count,
+                    int64_t* group_sizes, float _Complex* scratchpad, int64_t scratchpad_size);
+  void Zgetri_batch(Context* ctxt, int64_t* n, double _Complex** A, int64_t* lda, int64_t** ipiv, int64_t group_count,
+                    int64_t* group_sizes, double _Complex* scratchpad, int64_t scratchpad_size);
+
+  //getrs_batch (Group Version)
+  /** Calculate scratchpad size for Sgetrs_batch
+   * @param ctxt MKLShim context  
+   * @param group_count Number of groups
+   * @param trans Array of transpose operations for each group
+   * @param n Array of matrix dimensions for each group
+   * @param nrhs Array of right-hand side counts for each group
+   * @param lda Array of leading dimensions for matrices A
+   * @param ldb Array of leading dimensions for matrices B  
+   * @param group_sizes Array specifying number of matrices in each group
+   */
+  int64_t Sgetrs_batch_ScPadSz(Context* ctxt, int64_t group_count, onemklTranspose* trans, int64_t* n, int64_t* nrhs,
+                                int64_t* lda, int64_t* ldb, int64_t* group_sizes);
+  int64_t Dgetrs_batch_ScPadSz(Context* ctxt, int64_t group_count, onemklTranspose* trans, int64_t* n, int64_t* nrhs,
+                                int64_t* lda, int64_t* ldb, int64_t* group_sizes);
+  int64_t Cgetrs_batch_ScPadSz(Context* ctxt, int64_t group_count, onemklTranspose* trans, int64_t* n, int64_t* nrhs,
+                                int64_t* lda, int64_t* ldb, int64_t* group_sizes);
+  int64_t Zgetrs_batch_ScPadSz(Context* ctxt, int64_t group_count, onemklTranspose* trans, int64_t* n, int64_t* nrhs,
+                                int64_t* lda, int64_t* ldb, int64_t* group_sizes);
+  void Sgetrs_batch(Context* ctxt, onemklTranspose* trans, int64_t* n, int64_t* nrhs, float** A, int64_t* lda,
+                    int64_t** ipiv, float** B, int64_t* ldb, int64_t group_count, int64_t* group_sizes,
+                    float* scratchpad, int64_t scratchpad_size);
+  void Dgetrs_batch(Context* ctxt, onemklTranspose* trans, int64_t* n, int64_t* nrhs, double** A, int64_t* lda,
+                    int64_t** ipiv, double** B, int64_t* ldb, int64_t group_count, int64_t* group_sizes,
+                    double* scratchpad, int64_t scratchpad_size);
+  void Cgetrs_batch(Context* ctxt, onemklTranspose* trans, int64_t* n, int64_t* nrhs, float _Complex** A, int64_t* lda,
+                    int64_t** ipiv, float _Complex** B, int64_t* ldb, int64_t group_count, int64_t* group_sizes,
+                    float _Complex* scratchpad, int64_t scratchpad_size);
+  void Zgetrs_batch(Context* ctxt, onemklTranspose* trans, int64_t* n, int64_t* nrhs, double _Complex** A, int64_t* lda,
+                    int64_t** ipiv, double _Complex** B, int64_t* ldb, int64_t group_count, int64_t* group_sizes,
+                    double _Complex* scratchpad, int64_t scratchpad_size);
+
   //potrf
   int64_t Spotrf_ScPadSz(Context* ctxt, onemklUplo uplo, int64_t n, int64_t lda);
   int64_t Dpotrf_ScPadSz(Context* ctxt, onemklUplo uplo, int64_t n, int64_t lda);

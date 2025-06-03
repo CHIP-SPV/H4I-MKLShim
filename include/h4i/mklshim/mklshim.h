@@ -5,6 +5,7 @@
 #include "h4i/mklshim/types.h"
 #include "h4i/mklshim/Context.h"
 #include "h4i/mklshim/Stream.h"
+#include "h4i/mklshim/onemklsolver.h"
 
 // This is a workaround to flush MKL submissions into Level-zero queue,
 // using unspecified but guaranteed behavior of intel-sycl runtime.
@@ -35,6 +36,14 @@
     if(ctxt == nullptr) { \
       std::cerr << "Error context is null"<<std::endl; \
       return;\
+    }\
+    try\
+    {
+
+#define ONEMKL_TRY_RETURN(retval) \
+    if(ctxt == nullptr) { \
+      std::cerr << "Error context is null"<<std::endl; \
+      return retval;\
     }\
     try\
     {
