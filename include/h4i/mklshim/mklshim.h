@@ -9,11 +9,27 @@
 // This is a workaround to flush MKL submissions into Level-zero queue,
 // using unspecified but guaranteed behavior of intel-sycl runtime.
 // Once SYCL standard committee approves sycl::queue::flush() we will change the macro to use the same
+// FIXED: Handle OneAPI 2024.2.2 backend mismatch issue where OneMKL returns events with wrong backend
 #define __FORCE_MKL_FLUSH__(cmd)                                \
-    if (currentBackend == opencl)                               \
-        get_native<sycl::backend::opencl>(cmd);                 \
-    else                                                        \
-        get_native<sycl::backend::ext_oneapi_level_zero>(cmd);
+    try {                                                       \
+        if (currentBackend == opencl) {                         \
+            try {                                               \
+                get_native<sycl::backend::opencl>(cmd);         \
+            } catch (const sycl::exception& e) {                \
+                /* OneMKL 2024.2.2 bug: status has wrong backend */ \
+                get_native<sycl::backend::ext_oneapi_level_zero>(cmd); \
+            }                                                   \
+        } else {                                                \
+            try {                                               \
+                get_native<sycl::backend::ext_oneapi_level_zero>(cmd); \
+            } catch (const sycl::exception& e) {                \
+                /* Fallback to OpenCL if Level Zero fails */   \
+                get_native<sycl::backend::opencl>(cmd);         \
+            }                                                   \
+        }                                                       \
+    } catch (const sycl::exception& e) {                        \
+        /* If both fail, skip the flush (best effort) */       \
+    }
 
 #define ONEMKL_TRY \
     if(ctxt == nullptr) { \
