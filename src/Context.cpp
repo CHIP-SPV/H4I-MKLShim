@@ -149,9 +149,13 @@ Create(unsigned long const* handles, int numOfHandles)
 void
 Destroy(Context* ctxt)
 {
-    // Fix Me: Since not all resources are owned by Sycl,
-    // do we need to deleted Sycl pointers?
-    //delete ctxt;
+    // remove context from the table
+    context_tbl.erase(std::find_if(context_tbl.begin(), context_tbl.end(),
+                                   [ctxt](const auto& pair) {
+                                       return pair.second == ctxt;
+                                   }));
+    // delete the context
+    delete ctxt;
 }
 
 } // namespace
