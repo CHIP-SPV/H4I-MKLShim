@@ -94,10 +94,8 @@ Context* Update(Context* ctxt, unsigned long const* handles, int numOfHandles) {
         ctxt->platform = sycl::ext::oneapi::level_zero::make_platform((pi_native_handle)hDriver);
         ctxt->device = sycl::ext::oneapi::level_zero::make_device(ctxt->platform, (pi_native_handle)hDevice);
 
-        // FIX ME: only 1 device is returned from CHIP-SPV's lzHandles
-        std::vector<sycl::device> sycl_devices(1);
-        sycl_devices[0] = ctxt->device;
-        ctxt->context = sycl::ext::oneapi::level_zero::make_context(sycl_devices, (pi_native_handle)hContext, 1);
+        // this passes in all devices to make the context since it looks like MKL needs all devices in the context
+        ctxt->context = sycl::ext::oneapi::level_zero::make_context(sycl::device::get_devices(), (pi_native_handle)hContext, 1);
         
         if (isImmCmdList) {
             ctxt->queue = sycl::ext::oneapi::level_zero::make_queue(ctxt->context, ctxt->device, (pi_native_handle)hCommandList, true, 1, sycl::property::queue::in_order());
@@ -109,10 +107,8 @@ Context* Update(Context* ctxt, unsigned long const* handles, int numOfHandles) {
         ctxt->platform = sycl::ext::oneapi::level_zero::make_platform((pi_native_handle)hDriver);
         ctxt->device = sycl::ext::oneapi::level_zero::make_device(ctxt->platform, (pi_native_handle)hDevice);
 
-        // FIX ME: only 1 device is returned from CHIP-SPV's lzHandles
-        std::vector<sycl::device> sycl_devices(1);
-        sycl_devices[0] = ctxt->device;
-        ctxt->context = sycl::ext::oneapi::level_zero::make_context(sycl_devices, (pi_native_handle)hContext, 1);
+        // this passes in all devices to make the context since it looks like MKL needs all devices in the context
+        ctxt->context = sycl::ext::oneapi::level_zero::make_context(sycl::device::get_devices(), (pi_native_handle)hContext, 1);
         
         ctxt->queue = sycl::ext::oneapi::level_zero::make_queue(ctxt->context, ctxt->device, (pi_native_handle)hQueue, 1);
 #endif
