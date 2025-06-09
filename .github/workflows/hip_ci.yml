@@ -28,6 +28,8 @@ jobs:
           cd build
           cmake ..
           make -j$(nproc)
+          export IGC_EnableDPEmulation=1
+          export OverrideDefaultFP64Settings=1
           CHIP_BE=opencl ctest --output-on-failure -j$(nproc)
           CHIP_BE=level0 ctest --output-on-failure -j$(nproc)
 
@@ -43,5 +45,7 @@ jobs:
           cd build
           cmake ..
           make -j$(nproc)
+          export IGC_EnableDPEmulation=1
+          export OverrideDefaultFP64Settings=1
           CHIP_BE=opencl ctest --output-on-failure -j$(nproc)
           CHIP_BE=level0 ctest --output-on-failure -j$(nproc)
