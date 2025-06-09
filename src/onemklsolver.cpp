@@ -521,6 +521,7 @@ namespace H4I::MKLShim
   }
   void Sgetrs(Context* ctxt, onemklTranspose trans, int64_t n, int64_t nrhs, float* A, int64_t lda, std::int64_t *ipiv,
               float* B, int64_t ldb, float* scratchpad, int64_t scratchpad_size){
+    std::cerr << "WARNING: Sgetrs has known accuracy issues when compared to batch implementation. Results may differ from expected values." << std::endl;
     ONEMKL_TRY
     auto status = oneapi::mkl::lapack::getrs(ctxt->queue, convert(trans), n, nrhs, A, lda, ipiv, B, ldb, scratchpad, scratchpad_size);
     // Wait for the operation to complete before function returns
