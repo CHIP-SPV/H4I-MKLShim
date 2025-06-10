@@ -78,9 +78,9 @@ Context* Update(Context* ctxt, unsigned long const* handles, int numOfHandles) {
         // FIX ME: only 1 device is returned from CHIP-SPV's lzHandles
         std::vector<sycl::device> sycl_devices(1);
         sycl_devices[0] = ctxt->device;
-	// this passes in all devices to make the context since it looks like MKL needs all devices in the context
+	// Use the specific device from CHIP-SPV, not all system devices
         ctxt->context = sycl::detail::make_context((ur_native_handle_t)hContext, {}, sycl::backend::ext_oneapi_level_zero, false,
-						   sycl::device::get_devices());
+						   sycl_devices);
         
         if (isImmCmdList) {
             ctxt->queue = sycl::detail::make_queue((ur_native_handle_t)hCommandList, true, ctxt->context, &ctxt->device, true, 
