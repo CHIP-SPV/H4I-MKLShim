@@ -580,6 +580,732 @@ bool testDgetrfBatchVsNonBatch(H4I::MKLShim::Context* context) {
     }
 }
 
+// Test dGemmBatchedEx correctness  
+bool testDGemmBatchedExCorrectness(H4I::MKLShim::Context* context) {
+    std::cout << "Testing dGemmBatchedEx correctness..." << std::endl;
+    
+    const int64_t m = 2, n = 2, k = 2;
+    const int64_t lda = m, ldb = k, ldc = m;
+    const int64_t batch_count = 2;
+    const double alpha = 1.0, beta = 0.0;
+    
+    // Calculate strides
+    const int64_t stride_a = lda * k;
+    const int64_t stride_b = ldb * n;
+    const int64_t stride_c = ldc * n;
+    
+    // Create test data
+    std::vector<double> A_host(batch_count * stride_a);
+    std::vector<double> B_host(batch_count * stride_b);
+    std::vector<double> C_host(batch_count * stride_c, 0.0);
+    std::vector<double> C_expected(batch_count * stride_c, 0.0);
+    
+    // Initialize with simple values for manual verification
+    // A = [[1,2],[3,4]], B = [[2,0],[1,2]] for first batch
+    // A = [[2,3],[4,5]], B = [[2,0],[1,2]] for second batch
+    for (int64_t b = 0; b < batch_count; ++b) {
+        // Matrix A (column-major)
+        A_host[b * stride_a + 0] = 1.0 + b; // A(0,0) 
+        A_host[b * stride_a + 1] = 3.0 + b; // A(1,0)
+        A_host[b * stride_a + 2] = 2.0 + b; // A(0,1)
+        A_host[b * stride_a + 3] = 4.0 + b; // A(1,1)
+        
+        // Matrix B (column-major)
+        B_host[b * stride_b + 0] = 2.0; // B(0,0)
+        B_host[b * stride_b + 1] = 1.0; // B(1,0)
+        B_host[b * stride_b + 2] = 0.0; // B(0,1)
+        B_host[b * stride_b + 3] = 2.0; // B(1,1)
+        
+        // Expected C = A * B (manually calculated, column-major)
+        // C(0,0) = A(0,0)*B(0,0) + A(0,1)*B(1,0) = (1+b)*2 + (2+b)*1 = 4+3b
+        // C(1,0) = A(1,0)*B(0,0) + A(1,1)*B(1,0) = (3+b)*2 + (4+b)*1 = 10+3b
+        // C(0,1) = A(0,0)*B(0,1) + A(0,1)*B(1,1) = (1+b)*0 + (2+b)*2 = 4+2b
+        // C(1,1) = A(1,0)*B(0,1) + A(1,1)*B(1,1) = (3+b)*0 + (4+b)*2 = 8+2b
+        C_expected[b * stride_c + 0] = 4.0 + 3.0 * b; // C(0,0)
+        C_expected[b * stride_c + 1] = 10.0 + 3.0 * b; // C(1,0)
+        C_expected[b * stride_c + 2] = 4.0 + 2.0 * b; // C(0,1)
+        C_expected[b * stride_c + 3] = 8.0 + 2.0 * b; // C(1,1)
+    }
+    
+    // Allocate device memory
+    double* A_dev = nullptr;
+    double* B_dev = nullptr;
+    double* C_dev = nullptr;
+    
+    if (hipMalloc(&A_dev, A_host.size() * sizeof(double)) != hipSuccess ||
+        hipMalloc(&B_dev, B_host.size() * sizeof(double)) != hipSuccess ||
+        hipMalloc(&C_dev, C_host.size() * sizeof(double)) != hipSuccess) {
+        std::cout << "dGemmBatchedEx: Memory allocation failed" << std::endl;
+        return false;
+    }
+    
+    // Copy to device
+    hipMemcpy(A_dev, A_host.data(), A_host.size() * sizeof(double), hipMemcpyHostToDevice);
+    hipMemcpy(B_dev, B_host.data(), B_host.size() * sizeof(double), hipMemcpyHostToDevice);
+    hipMemcpy(C_dev, C_host.data(), C_host.size() * sizeof(double), hipMemcpyHostToDevice);
+    
+    // Execute batch GEMM
+    H4I::MKLShim::dGemmBatchedEx(context, 
+                                 H4I::MKLShim::ONEMKL_TRANSPOSE_NONTRANS, 
+                                 H4I::MKLShim::ONEMKL_TRANSPOSE_NONTRANS,
+                                 m, n, k, alpha,
+                                 A_dev, H4I::MKLShim::ONEMKL_R_64F, lda, stride_a,
+                                 B_dev, H4I::MKLShim::ONEMKL_R_64F, ldb, stride_b, 
+                                 beta, C_dev, H4I::MKLShim::ONEMKL_R_64F, ldc, stride_c, 
+                                 batch_count);
+    
+    hipDeviceSynchronize();
+    
+    // Copy result back
+    hipMemcpy(C_host.data(), C_dev, C_host.size() * sizeof(double), hipMemcpyDeviceToHost);
+    
+    // Compare with expected results
+    bool passed = true;
+    const double tolerance = 1e-12;
+    
+    for (size_t i = 0; i < C_host.size(); ++i) {
+        if (std::abs(C_host[i] - C_expected[i]) > tolerance) {
+            std::cout << "dGemmBatchedEx: Mismatch at index " << i << ": got " << C_host[i] 
+                      << ", expected " << C_expected[i] << std::endl;
+            passed = false;
+        }
+    }
+    
+    // Cleanup
+    if (A_dev) hipFree(A_dev);
+    if (B_dev) hipFree(B_dev);
+    if (C_dev) hipFree(C_dev);
+    
+    if (passed) {
+        std::cout << "dGemmBatchedEx correctness: PASSED" << std::endl;
+    } else {
+        std::cout << "dGemmBatchedEx correctness: FAILED" << std::endl;
+    }
+    
+    return passed;
+}
+
+// Test cGemmBatchedEx correctness  
+bool testCGemmBatchedExCorrectness(H4I::MKLShim::Context* context) {
+    std::cout << "Testing cGemmBatchedEx correctness..." << std::endl;
+    
+    const int64_t m = 2, n = 2, k = 2;
+    const int64_t lda = m, ldb = k, ldc = m;
+    const int64_t batch_count = 2;
+    const float _Complex alpha = 1.0f + 0.0fi, beta = 0.0f + 0.0fi;
+    
+    // Calculate strides
+    const int64_t stride_a = lda * k;
+    const int64_t stride_b = ldb * n;
+    const int64_t stride_c = ldc * n;
+    
+    // Create test data
+    std::vector<float _Complex> A_host(batch_count * stride_a);
+    std::vector<float _Complex> B_host(batch_count * stride_b);
+    std::vector<float _Complex> C_host(batch_count * stride_c, 0.0f + 0.0fi);
+    std::vector<float _Complex> C_expected(batch_count * stride_c);
+    
+    // Initialize test matrices
+    // Batch 0: A = [[1+i, 2], [3, 4+i]], B = [[1, 2+i], [3+i, 4]]
+    A_host[0] = 1.0f + 1.0f * I; A_host[1] = 3.0f + 0.0f * I;
+    A_host[2] = 2.0f + 0.0f * I; A_host[3] = 4.0f + 1.0f * I;
+    B_host[0] = 1.0f + 0.0f * I; B_host[1] = 3.0f + 1.0f * I;
+    B_host[2] = 2.0f + 1.0f * I; B_host[3] = 4.0f + 0.0f * I;
+    
+    // Batch 1: A = [[2+i, 1], [4, 3+i]], B = [[2, 1+i], [4+i, 3]]
+    A_host[4] = 2.0f + 1.0f * I; A_host[5] = 4.0f + 0.0f * I;
+    A_host[6] = 1.0f + 0.0f * I; A_host[7] = 3.0f + 1.0f * I;
+    B_host[4] = 2.0f + 0.0f * I; B_host[5] = 4.0f + 1.0f * I;
+    B_host[6] = 1.0f + 1.0f * I; B_host[7] = 3.0f + 0.0f * I;
+    
+    // Calculate expected results manually for C = A * B
+    // Batch 0: Expected results
+    C_expected[0] = (1.0f + 1.0f * I) * (1.0f + 0.0f * I) + (2.0f + 0.0f * I) * (3.0f + 1.0f * I); // C[0,0]
+    C_expected[1] = (3.0f + 0.0f * I) * (1.0f + 0.0f * I) + (4.0f + 1.0f * I) * (3.0f + 1.0f * I); // C[1,0]
+    C_expected[2] = (1.0f + 1.0f * I) * (2.0f + 1.0f * I) + (2.0f + 0.0f * I) * (4.0f + 0.0f * I); // C[0,1]
+    C_expected[3] = (3.0f + 0.0f * I) * (2.0f + 1.0f * I) + (4.0f + 1.0f * I) * (4.0f + 0.0f * I); // C[1,1]
+    
+    // Batch 1: Expected results
+    C_expected[4] = (2.0f + 1.0f * I) * (2.0f + 0.0f * I) + (1.0f + 0.0f * I) * (4.0f + 1.0f * I); // C[0,0]
+    C_expected[5] = (4.0f + 0.0f * I) * (2.0f + 0.0f * I) + (3.0f + 1.0f * I) * (4.0f + 1.0f * I); // C[1,0]
+    C_expected[6] = (2.0f + 1.0f * I) * (1.0f + 1.0f * I) + (1.0f + 0.0f * I) * (3.0f + 0.0f * I); // C[0,1]
+    C_expected[7] = (4.0f + 0.0f * I) * (1.0f + 1.0f * I) + (3.0f + 1.0f * I) * (3.0f + 0.0f * I); // C[1,1]
+    
+    // Allocate device memory
+    float _Complex *A_dev, *B_dev, *C_dev;
+    hipMalloc(&A_dev, sizeof(float _Complex) * batch_count * stride_a);
+    hipMalloc(&B_dev, sizeof(float _Complex) * batch_count * stride_b);
+    hipMalloc(&C_dev, sizeof(float _Complex) * batch_count * stride_c);
+    
+    // Copy data to device
+    hipMemcpy(A_dev, A_host.data(), sizeof(float _Complex) * batch_count * stride_a, hipMemcpyHostToDevice);
+    hipMemcpy(B_dev, B_host.data(), sizeof(float _Complex) * batch_count * stride_b, hipMemcpyHostToDevice);
+    hipMemcpy(C_dev, C_host.data(), sizeof(float _Complex) * batch_count * stride_c, hipMemcpyHostToDevice);
+    
+    // Execute cGemmBatchedEx
+    H4I::MKLShim::cGemmBatchedEx(context, H4I::MKLShim::ONEMKL_TRANSPOSE_NONTRANS, H4I::MKLShim::ONEMKL_TRANSPOSE_NONTRANS,
+                                 m, n, k, alpha,
+                                 A_dev, H4I::MKLShim::ONEMKL_C_32F, lda, stride_a,
+                                 B_dev, H4I::MKLShim::ONEMKL_C_32F, ldb, stride_b, beta,
+                                 C_dev, H4I::MKLShim::ONEMKL_C_32F, ldc, stride_c, batch_count);
+    
+    hipDeviceSynchronize();
+    
+    // Copy results back to host
+    hipMemcpy(C_host.data(), C_dev, sizeof(float _Complex) * batch_count * stride_c, hipMemcpyDeviceToHost);
+    
+    // Verify results
+    bool passed = true;
+    const float tolerance = 1e-5f;
+    for (int64_t i = 0; i < batch_count * stride_c; i++) {
+        float real_diff = fabsf(crealf(C_host[i]) - crealf(C_expected[i]));
+        float imag_diff = fabsf(cimagf(C_host[i]) - cimagf(C_expected[i]));
+        if (real_diff > tolerance || imag_diff > tolerance) {
+            std::cout << "Mismatch at index " << i << ": got (" << crealf(C_host[i]) << "," << cimagf(C_host[i]) 
+                      << "), expected (" << crealf(C_expected[i]) << "," << cimagf(C_expected[i]) << ")" << std::endl;
+            passed = false;
+        }
+    }
+    
+    // Cleanup
+    hipFree(A_dev);
+    hipFree(B_dev);
+    hipFree(C_dev);
+    
+    std::cout << "cGemmBatchedEx test: " << (passed ? "PASSED" : "FAILED") << std::endl;
+    return passed;
+}
+
+// Test zGemmBatchedEx correctness  
+bool testZGemmBatchedExCorrectness(H4I::MKLShim::Context* context) {
+    std::cout << "Testing zGemmBatchedEx correctness..." << std::endl;
+    
+    const int64_t m = 2, n = 2, k = 2;
+    const int64_t lda = m, ldb = k, ldc = m;
+    const int64_t batch_count = 2;
+    const double _Complex alpha = 1.0 + 0.0 * I, beta = 0.0 + 0.0 * I;
+    
+    // Calculate strides
+    const int64_t stride_a = lda * k;
+    const int64_t stride_b = ldb * n;
+    const int64_t stride_c = ldc * n;
+    
+    // Create test data
+    std::vector<double _Complex> A_host(batch_count * stride_a);
+    std::vector<double _Complex> B_host(batch_count * stride_b);
+    std::vector<double _Complex> C_host(batch_count * stride_c, 0.0 + 0.0 * I);
+    std::vector<double _Complex> C_expected(batch_count * stride_c);
+    
+    // Initialize with simple values for manual verification
+    for (int batch = 0; batch < batch_count; batch++) {
+        for (int i = 0; i < stride_a; i++) {
+            A_host[batch * stride_a + i] = (batch + 1.0) + (i + 1.0) * I;
+        }
+        for (int i = 0; i < stride_b; i++) {
+            B_host[batch * stride_b + i] = (batch + 2.0) + (i + 2.0) * I;
+        }
+    }
+    
+    // Calculate expected results manually
+    // For 2x2 matrices: C = A * B
+    for (int batch = 0; batch < batch_count; batch++) {
+        const double _Complex* A = &A_host[batch * stride_a];
+        const double _Complex* B = &B_host[batch * stride_b];
+        double _Complex* C = &C_expected[batch * stride_c];
+        
+        // Manual matrix multiplication for 2x2 case
+        C[0] = A[0] * B[0] + A[2] * B[1];  // C[0,0]
+        C[1] = A[1] * B[0] + A[3] * B[1];  // C[1,0]
+        C[2] = A[0] * B[2] + A[2] * B[3];  // C[0,1]
+        C[3] = A[1] * B[2] + A[3] * B[3];  // C[1,1]
+    }
+    
+    // Allocate device memory
+    void *A_dev, *B_dev, *C_dev;
+    hipMalloc(&A_dev, batch_count * stride_a * sizeof(double _Complex));
+    hipMalloc(&B_dev, batch_count * stride_b * sizeof(double _Complex));
+    hipMalloc(&C_dev, batch_count * stride_c * sizeof(double _Complex));
+    
+    // Copy to device
+    hipMemcpy(A_dev, A_host.data(), batch_count * stride_a * sizeof(double _Complex), hipMemcpyHostToDevice);
+    hipMemcpy(B_dev, B_host.data(), batch_count * stride_b * sizeof(double _Complex), hipMemcpyHostToDevice);
+    hipMemcpy(C_dev, C_host.data(), batch_count * stride_c * sizeof(double _Complex), hipMemcpyHostToDevice);
+    
+    // Execute zGemmBatchedEx
+    H4I::MKLShim::zGemmBatchedEx(context, H4I::MKLShim::ONEMKL_TRANSPOSE_NONTRANS, H4I::MKLShim::ONEMKL_TRANSPOSE_NONTRANS,
+                                 m, n, k, alpha,
+                                 A_dev, H4I::MKLShim::ONEMKL_C_64F, lda, stride_a,
+                                 B_dev, H4I::MKLShim::ONEMKL_C_64F, ldb, stride_b, beta,
+                                 C_dev, H4I::MKLShim::ONEMKL_C_64F, ldc, stride_c, batch_count);
+    
+    hipDeviceSynchronize();
+    
+    // Copy result back
+    std::vector<double _Complex> C_result(batch_count * stride_c);
+    hipMemcpy(C_result.data(), C_dev, batch_count * stride_c * sizeof(double _Complex), hipMemcpyDeviceToHost);
+    
+    // Cleanup
+    hipFree(A_dev);
+    hipFree(B_dev);
+    hipFree(C_dev);
+    
+    // Verify results
+    const double tolerance = 1e-12;
+    bool success = true;
+    for (int i = 0; i < batch_count * stride_c; i++) {
+        if (fabs(creal(C_result[i]) - creal(C_expected[i])) > tolerance ||
+            fabs(cimag(C_result[i]) - cimag(C_expected[i])) > tolerance) {
+            std::cout << "Mismatch at index " << i << ": expected (" << creal(C_expected[i]) << ", " << cimag(C_expected[i]) 
+                      << "), got (" << creal(C_result[i]) << ", " << cimag(C_result[i]) << ")" << std::endl;
+            success = false;
+        }
+    }
+    
+    if (success) {
+        std::cout << "zGemmBatchedEx test PASSED" << std::endl;
+    } else {
+        std::cout << "zGemmBatchedEx test FAILED" << std::endl;
+    }
+    
+    return success;
+}
+
+// Test sGemmBatched correctness  
+bool testSGemmBatchedCorrectness(H4I::MKLShim::Context* context) {
+    std::cout << "Testing sGemmBatched correctness..." << std::endl;
+    
+    const int64_t m = 2, n = 2, k = 2;
+    const int64_t lda = m, ldb = k, ldc = m;
+    const int64_t batch_count = 2;
+    const float alpha = 1.0f, beta = 0.0f;
+    
+    // Create test data
+    std::vector<float> A_host(batch_count * lda * k);
+    std::vector<float> B_host(batch_count * ldb * n);
+    std::vector<float> C_host(batch_count * ldc * n, 0.0f);
+    std::vector<float> C_expected(batch_count * ldc * n, 0.0f);
+    
+    // Initialize with simple values for manual verification
+    for (int batch = 0; batch < batch_count; batch++) {
+        for (int i = 0; i < lda * k; i++) {
+            A_host[batch * lda * k + i] = (batch + 1) * (i + 1);
+        }
+        for (int i = 0; i < ldb * n; i++) {
+            B_host[batch * ldb * n + i] = (batch + 2) * (i + 1);
+        }
+    }
+    
+    // Calculate expected results manually
+    // For 2x2 matrices: C = A * B
+    for (int batch = 0; batch < batch_count; batch++) {
+        const float* A = &A_host[batch * lda * k];
+        const float* B = &B_host[batch * ldb * n];
+        float* C = &C_expected[batch * ldc * n];
+        
+        // Manual matrix multiplication for 2x2 case
+        C[0] = A[0] * B[0] + A[2] * B[1];  // C[0,0]
+        C[1] = A[1] * B[0] + A[3] * B[1];  // C[1,0]
+        C[2] = A[0] * B[2] + A[2] * B[3];  // C[0,1]
+        C[3] = A[1] * B[2] + A[3] * B[3];  // C[1,1]
+    }
+    
+    // Allocate device memory for matrices
+    std::vector<void*> A_dev_ptrs(batch_count), B_dev_ptrs(batch_count), C_dev_ptrs(batch_count);
+    for (int i = 0; i < batch_count; i++) {
+        hipMalloc(&A_dev_ptrs[i], lda * k * sizeof(float));
+        hipMalloc(&B_dev_ptrs[i], ldb * n * sizeof(float));
+        hipMalloc(&C_dev_ptrs[i], ldc * n * sizeof(float));
+        
+        hipMemcpy(A_dev_ptrs[i], &A_host[i * lda * k], lda * k * sizeof(float), hipMemcpyHostToDevice);
+        hipMemcpy(B_dev_ptrs[i], &B_host[i * ldb * n], ldb * n * sizeof(float), hipMemcpyHostToDevice);
+        hipMemcpy(C_dev_ptrs[i], &C_host[i * ldc * n], ldc * n * sizeof(float), hipMemcpyHostToDevice);
+    }
+    
+    // Allocate device memory for pointer arrays
+    void **A_dev_ptr_array, **B_dev_ptr_array, **C_dev_ptr_array;
+    hipMalloc(&A_dev_ptr_array, batch_count * sizeof(void*));
+    hipMalloc(&B_dev_ptr_array, batch_count * sizeof(void*));
+    hipMalloc(&C_dev_ptr_array, batch_count * sizeof(void*));
+    
+    // Copy pointer arrays to device
+    hipMemcpy(A_dev_ptr_array, A_dev_ptrs.data(), batch_count * sizeof(void*), hipMemcpyHostToDevice);
+    hipMemcpy(B_dev_ptr_array, B_dev_ptrs.data(), batch_count * sizeof(void*), hipMemcpyHostToDevice);
+    hipMemcpy(C_dev_ptr_array, C_dev_ptrs.data(), batch_count * sizeof(void*), hipMemcpyHostToDevice);
+    
+    // Execute sGemmBatched
+    H4I::MKLShim::sGemmBatched(context, H4I::MKLShim::ONEMKL_TRANSPOSE_NONTRANS, H4I::MKLShim::ONEMKL_TRANSPOSE_NONTRANS,
+                               m, n, k, alpha,
+                               reinterpret_cast<const float* const*>(A_dev_ptr_array), lda,
+                               reinterpret_cast<const float* const*>(B_dev_ptr_array), ldb, beta,
+                               reinterpret_cast<float* const*>(C_dev_ptr_array), ldc, batch_count);
+    
+    hipDeviceSynchronize();
+    
+    // Copy results back
+    std::vector<float> C_result(batch_count * ldc * n);
+    for (int i = 0; i < batch_count; i++) {
+        hipMemcpy(&C_result[i * ldc * n], C_dev_ptrs[i], ldc * n * sizeof(float), hipMemcpyDeviceToHost);
+    }
+    
+    // Cleanup
+    for (int i = 0; i < batch_count; i++) {
+        hipFree(A_dev_ptrs[i]);
+        hipFree(B_dev_ptrs[i]);
+        hipFree(C_dev_ptrs[i]);
+    }
+    hipFree(A_dev_ptr_array);
+    hipFree(B_dev_ptr_array);
+    hipFree(C_dev_ptr_array);
+    
+    // Verify results
+    const float tolerance = 1e-5f;
+    bool success = true;
+    for (int i = 0; i < batch_count * ldc * n; i++) {
+        if (fabs(C_result[i] - C_expected[i]) > tolerance) {
+            std::cout << "Mismatch at index " << i << ": expected " << C_expected[i] 
+                      << ", got " << C_result[i] << std::endl;
+            success = false;
+        }
+    }
+    
+    if (success) {
+        std::cout << "sGemmBatched test PASSED" << std::endl;
+    } else {
+        std::cout << "sGemmBatched test FAILED" << std::endl;
+    }
+    
+    return success;
+}
+
+// Test dGemmBatched correctness  
+bool testDGemmBatchedCorrectness(H4I::MKLShim::Context* context) {
+    std::cout << "Testing dGemmBatched correctness..." << std::endl;
+    
+    const int64_t m = 2, n = 2, k = 2;
+    const int64_t lda = m, ldb = k, ldc = m;
+    const int64_t batch_count = 2;
+    const double alpha = 1.0, beta = 0.0;
+    
+    // Create test data
+    std::vector<double> A_host(batch_count * lda * k);
+    std::vector<double> B_host(batch_count * ldb * n);
+    std::vector<double> C_host(batch_count * ldc * n, 0.0);
+    std::vector<double> C_expected(batch_count * ldc * n, 0.0);
+    
+    // Initialize with simple values for manual verification
+    for (int batch = 0; batch < batch_count; batch++) {
+        for (int i = 0; i < lda * k; i++) {
+            A_host[batch * lda * k + i] = (batch + 1) * (i + 1);
+        }
+        for (int i = 0; i < ldb * n; i++) {
+            B_host[batch * ldb * n + i] = (batch + 2) * (i + 1);
+        }
+    }
+    
+    // Calculate expected results manually
+    // For 2x2 matrices: C = A * B
+    for (int batch = 0; batch < batch_count; batch++) {
+        const double* A = &A_host[batch * lda * k];
+        const double* B = &B_host[batch * ldb * n];
+        double* C = &C_expected[batch * ldc * n];
+        
+        // Manual matrix multiplication for 2x2 case
+        C[0] = A[0] * B[0] + A[2] * B[1];  // C[0,0]
+        C[1] = A[1] * B[0] + A[3] * B[1];  // C[1,0]
+        C[2] = A[0] * B[2] + A[2] * B[3];  // C[0,1]
+        C[3] = A[1] * B[2] + A[3] * B[3];  // C[1,1]
+    }
+    
+    // Allocate device memory for matrices
+    std::vector<void*> A_dev_ptrs(batch_count), B_dev_ptrs(batch_count), C_dev_ptrs(batch_count);
+    for (int i = 0; i < batch_count; i++) {
+        hipMalloc(&A_dev_ptrs[i], lda * k * sizeof(double));
+        hipMalloc(&B_dev_ptrs[i], ldb * n * sizeof(double));
+        hipMalloc(&C_dev_ptrs[i], ldc * n * sizeof(double));
+        
+        hipMemcpy(A_dev_ptrs[i], &A_host[i * lda * k], lda * k * sizeof(double), hipMemcpyHostToDevice);
+        hipMemcpy(B_dev_ptrs[i], &B_host[i * ldb * n], ldb * n * sizeof(double), hipMemcpyHostToDevice);
+        hipMemcpy(C_dev_ptrs[i], &C_host[i * ldc * n], ldc * n * sizeof(double), hipMemcpyHostToDevice);
+    }
+    
+    // Allocate device memory for pointer arrays
+    void **A_dev_ptr_array, **B_dev_ptr_array, **C_dev_ptr_array;
+    hipMalloc(&A_dev_ptr_array, batch_count * sizeof(void*));
+    hipMalloc(&B_dev_ptr_array, batch_count * sizeof(void*));
+    hipMalloc(&C_dev_ptr_array, batch_count * sizeof(void*));
+    
+    // Copy pointer arrays to device
+    hipMemcpy(A_dev_ptr_array, A_dev_ptrs.data(), batch_count * sizeof(void*), hipMemcpyHostToDevice);
+    hipMemcpy(B_dev_ptr_array, B_dev_ptrs.data(), batch_count * sizeof(void*), hipMemcpyHostToDevice);
+    hipMemcpy(C_dev_ptr_array, C_dev_ptrs.data(), batch_count * sizeof(void*), hipMemcpyHostToDevice);
+    
+    // Execute dGemmBatched
+    H4I::MKLShim::dGemmBatched(context, H4I::MKLShim::ONEMKL_TRANSPOSE_NONTRANS, H4I::MKLShim::ONEMKL_TRANSPOSE_NONTRANS,
+                               m, n, k, alpha,
+                               reinterpret_cast<const double* const*>(A_dev_ptr_array), lda,
+                               reinterpret_cast<const double* const*>(B_dev_ptr_array), ldb, beta,
+                               reinterpret_cast<double* const*>(C_dev_ptr_array), ldc, batch_count);
+    
+    hipDeviceSynchronize();
+    
+    // Copy results back
+    std::vector<double> C_result(batch_count * ldc * n);
+    for (int i = 0; i < batch_count; i++) {
+        hipMemcpy(&C_result[i * ldc * n], C_dev_ptrs[i], ldc * n * sizeof(double), hipMemcpyDeviceToHost);
+    }
+    
+    // Cleanup
+    for (int i = 0; i < batch_count; i++) {
+        hipFree(A_dev_ptrs[i]);
+        hipFree(B_dev_ptrs[i]);
+        hipFree(C_dev_ptrs[i]);
+    }
+    hipFree(A_dev_ptr_array);
+    hipFree(B_dev_ptr_array);
+    hipFree(C_dev_ptr_array);
+    
+    // Verify results
+    const double tolerance = 1e-12;
+    bool success = true;
+    for (int i = 0; i < batch_count * ldc * n; i++) {
+        if (fabs(C_result[i] - C_expected[i]) > tolerance) {
+            std::cout << "Mismatch at index " << i << ": expected " << C_expected[i] 
+                      << ", got " << C_result[i] << std::endl;
+            success = false;
+        }
+    }
+    
+    if (success) {
+        std::cout << "dGemmBatched test PASSED" << std::endl;
+    } else {
+        std::cout << "dGemmBatched test FAILED" << std::endl;
+    }
+    
+    return success;
+}
+
+// Test cGemmBatched correctness  
+bool testCGemmBatchedCorrectness(H4I::MKLShim::Context* context) {
+    std::cout << "Testing cGemmBatched correctness..." << std::endl;
+    
+    const int64_t m = 2, n = 2, k = 2;
+    const int64_t lda = m, ldb = k, ldc = m;
+    const int64_t batch_count = 2;
+    const float _Complex alpha = 1.0f + 0.0f * I, beta = 0.0f + 0.0f * I;
+    
+    // Create test data
+    std::vector<float _Complex> A_host(batch_count * lda * k);
+    std::vector<float _Complex> B_host(batch_count * ldb * n);
+    std::vector<float _Complex> C_host(batch_count * ldc * n, 0.0f + 0.0f * I);
+    std::vector<float _Complex> C_expected(batch_count * ldc * n, 0.0f + 0.0f * I);
+    
+    // Initialize with simple values for manual verification
+    for (int batch = 0; batch < batch_count; batch++) {
+        for (int i = 0; i < lda * k; i++) {
+            A_host[batch * lda * k + i] = (batch + 1.0f) + (i + 1.0f) * I;
+        }
+        for (int i = 0; i < ldb * n; i++) {
+            B_host[batch * ldb * n + i] = (batch + 2.0f) + (i + 2.0f) * I;
+        }
+    }
+    
+    // Calculate expected results manually
+    // For 2x2 matrices: C = A * B
+    for (int batch = 0; batch < batch_count; batch++) {
+        const float _Complex* A = &A_host[batch * lda * k];
+        const float _Complex* B = &B_host[batch * ldb * n];
+        float _Complex* C = &C_expected[batch * ldc * n];
+        
+        // Manual matrix multiplication for 2x2 case
+        C[0] = A[0] * B[0] + A[2] * B[1];  // C[0,0]
+        C[1] = A[1] * B[0] + A[3] * B[1];  // C[1,0]
+        C[2] = A[0] * B[2] + A[2] * B[3];  // C[0,1]
+        C[3] = A[1] * B[2] + A[3] * B[3];  // C[1,1]
+    }
+    
+    // Allocate device memory for matrices
+    std::vector<void*> A_dev_ptrs(batch_count), B_dev_ptrs(batch_count), C_dev_ptrs(batch_count);
+    for (int i = 0; i < batch_count; i++) {
+        hipMalloc(&A_dev_ptrs[i], lda * k * sizeof(float _Complex));
+        hipMalloc(&B_dev_ptrs[i], ldb * n * sizeof(float _Complex));
+        hipMalloc(&C_dev_ptrs[i], ldc * n * sizeof(float _Complex));
+        
+        hipMemcpy(A_dev_ptrs[i], &A_host[i * lda * k], lda * k * sizeof(float _Complex), hipMemcpyHostToDevice);
+        hipMemcpy(B_dev_ptrs[i], &B_host[i * ldb * n], ldb * n * sizeof(float _Complex), hipMemcpyHostToDevice);
+        hipMemcpy(C_dev_ptrs[i], &C_host[i * ldc * n], ldc * n * sizeof(float _Complex), hipMemcpyHostToDevice);
+    }
+    
+    // Allocate device memory for pointer arrays
+    void **A_dev_ptr_array, **B_dev_ptr_array, **C_dev_ptr_array;
+    hipMalloc(&A_dev_ptr_array, batch_count * sizeof(void*));
+    hipMalloc(&B_dev_ptr_array, batch_count * sizeof(void*));
+    hipMalloc(&C_dev_ptr_array, batch_count * sizeof(void*));
+    
+    // Copy pointer arrays to device
+    hipMemcpy(A_dev_ptr_array, A_dev_ptrs.data(), batch_count * sizeof(void*), hipMemcpyHostToDevice);
+    hipMemcpy(B_dev_ptr_array, B_dev_ptrs.data(), batch_count * sizeof(void*), hipMemcpyHostToDevice);
+    hipMemcpy(C_dev_ptr_array, C_dev_ptrs.data(), batch_count * sizeof(void*), hipMemcpyHostToDevice);
+    
+    // Execute cGemmBatched
+    H4I::MKLShim::cGemmBatched(context, H4I::MKLShim::ONEMKL_TRANSPOSE_NONTRANS, H4I::MKLShim::ONEMKL_TRANSPOSE_NONTRANS,
+                               m, n, k, alpha,
+                               reinterpret_cast<const float _Complex* const*>(A_dev_ptr_array), lda,
+                               reinterpret_cast<const float _Complex* const*>(B_dev_ptr_array), ldb, beta,
+                               reinterpret_cast<float _Complex* const*>(C_dev_ptr_array), ldc, batch_count);
+    
+    hipDeviceSynchronize();
+    
+    // Copy results back
+    std::vector<float _Complex> C_result(batch_count * ldc * n);
+    for (int i = 0; i < batch_count; i++) {
+        hipMemcpy(&C_result[i * ldc * n], C_dev_ptrs[i], ldc * n * sizeof(float _Complex), hipMemcpyDeviceToHost);
+    }
+    
+    // Cleanup
+    for (int i = 0; i < batch_count; i++) {
+        hipFree(A_dev_ptrs[i]);
+        hipFree(B_dev_ptrs[i]);
+        hipFree(C_dev_ptrs[i]);
+    }
+    hipFree(A_dev_ptr_array);
+    hipFree(B_dev_ptr_array);
+    hipFree(C_dev_ptr_array);
+    
+    // Verify results
+    const float tolerance = 1e-5f;
+    bool success = true;
+    for (int i = 0; i < batch_count * ldc * n; i++) {
+        float real_diff = fabsf(crealf(C_result[i]) - crealf(C_expected[i]));
+        float imag_diff = fabsf(cimagf(C_result[i]) - cimagf(C_expected[i]));
+        if (real_diff > tolerance || imag_diff > tolerance) {
+            std::cout << "Mismatch at index " << i << ": expected (" 
+                      << crealf(C_expected[i]) << ", " << cimagf(C_expected[i]) 
+                      << "), got (" << crealf(C_result[i]) << ", " << cimagf(C_result[i]) 
+                      << ")" << std::endl;
+            success = false;
+        }
+    }
+    
+    if (success) {
+        std::cout << "cGemmBatched test PASSED" << std::endl;
+    } else {
+        std::cout << "cGemmBatched test FAILED" << std::endl;
+    }
+    
+    return success;
+}
+
+// Test zGemmBatched correctness  
+bool testZGemmBatchedCorrectness(H4I::MKLShim::Context* context) {
+    std::cout << "Testing zGemmBatched correctness..." << std::endl;
+    
+    const int64_t m = 2, n = 2, k = 2;
+    const int64_t lda = m, ldb = k, ldc = m;
+    const int64_t batch_count = 2;
+    const double _Complex alpha = 1.0 + 0.0 * I, beta = 0.0 + 0.0 * I;
+    
+    // Create test data
+    std::vector<double _Complex> A_host(batch_count * lda * k);
+    std::vector<double _Complex> B_host(batch_count * ldb * n);
+    std::vector<double _Complex> C_host(batch_count * ldc * n, 0.0 + 0.0 * I);
+    std::vector<double _Complex> C_expected(batch_count * ldc * n, 0.0 + 0.0 * I);
+    
+    // Initialize with simple values for manual verification
+    for (int batch = 0; batch < batch_count; batch++) {
+        for (int i = 0; i < lda * k; i++) {
+            A_host[batch * lda * k + i] = (batch + 1.0) + (i + 1.0) * I;
+        }
+        for (int i = 0; i < ldb * n; i++) {
+            B_host[batch * ldb * n + i] = (batch + 2.0) + (i + 2.0) * I;
+        }
+    }
+    
+    // Calculate expected results manually
+    // For 2x2 matrices: C = A * B
+    for (int batch = 0; batch < batch_count; batch++) {
+        const double _Complex* A = &A_host[batch * lda * k];
+        const double _Complex* B = &B_host[batch * ldb * n];
+        double _Complex* C = &C_expected[batch * ldc * n];
+        
+        // Manual matrix multiplication for 2x2 case
+        C[0] = A[0] * B[0] + A[2] * B[1];  // C[0,0]
+        C[1] = A[1] * B[0] + A[3] * B[1];  // C[1,0]
+        C[2] = A[0] * B[2] + A[2] * B[3];  // C[0,1]
+        C[3] = A[1] * B[2] + A[3] * B[3];  // C[1,1]
+    }
+    
+    // Allocate device memory for matrices
+    std::vector<void*> A_dev_ptrs(batch_count), B_dev_ptrs(batch_count), C_dev_ptrs(batch_count);
+    for (int i = 0; i < batch_count; i++) {
+        hipMalloc(&A_dev_ptrs[i], lda * k * sizeof(double _Complex));
+        hipMalloc(&B_dev_ptrs[i], ldb * n * sizeof(double _Complex));
+        hipMalloc(&C_dev_ptrs[i], ldc * n * sizeof(double _Complex));
+        
+        hipMemcpy(A_dev_ptrs[i], &A_host[i * lda * k], lda * k * sizeof(double _Complex), hipMemcpyHostToDevice);
+        hipMemcpy(B_dev_ptrs[i], &B_host[i * ldb * n], ldb * n * sizeof(double _Complex), hipMemcpyHostToDevice);
+        hipMemcpy(C_dev_ptrs[i], &C_host[i * ldc * n], ldc * n * sizeof(double _Complex), hipMemcpyHostToDevice);
+    }
+    
+    // Allocate device memory for pointer arrays
+    void **A_dev_ptr_array, **B_dev_ptr_array, **C_dev_ptr_array;
+    hipMalloc(&A_dev_ptr_array, batch_count * sizeof(void*));
+    hipMalloc(&B_dev_ptr_array, batch_count * sizeof(void*));
+    hipMalloc(&C_dev_ptr_array, batch_count * sizeof(void*));
+    
+    // Copy pointer arrays to device
+    hipMemcpy(A_dev_ptr_array, A_dev_ptrs.data(), batch_count * sizeof(void*), hipMemcpyHostToDevice);
+    hipMemcpy(B_dev_ptr_array, B_dev_ptrs.data(), batch_count * sizeof(void*), hipMemcpyHostToDevice);
+    hipMemcpy(C_dev_ptr_array, C_dev_ptrs.data(), batch_count * sizeof(void*), hipMemcpyHostToDevice);
+    
+    // Execute zGemmBatched
+    H4I::MKLShim::zGemmBatched(context, H4I::MKLShim::ONEMKL_TRANSPOSE_NONTRANS, H4I::MKLShim::ONEMKL_TRANSPOSE_NONTRANS,
+                               m, n, k, alpha,
+                               reinterpret_cast<const double _Complex* const*>(A_dev_ptr_array), lda,
+                               reinterpret_cast<const double _Complex* const*>(B_dev_ptr_array), ldb, beta,
+                               reinterpret_cast<double _Complex* const*>(C_dev_ptr_array), ldc, batch_count);
+    
+    hipDeviceSynchronize();
+    
+    // Copy results back
+    std::vector<double _Complex> C_result(batch_count * ldc * n);
+    for (int i = 0; i < batch_count; i++) {
+        hipMemcpy(&C_result[i * ldc * n], C_dev_ptrs[i], ldc * n * sizeof(double _Complex), hipMemcpyDeviceToHost);
+    }
+    
+    // Cleanup
+    for (int i = 0; i < batch_count; i++) {
+        hipFree(A_dev_ptrs[i]);
+        hipFree(B_dev_ptrs[i]);
+        hipFree(C_dev_ptrs[i]);
+    }
+    hipFree(A_dev_ptr_array);
+    hipFree(B_dev_ptr_array);
+    hipFree(C_dev_ptr_array);
+    
+    // Verify results
+    const double tolerance = 1e-12;
+    bool success = true;
+    for (int i = 0; i < batch_count * ldc * n; i++) {
+        double real_diff = fabs(creal(C_result[i]) - creal(C_expected[i]));
+        double imag_diff = fabs(cimag(C_result[i]) - cimag(C_expected[i]));
+        if (real_diff > tolerance || imag_diff > tolerance) {
+            std::cout << "Mismatch at index " << i << ": expected (" 
+                      << creal(C_expected[i]) << ", " << cimag(C_expected[i]) 
+                      << "), got (" << creal(C_result[i]) << ", " << cimag(C_result[i]) 
+                      << ")" << std::endl;
+            success = false;
+        }
+    }
+    
+    if (success) {
+        std::cout << "zGemmBatched test PASSED" << std::endl;
+    } else {
+        std::cout << "zGemmBatched test FAILED" << std::endl;
+    }
+    
+    return success;
+}
+
 int main() {
     std::cout << "MKLShim Batch Functions Correctness Test" << std::endl;
     std::cout << "=========================================" << std::endl;
@@ -619,6 +1345,13 @@ int main() {
     // allTestsPassed &= testSgetrfCorrectnessCPU(context);
     std::cout << "Sgetrf correctness: SKIPPED" << std::endl;
     allTestsPassed &= testSgetrfCorrectnessCPU(context);
+    allTestsPassed &= testDGemmBatchedExCorrectness(context);
+    allTestsPassed &= testCGemmBatchedExCorrectness(context);
+    allTestsPassed &= testZGemmBatchedExCorrectness(context);
+    allTestsPassed &= testSGemmBatchedCorrectness(context);
+    allTestsPassed &= testDGemmBatchedCorrectness(context);
+    allTestsPassed &= testCGemmBatchedCorrectness(context);
+    allTestsPassed &= testZGemmBatchedCorrectness(context);
     
     // Ensure all GPU operations are complete before cleanup
     std::cout << "\nSynchronizing all GPU operations..." << std::endl;
