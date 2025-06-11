@@ -80,7 +80,7 @@ namespace H4I::MKLShim
   //orgbr/ungbr
   int64_t Sorgbr_ScPadSz(Context* ctxt,onemklGen gen, int64_t m, int64_t n, int64_t k,
                               int64_t lda) {
-    ONEMKL_TRY
+    ONEMKL_TRY_RETURN(-1)
     auto size = oneapi::mkl::lapack::orgbr_scratchpad_size<float>(ctxt->queue, convert(gen), m, n, k, lda);
     return size;
     ONEMKL_CATCH_NO_FLUSH("Sorgbr_ScPadSz")
@@ -88,7 +88,7 @@ namespace H4I::MKLShim
 
   int64_t Dorgbr_ScPadSz(Context* ctxt,onemklGen gen, int64_t m, int64_t n, int64_t k,
                               int64_t lda) {
-    ONEMKL_TRY
+    ONEMKL_TRY_RETURN(-1)
     auto size = oneapi::mkl::lapack::orgbr_scratchpad_size<double>(ctxt->queue, convert(gen), m, n, k, lda);
     return size;
     ONEMKL_CATCH_NO_FLUSH("Dorgbr_ScPadSz")
@@ -109,7 +109,7 @@ namespace H4I::MKLShim
 
   int64_t Cungbr_ScPadSz(Context* ctxt,onemklGen gen, int64_t m, int64_t n, int64_t k,
                               int64_t lda) {
-    ONEMKL_TRY
+    ONEMKL_TRY_RETURN(-1)
     auto size = oneapi::mkl::lapack::ungbr_scratchpad_size<std::complex<float>>(ctxt->queue, convert(gen), m, n, k, lda);
     return size;
     ONEMKL_CATCH_NO_FLUSH("Cungbr_ScPadSz")
@@ -117,7 +117,7 @@ namespace H4I::MKLShim
 
   int64_t Zungbr_ScPadSz(Context* ctxt,onemklGen gen, int64_t m, int64_t n, int64_t k,
                               int64_t lda) {
-    ONEMKL_TRY
+    ONEMKL_TRY_RETURN(-1)
     auto size = oneapi::mkl::lapack::ungbr_scratchpad_size<std::complex<double>>(ctxt->queue, convert(gen), m, n, k, lda);
     return size;
     ONEMKL_CATCH_NO_FLUSH("Zungbr_ScPadSz")
@@ -263,28 +263,28 @@ namespace H4I::MKLShim
   // ormqr/unmqr
   int64_t Sormqr_ScPadSz(Context* ctxt, onemklSideMode side, onemklTranspose trans, int64_t m, int64_t n, int64_t k,
                     int64_t lda, int64_t ldc) {
-    ONEMKL_TRY
+    ONEMKL_TRY_RETURN(-1)
     auto size = oneapi::mkl::lapack::ormqr_scratchpad_size<float>(ctxt->queue, convert(side), convert(trans), m, n, k, lda, ldc);
     return size;
     ONEMKL_CATCH_NO_FLUSH("Sormqr_ScPadSz")
   }
   int64_t Dormqr_ScPadSz(Context* ctxt, onemklSideMode side, onemklTranspose trans, int64_t m, int64_t n, int64_t k,
                     int64_t lda, int64_t ldc) {
-    ONEMKL_TRY
+    ONEMKL_TRY_RETURN(-1)
     auto size = oneapi::mkl::lapack::ormqr_scratchpad_size<double>(ctxt->queue, convert(side), convert(trans), m, n, k, lda, ldc);
     return size;
     ONEMKL_CATCH_NO_FLUSH("Dormqr_ScPadSz")
   }
   int64_t Cunmqr_ScPadSz(Context* ctxt, onemklSideMode side, onemklTranspose trans, int64_t m, int64_t n, int64_t k,
                     int64_t lda, int64_t ldc) {
-    ONEMKL_TRY
+    ONEMKL_TRY_RETURN(-1)
     auto size = oneapi::mkl::lapack::unmqr_scratchpad_size<std::complex<float>>(ctxt->queue, convert(side), convert(trans), m, n, k, lda, ldc);
     return size;
     ONEMKL_CATCH_NO_FLUSH("Cunmqr_ScPadSz")
   }
   int64_t Zunmqr_ScPadSz(Context* ctxt, onemklSideMode side, onemklTranspose trans, int64_t m, int64_t n, int64_t k,
                     int64_t lda, int64_t ldc) {
-    ONEMKL_TRY
+    ONEMKL_TRY_RETURN(-1)
     auto size = oneapi::mkl::lapack::unmqr_scratchpad_size<std::complex<double>>(ctxt->queue, convert(side), convert(trans), m, n, k, lda, ldc);
     return size;
     ONEMKL_CATCH_NO_FLUSH("Zunmqr_ScPadSz")
@@ -325,14 +325,14 @@ namespace H4I::MKLShim
   // ormtr/unmtr
   int64_t Sormtr_ScPadSz(Context* ctxt, onemklSideMode side, onemklUplo uplo, onemklTranspose trans, int64_t m, int64_t n,
                     int64_t lda, int64_t ldc) {
-    ONEMKL_TRY
+    ONEMKL_TRY_RETURN(-1)
     auto size = oneapi::mkl::lapack::ormtr_scratchpad_size<float>(ctxt->queue, convert(side), convert(uplo), convert(trans), m, n, lda, ldc);
     return size;
     ONEMKL_CATCH_NO_FLUSH("Sormtr_ScPadSz")
   }
   int64_t Dormtr_ScPadSz(Context* ctxt, onemklSideMode side, onemklUplo uplo, onemklTranspose trans, int64_t m, int64_t n,
                     int64_t lda, int64_t ldc) {
-    ONEMKL_TRY
+    ONEMKL_TRY_RETURN(-1)
     auto size = oneapi::mkl::lapack::ormtr_scratchpad_size<double>(ctxt->queue, convert(side), convert(uplo), convert(trans), m, n, lda, ldc);
     return size;
     ONEMKL_CATCH_NO_FLUSH("Dormtr_ScPadSz")
@@ -353,14 +353,14 @@ namespace H4I::MKLShim
   }
   int64_t Cunmtr_ScPadSz(Context* ctxt, onemklSideMode side, onemklUplo uplo, onemklTranspose trans, int64_t m, int64_t n,
                     int64_t lda, int64_t ldc) {
-    ONEMKL_TRY
+    ONEMKL_TRY_RETURN(-1)
     auto size = oneapi::mkl::lapack::unmtr_scratchpad_size<std::complex<float>>(ctxt->queue, convert(side), convert(uplo), convert(trans), m, n, lda, ldc);
     return size;
     ONEMKL_CATCH_NO_FLUSH("Cunmtr_ScPadSz")
   }
   int64_t Zunmtr_ScPadSz(Context* ctxt, onemklSideMode side, onemklUplo uplo, onemklTranspose trans, int64_t m, int64_t n,
                     int64_t lda, int64_t ldc) {
-    ONEMKL_TRY
+    ONEMKL_TRY_RETURN(-1)
     auto size = oneapi::mkl::lapack::unmtr_scratchpad_size<std::complex<double>>(ctxt->queue, convert(side), convert(uplo), convert(trans), m, n, lda, ldc);
     return size;
     ONEMKL_CATCH_NO_FLUSH("Zunmtr_ScPadSz")
@@ -706,28 +706,28 @@ namespace H4I::MKLShim
   //gesvd
   int64_t Sgesvd_ScPadSz(Context* ctxt, signed char jobu, signed char jobvt, int64_t m, int64_t n,
                               int64_t lda, int64_t ldu, int64_t ldvt){
-    ONEMKL_TRY
+    ONEMKL_TRY_RETURN(-1)
     auto size = oneapi::mkl::lapack::gesvd_scratchpad_size<float>(ctxt->queue, convert(jobu), convert(jobvt), m, n, lda, ldu, ldvt);
     return size;
     ONEMKL_CATCH_NO_FLUSH("Sgesvd_scratchpad")
   }
   int64_t Dgesvd_ScPadSz(Context* ctxt, signed char jobu, signed char jobvt, int64_t m, int64_t n,
                               int64_t lda, int64_t ldu, int64_t ldvt){
-    ONEMKL_TRY
+    ONEMKL_TRY_RETURN(-1)
     auto size = oneapi::mkl::lapack::gesvd_scratchpad_size<double>(ctxt->queue, convert(jobu), convert(jobvt), m, n, lda, ldu, ldvt);
     return size;
     ONEMKL_CATCH_NO_FLUSH("Dgesvd_scratchpad")
   }
   int64_t Cgesvd_ScPadSz(Context* ctxt, signed char jobu, signed char jobvt, int64_t m, int64_t n,
                               int64_t lda, int64_t ldu, int64_t ldvt){
-    ONEMKL_TRY
+    ONEMKL_TRY_RETURN(-1)
     auto size = oneapi::mkl::lapack::gesvd_scratchpad_size<std::complex<float>>(ctxt->queue, convert(jobu), convert(jobvt), m, n, lda, ldu, ldvt);
     return size;
     ONEMKL_CATCH_NO_FLUSH("Cgesvd_scratchpad")
   }
   int64_t Zgesvd_ScPadSz(Context* ctxt, signed char jobu, signed char jobvt, int64_t m, int64_t n,
                               int64_t lda, int64_t ldu, int64_t ldvt){
-    ONEMKL_TRY
+    ONEMKL_TRY_RETURN(-1)
     auto size = oneapi::mkl::lapack::gesvd_scratchpad_size<std::complex<double>>(ctxt->queue, convert(jobu), convert(jobvt), m, n, lda, ldu, ldvt);
     return size;
     ONEMKL_CATCH_NO_FLUSH("Zgesvd_scratchpad")
@@ -949,21 +949,25 @@ namespace H4I::MKLShim
   int64_t Ssygvd_ScPadSz(Context* ctxt, int64_t itype, onemklJob job, onemklUplo uplo, int64_t n, int64_t lda, int64_t ldb){
     ONEMKL_TRY_RETURN(-1)
     auto size = oneapi::mkl::lapack::sygvd_scratchpad_size<float>(ctxt->queue, itype, convert(job), convert(uplo), n, lda, ldb);
+    return size;
     ONEMKL_CATCH_NO_FLUSH("Ssygvd_ScPadSz")
   }
   int64_t Dsygvd_ScPadSz(Context* ctxt, int64_t itype, onemklJob job, onemklUplo uplo, int64_t n, int64_t lda, int64_t ldb){
     ONEMKL_TRY_RETURN(-1)
     auto size = oneapi::mkl::lapack::sygvd_scratchpad_size<double>(ctxt->queue, itype, convert(job), convert(uplo), n, lda, ldb);
+    return size;
     ONEMKL_CATCH_NO_FLUSH("Dsygvd_ScPadSz")
   }
   int64_t Chegvd_ScPadSz(Context* ctxt, int64_t itype, onemklJob job, onemklUplo uplo, int64_t n, int64_t lda, int64_t ldb){
     ONEMKL_TRY_RETURN(-1)
     auto size = oneapi::mkl::lapack::hegvd_scratchpad_size<std::complex<float>>(ctxt->queue, itype, convert(job), convert(uplo), n, lda, ldb);
+    return size;
     ONEMKL_CATCH_NO_FLUSH("Chegvd_ScPadSz")
   }
   int64_t Zhegvd_ScPadSz(Context* ctxt, int64_t itype, onemklJob job, onemklUplo uplo, int64_t n, int64_t lda, int64_t ldb){
     ONEMKL_TRY_RETURN(-1)
     auto size = oneapi::mkl::lapack::hegvd_scratchpad_size<std::complex<double>>(ctxt->queue, itype, convert(job), convert(uplo), n, lda, ldb);
+    return size;
     ONEMKL_CATCH_NO_FLUSH("Zhegvd_ScPadSz")
   }
   void Ssygvd(Context* ctxt, int64_t itype, onemklJob job, onemklUplo uplo, int64_t n, float* A, int64_t lda, float* B, int64_t ldb, float* W,
@@ -1152,7 +1156,7 @@ namespace H4I::MKLShim
   // getrs_batch
   int64_t Sgetrs_batch_ScPadSz(Context* ctxt, int64_t group_count, onemklTranspose* trans, int64_t* n, int64_t* nrhs,
                                 int64_t* lda, int64_t* ldb, int64_t* group_sizes){
-    ONEMKL_TRY
+    ONEMKL_TRY_RETURN(-1)
     std::vector<oneapi::mkl::transpose> trans_vec(group_count);
     for(int64_t i = 0; i < group_count; ++i) {
       trans_vec[i] = convert(trans[i]);
@@ -1165,7 +1169,7 @@ namespace H4I::MKLShim
 
   int64_t Dgetrs_batch_ScPadSz(Context* ctxt, int64_t group_count, onemklTranspose* trans, int64_t* n, int64_t* nrhs,
                                 int64_t* lda, int64_t* ldb, int64_t* group_sizes){
-    ONEMKL_TRY
+    ONEMKL_TRY_RETURN(-1)
     std::vector<oneapi::mkl::transpose> trans_vec(group_count);
     for(int64_t i = 0; i < group_count; ++i) {
       trans_vec[i] = convert(trans[i]);
@@ -1178,7 +1182,7 @@ namespace H4I::MKLShim
 
   int64_t Cgetrs_batch_ScPadSz(Context* ctxt, int64_t group_count, onemklTranspose* trans, int64_t* n, int64_t* nrhs,
                                 int64_t* lda, int64_t* ldb, int64_t* group_sizes){
-    ONEMKL_TRY
+    ONEMKL_TRY_RETURN(-1)
     std::vector<oneapi::mkl::transpose> trans_vec(group_count);
     for(int64_t i = 0; i < group_count; ++i) {
       trans_vec[i] = convert(trans[i]);
@@ -1191,7 +1195,7 @@ namespace H4I::MKLShim
 
   int64_t Zgetrs_batch_ScPadSz(Context* ctxt, int64_t group_count, onemklTranspose* trans, int64_t* n, int64_t* nrhs,
                                 int64_t* lda, int64_t* ldb, int64_t* group_sizes){
-    ONEMKL_TRY
+    ONEMKL_TRY_RETURN(-1)
     std::vector<oneapi::mkl::transpose> trans_vec(group_count);
     for(int64_t i = 0; i < group_count; ++i) {
       trans_vec[i] = convert(trans[i]);
