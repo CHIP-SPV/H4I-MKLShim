@@ -16,17 +16,17 @@
     try {                                                       \
         if (currentBackend == opencl) {                         \
             try {                                               \
-                get_native<sycl::backend::opencl>(cmd);         \
+                sycl::get_native<sycl::backend::opencl>(cmd);         \
             } catch (const sycl::exception& e) {                \
                 /* OneMKL 2024.2.2 bug: status has wrong backend */ \
-                get_native<sycl::backend::ext_oneapi_level_zero>(cmd); \
+                sycl::get_native<sycl::backend::ext_oneapi_level_zero>(cmd); \
             }                                                   \
         } else {                                                \
             try {                                               \
-                get_native<sycl::backend::ext_oneapi_level_zero>(cmd); \
+                sycl::get_native<sycl::backend::ext_oneapi_level_zero>(cmd); \
             } catch (const sycl::exception& e) {                \
                 /* Fallback to OpenCL if Level Zero fails */   \
-                get_native<sycl::backend::opencl>(cmd);         \
+                sycl::get_native<sycl::backend::opencl>(cmd);         \
             }                                                   \
         }                                                       \
     } catch (const sycl::exception& e) {                        \
