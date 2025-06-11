@@ -75,9 +75,8 @@ Context* Update(Context* ctxt, unsigned long const* handles, int numOfHandles) {
         ctxt->platform = sycl::detail::make_platform((ur_native_handle_t)hDriver, sycl::backend::ext_oneapi_level_zero);
         ctxt->device = sycl::detail::make_device((ur_native_handle_t)hDevice, sycl::backend::ext_oneapi_level_zero);
 
-        // FIX ME: only 1 device is returned from CHIP-SPV's lzHandles
-        std::vector<sycl::device> sycl_devices(1);
-        sycl_devices[0] = ctxt->device;
+        std::vector<sycl::device> sycl_devices;
+        sycl_devices = ctxt->platform.get_devices();
 	// Use the specific device from CHIP-SPV, not all system devices
         ctxt->context = sycl::detail::make_context((ur_native_handle_t)hContext, {}, sycl::backend::ext_oneapi_level_zero, false,
 						   sycl_devices);
@@ -94,9 +93,8 @@ Context* Update(Context* ctxt, unsigned long const* handles, int numOfHandles) {
         ctxt->platform = sycl::ext::oneapi::level_zero::make_platform((pi_native_handle)hDriver);
         ctxt->device = sycl::ext::oneapi::level_zero::make_device(ctxt->platform, (pi_native_handle)hDevice);
 
-        // FIX ME: only 1 device is returned from CHIP-SPV's lzHandles
-        std::vector<sycl::device> sycl_devices(1);
-        sycl_devices[0] = ctxt->device;
+        std::vector<sycl::device> sycl_devices;
+        sycl_devices = ctxt->platform.get_devices();
         ctxt->context = sycl::ext::oneapi::level_zero::make_context(sycl_devices, (pi_native_handle)hContext, 1);
         
         if (isImmCmdList) {
@@ -109,9 +107,8 @@ Context* Update(Context* ctxt, unsigned long const* handles, int numOfHandles) {
         ctxt->platform = sycl::ext::oneapi::level_zero::make_platform((pi_native_handle)hDriver);
         ctxt->device = sycl::ext::oneapi::level_zero::make_device(ctxt->platform, (pi_native_handle)hDevice);
 
-        // FIX ME: only 1 device is returned from CHIP-SPV's lzHandles
-        std::vector<sycl::device> sycl_devices(1);
-        sycl_devices[0] = ctxt->device;
+        std::vector<sycl::device> sycl_devices;
+        sycl_devices = ctxt->platform.get_devices();
         ctxt->context = sycl::ext::oneapi::level_zero::make_context(sycl_devices, (pi_native_handle)hContext, 1);
         
         ctxt->queue = sycl::ext::oneapi::level_zero::make_queue(ctxt->context, ctxt->device, (pi_native_handle)hQueue, 1);
