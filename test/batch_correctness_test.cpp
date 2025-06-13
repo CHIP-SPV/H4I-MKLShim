@@ -22,9 +22,9 @@ const double COMPLEX_DOUBLE_TOLERANCE = 1e-12;
 template<typename T>
 void createRandomMatrix(T* matrix, int64_t rows, int64_t cols, int64_t lda, int seed = 42) {
     std::srand(seed);
-    for (int64_t i = 0; i < rows; ++i) {
-        for (int64_t j = 0; j < cols; ++j) {
-            matrix[i * lda + j] = T((std::rand() % 100) / 100.0 + 0.1); // Avoid zero
+    for (int64_t j = 0; j < cols; ++j) {
+        for (int64_t i = 0; i < rows; ++i) {
+            matrix[j * lda + i] = T((std::rand() % 100) / 100.0 + 0.1); // Avoid zero
         }
     }
 }
@@ -32,11 +32,11 @@ void createRandomMatrix(T* matrix, int64_t rows, int64_t cols, int64_t lda, int 
 template<>
 void createRandomMatrix<float _Complex>(float _Complex* matrix, int64_t rows, int64_t cols, int64_t lda, int seed) {
     std::srand(seed);
-    for (int64_t i = 0; i < rows; ++i) {
-        for (int64_t j = 0; j < cols; ++j) {
+    for (int64_t j = 0; j < cols; ++j) {
+        for (int64_t i = 0; i < rows; ++i) {
             float real = (std::rand() % 100) / 100.0f + 0.1f;
             float imag = (std::rand() % 100) / 100.0f + 0.1f;
-            matrix[i * lda + j] = real + imag * 1.0fi;
+            matrix[j * lda + i] = real + imag * 1.0fi;
         }
     }
 }
@@ -44,32 +44,33 @@ void createRandomMatrix<float _Complex>(float _Complex* matrix, int64_t rows, in
 template<>
 void createRandomMatrix<double _Complex>(double _Complex* matrix, int64_t rows, int64_t cols, int64_t lda, int seed) {
     std::srand(seed);
-    for (int64_t i = 0; i < rows; ++i) {
-        for (int64_t j = 0; j < cols; ++j) {
+    for (int64_t j = 0; j < cols; ++j) {
+        for (int64_t i = 0; i < rows; ++i) {
             double real = (std::rand() % 100) / 100.0 + 0.1;
             double imag = (std::rand() % 100) / 100.0 + 0.1;
-            matrix[i * lda + j] = real + imag * 1.0i;
+            matrix[j * lda + i] = real + imag * 1.0i;
         }
     }
 }
 
 template<typename T>
 void copyMatrix(const T* src, T* dst, int64_t rows, int64_t cols, int64_t lda) {
-    for (int64_t i = 0; i < rows; ++i) {
-        for (int64_t j = 0; j < cols; ++j) {
-            dst[i * lda + j] = src[i * lda + j];
+    for (int64_t j = 0; j < cols; ++j) {
+        for (int64_t i = 0; i < rows; ++i) {
+            dst[j * lda + i] = src[j * lda + i];
         }
     }
 }
 
 template<typename T>
 bool compareMatrices(const T* A, const T* B, int64_t rows, int64_t cols, int64_t lda, double tolerance) {
-    for (int64_t i = 0; i < rows; ++i) {
-        for (int64_t j = 0; j < cols; ++j) {
-            if (std::abs(A[i * lda + j] - B[i * lda + j]) > tolerance) {
+    for (int64_t j = 0; j < cols; ++j) {
+        for (int64_t i = 0; i < rows; ++i) {
+            int idx = j * lda + i;  // Column-major indexing
+            if (std::abs(A[idx] - B[idx]) > tolerance) {
                 std::cout << "Mismatch at (" << i << "," << j << "): " 
-                         << A[i * lda + j] << " vs " << B[i * lda + j] 
-                         << " (diff: " << std::abs(A[i * lda + j] - B[i * lda + j]) << ")" << std::endl;
+                         << A[idx] << " vs " << B[idx] 
+                         << " (diff: " << std::abs(A[idx] - B[idx]) << ")" << std::endl;
                 return false;
             }
         }
@@ -81,14 +82,15 @@ bool compareMatrices(const T* A, const T* B, int64_t rows, int64_t cols, int64_t
 template<>
 bool compareMatrices<float _Complex>(const float _Complex* A, const float _Complex* B, 
                                      int64_t rows, int64_t cols, int64_t lda, double tolerance) {
-    for (int64_t i = 0; i < rows; ++i) {
-        for (int64_t j = 0; j < cols; ++j) {
-            float diff_real = std::abs(crealf(A[i * lda + j]) - crealf(B[i * lda + j]));
-            float diff_imag = std::abs(cimagf(A[i * lda + j]) - cimagf(B[i * lda + j]));
+    for (int64_t j = 0; j < cols; ++j) {
+        for (int64_t i = 0; i < rows; ++i) {
+            int idx = j * lda + i;  // Column-major indexing
+            float diff_real = std::abs(crealf(A[idx]) - crealf(B[idx]));
+            float diff_imag = std::abs(cimagf(A[idx]) - cimagf(B[idx]));
             if (diff_real > tolerance || diff_imag > tolerance) {
                 std::cout << "Complex mismatch at (" << i << "," << j << "): " 
-                         << crealf(A[i * lda + j]) << "+" << cimagf(A[i * lda + j]) << "i vs "
-                         << crealf(B[i * lda + j]) << "+" << cimagf(B[i * lda + j]) << "i" << std::endl;
+                         << crealf(A[idx]) << "+" << cimagf(A[idx]) << "i vs "
+                         << crealf(B[idx]) << "+" << cimagf(B[idx]) << "i" << std::endl;
                 return false;
             }
         }
@@ -99,14 +101,15 @@ bool compareMatrices<float _Complex>(const float _Complex* A, const float _Compl
 template<>
 bool compareMatrices<double _Complex>(const double _Complex* A, const double _Complex* B, 
                                       int64_t rows, int64_t cols, int64_t lda, double tolerance) {
-    for (int64_t i = 0; i < rows; ++i) {
-        for (int64_t j = 0; j < cols; ++j) {
-            double diff_real = std::abs(creal(A[i * lda + j]) - creal(B[i * lda + j]));
-            double diff_imag = std::abs(cimag(A[i * lda + j]) - cimag(B[i * lda + j]));
+    for (int64_t j = 0; j < cols; ++j) {
+        for (int64_t i = 0; i < rows; ++i) {
+            int idx = j * lda + i;  // Column-major indexing
+            double diff_real = std::abs(creal(A[idx]) - creal(B[idx]));
+            double diff_imag = std::abs(cimag(A[idx]) - cimag(B[idx]));
             if (diff_real > tolerance || diff_imag > tolerance) {
                 std::cout << "Complex mismatch at (" << i << "," << j << "): " 
-                         << creal(A[i * lda + j]) << "+" << cimag(A[i * lda + j]) << "i vs "
-                         << creal(B[i * lda + j]) << "+" << cimag(B[i * lda + j]) << "i" << std::endl;
+                         << creal(A[idx]) << "+" << cimag(A[idx]) << "i vs "
+                         << creal(B[idx]) << "+" << cimag(B[idx]) << "i" << std::endl;
                 return false;
             }
         }
@@ -607,15 +610,15 @@ int main() {
     
     // Run correctness tests comparing batch vs non-batch implementations
     std::cout << "\n--- Batch vs Non-Batch Comparison Tests ---" << std::endl;
-    // allTestsPassed &= testSgetrfBatchVsNonBatch(context);
-    std::cout << "Sgetrf batch vs non-batch: SKIPPED" << std::endl;
-    // allTestsPassed &= testSgetrsBatchVsNonBatch(context);
+    allTestsPassed &= testSgetrfBatchVsNonBatch(context);
+    allTestsPassed &= testSgetrsBatchVsNonBatch(context);
     allTestsPassed &= testDgetrfBatchVsNonBatch(context);
     
     // Run CPU-based verification tests  
     std::cout << "\n--- CPU Mathematical Verification Tests ---" << std::endl;
     // allTestsPassed &= testSgetrfCorrectnessCPU(context);
     std::cout << "Sgetrf correctness: SKIPPED" << std::endl;
+    allTestsPassed &= testSgetrfCorrectnessCPU(context);
     
     // Ensure all GPU operations are complete before cleanup
     std::cout << "\nSynchronizing all GPU operations..." << std::endl;
