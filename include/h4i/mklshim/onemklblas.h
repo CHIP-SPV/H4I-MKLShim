@@ -368,6 +368,96 @@ namespace H4I::MKLShim
               const void *B, onemklDatatype_t Btype, int64_t ldb, int64_t strideb, float beta,
               void *C, onemklDatatype_t Ctype, int64_t ldc, int64_t stridec, int64_t batch_count);
 
+  /** 
+   * @brief Double precision strided batch GEMM operation
+   * @param ctxt Context for the operation
+   * @param transA Transpose operation for matrix A
+   * @param transB Transpose operation for matrix B
+   * @param m Number of rows in matrix A and C
+   * @param n Number of columns in matrix B and C
+   * @param k Number of columns in matrix A and rows in matrix B
+   * @param alpha Scalar alpha
+   * @param A Input matrix A with strided batch layout
+   * @param Atype Data type of matrix A
+   * @param lda Leading dimension of matrix A
+   * @param stridea Stride between consecutive matrices in A
+   * @param B Input matrix B with strided batch layout
+   * @param Btype Data type of matrix B
+   * @param ldb Leading dimension of matrix B
+   * @param strideb Stride between consecutive matrices in B
+   * @param beta Scalar beta
+   * @param C Output matrix C with strided batch layout
+   * @param Ctype Data type of matrix C
+   * @param ldc Leading dimension of matrix C
+   * @param stridec Stride between consecutive matrices in C
+   * @param batch_count Number of matrices in the batch
+   */
+  void dGemmBatchedEx(Context* ctxt, onemklTranspose transA, onemklTranspose transB,
+              int64_t m, int64_t n, int64_t k, double alpha,
+              const void *A, onemklDatatype_t Atype, int64_t lda, int64_t stridea,
+              const void *B, onemklDatatype_t Btype, int64_t ldb, int64_t strideb, double beta,
+              void *C, onemklDatatype_t Ctype, int64_t ldc, int64_t stridec, int64_t batch_count);
+
+  /** 
+   * @brief Complex single precision strided batch GEMM operation
+   * @param ctxt Context for the operation
+   * @param transA Transpose operation for matrix A
+   * @param transB Transpose operation for matrix B
+   * @param m Number of rows in matrix A and C
+   * @param n Number of columns in matrix B and C
+   * @param k Number of columns in matrix A and rows in matrix B
+   * @param alpha Scalar alpha
+   * @param A Input matrix A with strided batch layout
+   * @param Atype Data type of matrix A
+   * @param lda Leading dimension of matrix A
+   * @param stridea Stride between consecutive matrices in A
+   * @param B Input matrix B with strided batch layout
+   * @param Btype Data type of matrix B
+   * @param ldb Leading dimension of matrix B
+   * @param strideb Stride between consecutive matrices in B
+   * @param beta Scalar beta
+   * @param C Output matrix C with strided batch layout
+   * @param Ctype Data type of matrix C
+   * @param ldc Leading dimension of matrix C
+   * @param stridec Stride between consecutive matrices in C
+   * @param batch_count Number of matrices in the batch
+   */
+  void cGemmBatchedEx(Context* ctxt, onemklTranspose transA, onemklTranspose transB,
+              int64_t m, int64_t n, int64_t k, float _Complex alpha,
+              const void *A, onemklDatatype_t Atype, int64_t lda, int64_t stridea,
+              const void *B, onemklDatatype_t Btype, int64_t ldb, int64_t strideb, float _Complex beta,
+              void *C, onemklDatatype_t Ctype, int64_t ldc, int64_t stridec, int64_t batch_count);
+
+  /** 
+   * @brief Complex double precision strided batch GEMM operation
+   * @param ctxt Context for the operation
+   * @param transA Transpose operation for matrix A
+   * @param transB Transpose operation for matrix B
+   * @param m Number of rows in matrix A and C
+   * @param n Number of columns in matrix B and C
+   * @param k Number of columns in matrix A and rows in matrix B
+   * @param alpha Scalar alpha
+   * @param A Input matrix A with strided batch layout
+   * @param Atype Data type of matrix A
+   * @param lda Leading dimension of matrix A
+   * @param stridea Stride between consecutive matrices in A
+   * @param B Input matrix B with strided batch layout
+   * @param Btype Data type of matrix B
+   * @param ldb Leading dimension of matrix B
+   * @param strideb Stride between consecutive matrices in B
+   * @param beta Scalar beta
+   * @param C Output matrix C with strided batch layout
+   * @param Ctype Data type of matrix C
+   * @param ldc Leading dimension of matrix C
+   * @param stridec Stride between consecutive matrices in C
+   * @param batch_count Number of matrices in the batch
+   */
+  void zGemmBatchedEx(Context* ctxt, onemklTranspose transA, onemklTranspose transB,
+              int64_t m, int64_t n, int64_t k, double _Complex alpha,
+              const void *A, onemklDatatype_t Atype, int64_t lda, int64_t stridea,
+              const void *B, onemklDatatype_t Btype, int64_t ldb, int64_t strideb, double _Complex beta,
+              void *C, onemklDatatype_t Ctype, int64_t ldc, int64_t stridec, int64_t batch_count);
+
   void cHerk(Context* ctxt, onemklUplo uplo, onemklTranspose trans, int64_t n, int64_t k,
                   float alpha, const float _Complex* a, int64_t lda, float beta, float _Complex* c, int64_t ldc);
   void zHerk(Context* ctxt, onemklUplo uplo, onemklTranspose trans, int64_t n, int64_t k,
@@ -450,4 +540,24 @@ namespace H4I::MKLShim
   void zGeam(Context* ctxt, onemklTranspose transA, onemklTranspose transB, int64_t m, int64_t n,
                   double _Complex alpha, const double _Complex *A, int64_t lda, double _Complex beta, const double _Complex *B, int64_t ldb,
                   double _Complex *C, int64_t ldc);
+  void sGemmBatched(Context* ctxt, onemklTranspose transA, onemklTranspose transB,
+              int64_t m, int64_t n, int64_t k, float alpha,
+              const float* const* A, int64_t lda,
+              const float* const* B, int64_t ldb, float beta,
+              float* const* C, int64_t ldc, int64_t batch_count);
+  void dGemmBatched(Context* ctxt, onemklTranspose transA, onemklTranspose transB,
+              int64_t m, int64_t n, int64_t k, double alpha,
+              const double* const* A, int64_t lda,
+              const double* const* B, int64_t ldb, double beta,
+              double* const* C, int64_t ldc, int64_t batch_count);
+  void cGemmBatched(Context* ctxt, onemklTranspose transA, onemklTranspose transB,
+              int64_t m, int64_t n, int64_t k, float _Complex alpha,
+              const float _Complex* const* A, int64_t lda,
+              const float _Complex* const* B, int64_t ldb, float _Complex beta,
+              float _Complex* const* C, int64_t ldc, int64_t batch_count);
+  void zGemmBatched(Context* ctxt, onemklTranspose transA, onemklTranspose transB,
+              int64_t m, int64_t n, int64_t k, double _Complex alpha,
+              const double _Complex* const* A, int64_t lda,
+              const double _Complex* const* B, int64_t ldb, double _Complex beta,
+              double _Complex* const* C, int64_t ldc, int64_t batch_count);
 } // namespace

@@ -1299,6 +1299,67 @@ namespace H4I::MKLShim
     ONEMKL_CATCH("SGEMMBATCHED-EX");
   }
 
+  void dGemmBatchedEx(Context* ctxt, onemklTranspose transA, onemklTranspose transB,
+              int64_t m, int64_t n, int64_t k, double alpha,
+              const void *A, onemklDatatype_t Atype, int64_t lda, int64_t stridea,
+              const void *B, onemklDatatype_t Btype, int64_t ldb, int64_t strideb, double beta,
+              void *C, onemklDatatype_t Ctype, int64_t ldc, int64_t stridec, int64_t batch_count) {
+    ONEMKL_TRY
+    sycl::event status;
+
+    auto tA = convert(transA);
+    auto tB = convert(transB);
+    if (Atype == ONEMKL_R_64F && Btype == ONEMKL_R_64F && Ctype == ONEMKL_R_64F) {
+    status = oneapi::mkl::blas::column_major::gemm_batch(ctxt->queue, tA,
+                                          tB, m, n, k, alpha, reinterpret_cast<const double *>(A),
+                                          lda, stridea, reinterpret_cast<const double *>(B), ldb, strideb, beta,
+                                          reinterpret_cast<double *>(C), ldc, stridec, batch_count);
+    }
+    ONEMKL_CATCH("DGEMMBATCHED-EX");
+  }
+
+  void cGemmBatchedEx(Context* ctxt, onemklTranspose transA, onemklTranspose transB,
+              int64_t m, int64_t n, int64_t k, float _Complex alpha,
+              const void *A, onemklDatatype_t Atype, int64_t lda, int64_t stridea,
+              const void *B, onemklDatatype_t Btype, int64_t ldb, int64_t strideb, float _Complex beta,
+              void *C, onemklDatatype_t Ctype, int64_t ldc, int64_t stridec, int64_t batch_count) {
+    ONEMKL_TRY
+    sycl::event status;
+
+    auto tA = convert(transA);
+    auto tB = convert(transB);
+    if (Atype == ONEMKL_C_32F && Btype == ONEMKL_C_32F && Ctype == ONEMKL_C_32F) {
+    status = oneapi::mkl::blas::column_major::gemm_batch(ctxt->queue, tA,
+                                          tB, m, n, k, static_cast<std::complex<float>>(alpha), 
+                                          reinterpret_cast<const std::complex<float> *>(A),
+                                          lda, stridea, reinterpret_cast<const std::complex<float> *>(B), ldb, strideb, 
+                                          static_cast<std::complex<float>>(beta),
+                                          reinterpret_cast<std::complex<float> *>(C), ldc, stridec, batch_count);
+    }
+    ONEMKL_CATCH("CGEMMBATCHED-EX");
+  }
+
+  void zGemmBatchedEx(Context* ctxt, onemklTranspose transA, onemklTranspose transB,
+              int64_t m, int64_t n, int64_t k, double _Complex alpha,
+              const void *A, onemklDatatype_t Atype, int64_t lda, int64_t stridea,
+              const void *B, onemklDatatype_t Btype, int64_t ldb, int64_t strideb, double _Complex beta,
+              void *C, onemklDatatype_t Ctype, int64_t ldc, int64_t stridec, int64_t batch_count) {
+    ONEMKL_TRY
+    sycl::event status;
+
+    auto tA = convert(transA);
+    auto tB = convert(transB);
+    if (Atype == ONEMKL_C_64F && Btype == ONEMKL_C_64F && Ctype == ONEMKL_C_64F) {
+    status = oneapi::mkl::blas::column_major::gemm_batch(ctxt->queue, tA,
+                                          tB, m, n, k, static_cast<std::complex<double>>(alpha), 
+                                          reinterpret_cast<const std::complex<double> *>(A),
+                                          lda, stridea, reinterpret_cast<const std::complex<double> *>(B), ldb, strideb, 
+                                          static_cast<std::complex<double>>(beta),
+                                          reinterpret_cast<std::complex<double> *>(C), ldc, stridec, batch_count);
+    }
+    ONEMKL_CATCH("ZGEMMBATCHED-EX");
+  }
+
   void cHerk(Context* ctxt, onemklUplo uplo, onemklTranspose trans, int64_t n, int64_t k,
                 float alpha, const float _Complex* a, int64_t lda, float beta, float _Complex* c, int64_t ldc) {
     ONEMKL_TRY
@@ -1578,4 +1639,143 @@ namespace H4I::MKLShim
     ONEMKL_CATCH("zgeam");
   }
 
+  void sGemmBatched(Context* ctxt, onemklTranspose transA, onemklTranspose transB,
+              int64_t m, int64_t n, int64_t k, float alpha,
+              const float* const* A, int64_t lda,
+              const float* const* B, int64_t ldb, float beta,
+              float* const* C, int64_t ldc, int64_t batch_count) {
+    ONEMKL_TRY
+    sycl::event status;
+
+    auto tA = convert(transA);
+    auto tB = convert(transB);
+    
+    // For pointer array version, parameters need to be arrays
+    std::vector<oneapi::mkl::transpose> transA_array(batch_count, tA);
+    std::vector<oneapi::mkl::transpose> transB_array(batch_count, tB);
+    std::vector<int64_t> m_array(batch_count, m);
+    std::vector<int64_t> n_array(batch_count, n);
+    std::vector<int64_t> k_array(batch_count, k);
+    std::vector<float> alpha_array(batch_count, alpha);
+    std::vector<int64_t> lda_array(batch_count, lda);
+    std::vector<int64_t> ldb_array(batch_count, ldb);
+    std::vector<float> beta_array(batch_count, beta);
+    std::vector<int64_t> ldc_array(batch_count, ldc);
+
+    status = oneapi::mkl::blas::column_major::gemm_batch(ctxt->queue, 
+                                          transA_array.data(), transB_array.data(),
+                                          m_array.data(), n_array.data(), k_array.data(),
+                                          alpha_array.data(), const_cast<const float**>(A), lda_array.data(),
+                                          const_cast<const float**>(B), ldb_array.data(), beta_array.data(), const_cast<float**>(C),
+                                          ldc_array.data(), 1, &batch_count, {});
+    status.wait();
+    ONEMKL_CATCH("SGEMMBATCHED")
+  }
+
+  void dGemmBatched(Context* ctxt, onemklTranspose transA, onemklTranspose transB,
+              int64_t m, int64_t n, int64_t k, double alpha,
+              const double* const* A, int64_t lda,
+              const double* const* B, int64_t ldb, double beta,
+              double* const* C, int64_t ldc, int64_t batch_count) {
+    ONEMKL_TRY
+    sycl::event status;
+
+    auto tA = convert(transA);
+    auto tB = convert(transB);
+    
+    // For pointer array version, parameters need to be arrays
+    std::vector<oneapi::mkl::transpose> transA_array(batch_count, tA);
+    std::vector<oneapi::mkl::transpose> transB_array(batch_count, tB);
+    std::vector<int64_t> m_array(batch_count, m);
+    std::vector<int64_t> n_array(batch_count, n);
+    std::vector<int64_t> k_array(batch_count, k);
+    std::vector<double> alpha_array(batch_count, alpha);
+    std::vector<int64_t> lda_array(batch_count, lda);
+    std::vector<int64_t> ldb_array(batch_count, ldb);
+    std::vector<double> beta_array(batch_count, beta);
+    std::vector<int64_t> ldc_array(batch_count, ldc);
+
+    status = oneapi::mkl::blas::column_major::gemm_batch(ctxt->queue, 
+                                          transA_array.data(), transB_array.data(),
+                                          m_array.data(), n_array.data(), k_array.data(),
+                                          alpha_array.data(), const_cast<const double**>(A), lda_array.data(),
+                                          const_cast<const double**>(B), ldb_array.data(), beta_array.data(), const_cast<double**>(C),
+                                          ldc_array.data(), 1, &batch_count, {});
+    status.wait();
+    ONEMKL_CATCH("DGEMMBATCHED")
+  }
+
+  void cGemmBatched(Context* ctxt, onemklTranspose transA, onemklTranspose transB,
+              int64_t m, int64_t n, int64_t k, float _Complex alpha,
+              const float _Complex* const* A, int64_t lda,
+              const float _Complex* const* B, int64_t ldb, float _Complex beta,
+              float _Complex* const* C, int64_t ldc, int64_t batch_count) {
+    ONEMKL_TRY
+    sycl::event status;
+
+    auto tA = convert(transA);
+    auto tB = convert(transB);
+    
+    // For pointer array version, parameters need to be arrays
+    std::vector<oneapi::mkl::transpose> transA_array(batch_count, tA);
+    std::vector<oneapi::mkl::transpose> transB_array(batch_count, tB);
+    std::vector<int64_t> m_array(batch_count, m);
+    std::vector<int64_t> n_array(batch_count, n);
+    std::vector<int64_t> k_array(batch_count, k);
+    std::vector<std::complex<float>> alpha_array(batch_count, static_cast<std::complex<float>>(alpha));
+    std::vector<int64_t> lda_array(batch_count, lda);
+    std::vector<int64_t> ldb_array(batch_count, ldb);
+    std::vector<std::complex<float>> beta_array(batch_count, static_cast<std::complex<float>>(beta));
+    std::vector<int64_t> ldc_array(batch_count, ldc);
+
+    status = oneapi::mkl::blas::column_major::gemm_batch(ctxt->queue, 
+                                          transA_array.data(), transB_array.data(),
+                                          m_array.data(), n_array.data(), k_array.data(),
+                                          alpha_array.data(), 
+                                          const_cast<const std::complex<float>**>(reinterpret_cast<const std::complex<float>* const*>(A)), 
+                                          lda_array.data(),
+                                          const_cast<const std::complex<float>**>(reinterpret_cast<const std::complex<float>* const*>(B)), 
+                                          ldb_array.data(), beta_array.data(),
+                                          const_cast<std::complex<float>**>(reinterpret_cast<std::complex<float>* const*>(C)),
+                                          ldc_array.data(), 1, &batch_count, {});
+    status.wait();
+    ONEMKL_CATCH("CGEMMBATCHED")
+  }
+
+  void zGemmBatched(Context* ctxt, onemklTranspose transA, onemklTranspose transB,
+              int64_t m, int64_t n, int64_t k, double _Complex alpha,
+              const double _Complex* const* A, int64_t lda,
+              const double _Complex* const* B, int64_t ldb, double _Complex beta,
+              double _Complex* const* C, int64_t ldc, int64_t batch_count) {
+    ONEMKL_TRY
+    sycl::event status;
+
+    auto tA = convert(transA);
+    auto tB = convert(transB);
+    
+    // For pointer array version, parameters need to be arrays
+    std::vector<oneapi::mkl::transpose> transA_array(batch_count, tA);
+    std::vector<oneapi::mkl::transpose> transB_array(batch_count, tB);
+    std::vector<int64_t> m_array(batch_count, m);
+    std::vector<int64_t> n_array(batch_count, n);
+    std::vector<int64_t> k_array(batch_count, k);
+    std::vector<std::complex<double>> alpha_array(batch_count, static_cast<std::complex<double>>(alpha));
+    std::vector<int64_t> lda_array(batch_count, lda);
+    std::vector<int64_t> ldb_array(batch_count, ldb);
+    std::vector<std::complex<double>> beta_array(batch_count, static_cast<std::complex<double>>(beta));
+    std::vector<int64_t> ldc_array(batch_count, ldc);
+
+    status = oneapi::mkl::blas::column_major::gemm_batch(ctxt->queue, 
+                                          transA_array.data(), transB_array.data(),
+                                          m_array.data(), n_array.data(), k_array.data(),
+                                          alpha_array.data(), 
+                                          const_cast<const std::complex<double>**>(reinterpret_cast<const std::complex<double>* const*>(A)), 
+                                          lda_array.data(),
+                                          const_cast<const std::complex<double>**>(reinterpret_cast<const std::complex<double>* const*>(B)), 
+                                          ldb_array.data(), beta_array.data(),
+                                          const_cast<std::complex<double>**>(reinterpret_cast<std::complex<double>* const*>(C)),
+                                          ldc_array.data(), 1, &batch_count, {});
+    status.wait();
+    ONEMKL_CATCH("ZGEMMBATCHED")
+  }
 }// end of namespace

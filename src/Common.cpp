@@ -28,7 +28,10 @@ namespace H4I::MKLShim
         return oneapi::mkl::side::left;
       case ONEMKL_SIDE_RIGHT:
         return oneapi::mkl::side::right;
+      case ONEMKL_SIDE_BOTH:
+        return oneapi::mkl::side::left; // Default to left for BOTH case
     }
+    return oneapi::mkl::side::left; // Default return
   }
 
   oneapi::mkl::diag convert(onemklDiag val) {
@@ -38,6 +41,7 @@ namespace H4I::MKLShim
       case ONEMKL_DIAG_UNIT:
         return oneapi::mkl::diag::unit;
     }
+    return oneapi::mkl::diag::nonunit; // Default return
   }
 
   oneapi::mkl::jobsvd convert(signed char j) {
@@ -55,6 +59,7 @@ namespace H4I::MKLShim
       case ONEMKL_JOB_NOVEC: return oneapi::mkl::job::novec;
       case ONEMKL_JOB_VEC: return oneapi::mkl::job::vec;
     }
+    return oneapi::mkl::job::novec; // Default return
   }
 
   oneapi::mkl::generate convert(onemklGen g) {
@@ -62,6 +67,7 @@ namespace H4I::MKLShim
       case ONEMKL_GEN_Q: return oneapi::mkl::generate::q;
       case ONEMKL_GEN_P: return oneapi::mkl::generate::p;
     }
+    return oneapi::mkl::generate::q; // Default return
   }
 
   MKL_VERSION get_mkl_version() {
