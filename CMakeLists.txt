@@ -65,7 +65,13 @@ if(IntelSYCL_FOUND)
     # after the SYCL version, not DPC++ support.
     set(DPCPP_COMPILER ON)
 endif()
-set(MKL_THREADING sequential)
+
+# Option for configuring MKL threading mode
+# Based on Intel oneAPI MKL threading libraries: sequential, intel_thread, gnu_thread, tbb_thread, pgi_thread
+set(MKL_THREADING "sequential" CACHE STRING "MKL threading mode (sequential, intel_thread, gnu_thread, tbb_thread, pgi_thread)")
+set_property(CACHE MKL_THREADING PROPERTY STRINGS "sequential" "intel_thread" "gnu_thread" "tbb_thread" "pgi_thread")
+message(STATUS "MKL threading mode set to: ${MKL_THREADING}")
+
 find_package(MKL CONFIG REQUIRED)
 message(STATUS "Known MKL Targets: ${MKL_IMPORTED_TARGETS}")
 
