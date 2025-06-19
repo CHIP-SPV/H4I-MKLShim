@@ -34,7 +34,7 @@ An example of a build:
 
    mkdir build && cd build
    . /opt/intel/oneapi/setvars.sh
-   cmake .. -DCMAKE_CXX_COMPILER=icpx -DCMAKE_INSTALL_PREFIX=$HOME/local/stow/H4I-MKLShim
+   cmake .. -DCMAKE_INSTALL_PREFIX=$HOME/local/stow/H4I-MKLShim
    make all install
 
 
