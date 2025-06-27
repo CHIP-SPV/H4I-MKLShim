@@ -132,9 +132,13 @@ Create(unsigned long const* handles, int numOfHandles)
         return nullptr;
     }
     Context *ctxt;
+    // check if context already exists for this queue
     if (context_tbl.find(handles[QUEUE]) != context_tbl.end()) {
         ctxt = context_tbl[handles[QUEUE]];
+        // since context already exists, increment reference count
+        ctxt->addRef();
     } else {
+        // create new context (starts with ref count of 1)
         ctxt = Update(new Context(), handles, numOfHandles);
     }
 
@@ -146,13 +150,20 @@ Create(unsigned long const* handles, int numOfHandles)
 void
 Destroy(Context* ctxt)
 {
-    // remove context from the table
-    context_tbl.erase(std::find_if(context_tbl.begin(), context_tbl.end(),
-                                   [ctxt](const auto& pair) {
-                                       return pair.second == ctxt;
-                                   }));
-    // delete the context
-    delete ctxt;
+    if (!ctxt) return;
+   
+    int newRefCount = ctxt->release();
+    
+    if (newRefCount == 0) {
+        // Reference count reached zero, actually delete the context
+        // Remove context from the table
+        context_tbl.erase(std::find_if(context_tbl.begin(), context_tbl.end(),
+                                       [ctxt](const auto& pair) {
+                                           return pair.second == ctxt;
+                                       }));
+        delete ctxt;
+    }
+    // If newRefCount > 0, other references still exist, don't delete
 }
 
 } // namespace
