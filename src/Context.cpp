@@ -4,6 +4,7 @@
 #include "h4i/mklshim/mklshim.h"
 #include "h4i/mklshim/impl/Context.h"
 #include "h4i/mklshim/common.h"
+#include <mutex>
 
 // Check if UR API is available
 #if INTEL_MKL_VERSION >= 20250000
@@ -28,6 +29,8 @@ namespace H4I::MKLShim
 // Indicates current backend used
 Backend currentBackend;
 std::unordered_map<uintptr_t, Context*> context_tbl;
+// Mutex to protect access to context_tbl
+std::mutex context_tbl_mutex;
 
 Context* Update(Context* ctxt, unsigned long const* handles, int numOfHandles) {
     // Obtain the handles to the LZ constructs.
@@ -131,7 +134,12 @@ Create(unsigned long const* handles, int numOfHandles)
         std::cerr << "Error: Invalid handles\n";
         return nullptr;
     }
+    
     Context *ctxt;
+    
+    // Lock the mutex to protect access to context_tbl
+    std::lock_guard<std::mutex> lock(context_tbl_mutex);
+    
     // check if context already exists for this queue
     if (context_tbl.find(handles[QUEUE]) != context_tbl.end()) {
         ctxt = context_tbl[handles[QUEUE]];
@@ -156,6 +164,9 @@ Destroy(Context* ctxt)
     
     if (newRefCount == 0) {
         // Reference count reached zero, actually delete the context
+        // Lock the mutex to protect access to context_tbl
+        std::lock_guard<std::mutex> lock(context_tbl_mutex);
+        
         // Remove context from the table
         context_tbl.erase(std::find_if(context_tbl.begin(), context_tbl.end(),
                                        [ctxt](const auto& pair) {

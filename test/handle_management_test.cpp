@@ -1,6 +1,3 @@
-// Copyright 2021-2023 UT-Battelle
-// See LICENSE.txt in the root of the source distribution for license info.
-
 #include <h4i/mklshim/mklshim.h>
 #include <hip/hip_runtime.h>
 #include <hip/hip_interop.h>
@@ -8,6 +5,9 @@
 #include <vector>
 #include <cstdlib>
 #include <cassert>
+#include <thread>
+#include <atomic>
+#include <chrono>
 
 /**
  * Test case 1: Basic context creation and destruction
@@ -221,6 +221,89 @@ bool test_different_streams() {
     return true;
 }
 
+/**
+ * Test case 5: Thread safety test
+ * Test that multiple threads can create and destroy contexts simultaneously
+ * without causing race conditions in the reference counting
+ */
+bool test_thread_safety() {
+    std::cout << "Test 5: Testing thread safety of context reference counting..." << std::endl;
+    
+    // Get native handles for default stream
+    int nHandles;
+    hipGetBackendNativeHandles((uintptr_t)0, 0, &nHandles);
+    
+    if (nHandles <= 0) {
+        std::cerr << "Failed to get number of native handles" << std::endl;
+        return false;
+    }
+    
+    std::vector<unsigned long> handles(nHandles);
+    hipGetBackendNativeHandles((uintptr_t)NULL, handles.data(), 0);
+    
+    const int num_threads = 8;
+    const int operations_per_thread = 50;
+    std::vector<std::thread> threads;
+    std::atomic<int> success_count{0};
+    std::atomic<int> failure_count{0};
+    
+    // Function that each thread will execute
+    auto thread_worker = [&](int thread_id) {
+        try {
+            for (int i = 0; i < operations_per_thread; ++i) {
+                // Create context
+                H4I::MKLShim::Context* context = H4I::MKLShim::Create(handles.data(), nHandles);
+                if (!context) {
+                    failure_count.fetch_add(1);
+                    continue;
+                }
+                
+                // Simulate some work
+                std::this_thread::sleep_for(std::chrono::microseconds(1));
+                
+                // Destroy context
+                H4I::MKLShim::Destroy(context);
+                success_count.fetch_add(1);
+            }
+        } catch (...) {
+            failure_count.fetch_add(operations_per_thread);
+        }
+    };
+    
+    // Launch threads
+    std::cout << "  Launching " << num_threads << " threads, each doing " 
+              << operations_per_thread << " create/destroy operations..." << std::endl;
+    
+    auto start_time = std::chrono::high_resolution_clock::now();
+    
+    for (int i = 0; i < num_threads; ++i) {
+        threads.emplace_back(thread_worker, i);
+    }
+    
+    // Wait for all threads to complete
+    for (auto& t : threads) {
+        t.join();
+    }
+    
+    auto end_time = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
+    
+    std::cout << "  Completed in " << duration.count() << "ms" << std::endl;
+    std::cout << "  Successful operations: " << success_count.load() << std::endl;
+    std::cout << "  Failed operations: " << failure_count.load() << std::endl;
+    
+    // Check results
+    int expected_total = num_threads * operations_per_thread;
+    if (success_count.load() != expected_total || failure_count.load() != 0) {
+        std::cerr << "Expected " << expected_total << " successful operations, got " 
+                  << success_count.load() << " successful and " << failure_count.load() << " failed" << std::endl;
+        return false;
+    }
+    
+    std::cout << "Test 5: PASSED (thread safety verified!)" << std::endl;
+    return true;
+}
+
 int main() {
     std::cout << "Testing MKLShim Handle Management (GitHub Issue #44)" << std::endl;
     std::cout << "===================================================" << std::endl;
@@ -231,8 +314,9 @@ int main() {
         bool test2_pass = test_multiple_contexts_same_stream();
         bool test3_pass = test_reference_counting_issue();
         bool test4_pass = test_different_streams();
+        bool test5_pass = test_thread_safety();
         
-        if (test1_pass && test2_pass && test3_pass && test4_pass) {
+        if (test1_pass && test2_pass && test3_pass && test4_pass && test5_pass) {
             std::cout << "===================================================" << std::endl;
             std::cout << "All handle management tests passed successfully!" << std::endl;
             std::cout << "Note: Test 3 verifies that reference counting works correctly" << std::endl;
