@@ -1,4 +1,5 @@
 #include <h4i/mklshim/mklshim.h>
+#include <h4i/mklshim/impl/Context.h>
 #include <hip/hip_runtime.h>
 #include <hip/hip_interop.h>
 #include <iostream>
@@ -109,8 +110,34 @@ bool test_reference_counting_issue() {
     std::cout << "  Creating context 1..." << std::endl;
     H4I::MKLShim::Context* context1 = H4I::MKLShim::Create(handles.data(), nHandles);
     
+    if (!context1) {
+        std::cerr << "Failed to create context1" << std::endl;
+        return false;
+    }
+    
+    // Check initial reference count
+    int refCount1 = context1->getRefCount();
+    std::cout << "  After creating context 1, ref count: " << refCount1 << " (expected: 1)" << std::endl;
+    if (refCount1 != 1) {
+        std::cerr << "  ERROR: Expected ref count 1, got " << refCount1 << std::endl;
+        return false;
+    }
+    
     std::cout << "  Creating context 2..." << std::endl;
     H4I::MKLShim::Context* context2 = H4I::MKLShim::Create(handles.data(), nHandles);
+    
+    if (!context2) {
+        std::cerr << "Failed to create context2" << std::endl;
+        return false;
+    }
+    
+    // Check reference count after second context
+    int refCount2 = context1->getRefCount();
+    std::cout << "  After creating context 2, ref count: " << refCount2 << " (expected: 2)" << std::endl;
+    if (refCount2 != 2) {
+        std::cerr << "  ERROR: Expected ref count 2, got " << refCount2 << std::endl;
+        return false;
+    }
     
     std::cout << "  Creating context 3..." << std::endl;
     H4I::MKLShim::Context* context3 = H4I::MKLShim::Create(handles.data(), nHandles);
@@ -118,7 +145,7 @@ bool test_reference_counting_issue() {
     std::cout << "  Creating context 4..." << std::endl;
     H4I::MKLShim::Context* context4 = H4I::MKLShim::Create(handles.data(), nHandles);
     
-    if (!context1 || !context2 || !context3 || !context4) {
+    if (!context3 || !context4) {
         std::cerr << "Failed to create contexts" << std::endl;
         return false;
     }
@@ -129,15 +156,44 @@ bool test_reference_counting_issue() {
         return false;
     }
     
+    // Check reference count after all contexts created
+    int refCount4 = context1->getRefCount();
+    std::cout << "  After creating all 4 contexts, ref count: " << refCount4 << " (expected: 4)" << std::endl;
+    if (refCount4 != 4) {
+        std::cerr << "  ERROR: Expected ref count 4, got " << refCount4 << std::endl;
+        return false;
+    }
+    
     // Destroy contexts 4, 3, and 2
     std::cout << "  Destroying context 4..." << std::endl;
     H4I::MKLShim::Destroy(context4);
     
+    int refCountAfter4 = context1->getRefCount();
+    std::cout << "  After destroying context 4, ref count: " << refCountAfter4 << " (expected: 3)" << std::endl;
+    if (refCountAfter4 != 3) {
+        std::cerr << "  ERROR: Expected ref count 3, got " << refCountAfter4 << std::endl;
+        return false;
+    }
+    
     std::cout << "  Destroying context 3..." << std::endl;
     H4I::MKLShim::Destroy(context3);
     
+    int refCountAfter3 = context1->getRefCount();
+    std::cout << "  After destroying context 3, ref count: " << refCountAfter3 << " (expected: 2)" << std::endl;
+    if (refCountAfter3 != 2) {
+        std::cerr << "  ERROR: Expected ref count 2, got " << refCountAfter3 << std::endl;
+        return false;
+    }
+    
     std::cout << "  Destroying context 2..." << std::endl;
     H4I::MKLShim::Destroy(context2);
+    
+    int refCountAfter2 = context1->getRefCount();
+    std::cout << "  After destroying context 2, ref count: " << refCountAfter2 << " (expected: 1)" << std::endl;
+    if (refCountAfter2 != 1) {
+        std::cerr << "  ERROR: Expected ref count 1, got " << refCountAfter2 << std::endl;
+        return false;
+    }
     
     // At this point, context1 should still be valid with the fix
     // Let's verify by trying to get MKL version (a simple operation that uses the context)
