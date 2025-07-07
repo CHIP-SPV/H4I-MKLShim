@@ -22,6 +22,14 @@ target_include_directories(mklshim_batch_correctness_test PRIVATE
                           ${CMAKE_BINARY_DIR}/include 
                           ${CMAKE_SOURCE_DIR}/include)
 
+# Add the handle management test (GitHub issue #44 reproducer)
+add_executable(mklshim_handle_management_test handle_management_test.cpp)
+target_link_libraries(mklshim_handle_management_test PRIVATE MKLShim hip::host)
+target_include_directories(mklshim_handle_management_test PRIVATE
+                          ${CMAKE_BINARY_DIR}/include
+                          ${CMAKE_SOURCE_DIR}/include)
+target_compile_options(mklshim_handle_management_test PRIVATE -fsycl)
+
 # Add tests to CTest
 add_test(NAME h4i-mklshim_context_test COMMAND mklshim_context_test) 
 set_tests_properties(h4i-mklshim_context_test PROPERTIES 
@@ -34,3 +42,7 @@ set_tests_properties(h4i-mklshim_batch_smoke_test PROPERTIES
 add_test(NAME h4i-mklshim_batch_correctness_test COMMAND mklshim_batch_correctness_test)
 set_tests_properties(h4i-mklshim_batch_correctness_test PROPERTIES 
     PASS_REGULAR_EXPRESSION "All batch function correctness tests passed!")
+
+add_test(NAME h4i-mklshim_handle_management_test COMMAND mklshim_handle_management_test)
+set_tests_properties(h4i-mklshim_handle_management_test PROPERTIES
+    PASS_REGULAR_EXPRESSION "All handle management tests passed successfully!")
