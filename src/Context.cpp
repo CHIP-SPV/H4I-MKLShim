@@ -50,8 +50,8 @@ Context* Update(Context* ctxt, unsigned long const* handles, int numOfHandles) {
         // MKL 2025 uses UR API
         ctxt->platform = sycl::detail::make_platform((ur_native_handle_t)hPlatformId, sycl::backend::opencl);
         ctxt->device = sycl::detail::make_device((ur_native_handle_t)hDeviceId, sycl::backend::opencl);
-        ctxt->context = sycl::detail::make_context((ur_native_handle_t)hContext, {}, sycl::backend::opencl, false);
-        ctxt->queue = sycl::detail::make_queue((ur_native_handle_t)hQueue, false, ctxt->context, &ctxt->device, false, {}, {}, sycl::backend::opencl);
+        ctxt->context = sycl::detail::make_context((ur_native_handle_t)hContext, {}, sycl::backend::opencl, true);
+        ctxt->queue = sycl::detail::make_queue((ur_native_handle_t)hQueue, false, ctxt->context, &ctxt->device, true, {}, {}, sycl::backend::opencl);
 #else
         // MKL 2024 and earlier use PI API
         ctxt->platform = sycl::opencl::make_platform((pi_native_handle)hPlatformId);
@@ -86,7 +86,8 @@ Context* Update(Context* ctxt, unsigned long const* handles, int numOfHandles) {
             }
         }
         // Pass only the matched device — native context was created for one device.
-        ctxt->context = sycl::detail::make_context((ur_native_handle_t)hContext, {}, sycl::backend::ext_oneapi_level_zero, false,
+        // KeepOwnership=true: caller retains the Level Zero context/queue handles.
+        ctxt->context = sycl::detail::make_context((ur_native_handle_t)hContext, {}, sycl::backend::ext_oneapi_level_zero, true,
                                                    {ctxt->device});
         
         if (isImmCmdList) {
