@@ -1,0 +1,2 @@
+# CTest exclude patterns. Each entry links to an upstream issue.
+# Fix the test, then remove the entry.
