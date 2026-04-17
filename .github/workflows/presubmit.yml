@@ -1,0 +1,42 @@
+name: Presubmit
+
+on:
+  pull_request:
+    paths-ignore: "docs/**"
+  push:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  meatloaf-x64-intel:
+    runs-on: [self-hosted, Linux, X64]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 1
+      - name: Build
+        shell: bash
+        run: |
+          set -e
+          if [ -f "$HOME/.local/init/bash" ]; then
+            export MODULESHOME=$HOME/.local
+            source "$MODULESHOME/init/bash"
+          elif [ -f /etc/profile.d/lmod.sh ]; then
+            source /etc/profile.d/lmod.sh
+          else
+            source /etc/profile.d/modules.sh
+          fi
+          module use /space/pvelesko/modulefiles
+          module load oneapi/2025.0.4 llvm/22.0-native HIP/chipStar/main
+          module list
+          rm -rf build
+          cmake -S . -B build \
+            -DCMAKE_CXX_COMPILER="$(which icpx)" \
+            -DINTEL_COMPILER_PATH="$(which icpx)" \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+          cmake --build build -j 8
