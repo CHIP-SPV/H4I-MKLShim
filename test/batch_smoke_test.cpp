@@ -6,6 +6,7 @@
 #include <complex>
 #include <cstring>
 #include <algorithm>
+#include <string>
 #include <hip/hip_runtime.h>
 #include <hip/hip_interop.h>
 #include "h4i/mklshim/mklshim.h"
@@ -415,8 +416,23 @@ int main() {
     
     // Run smoke tests - these only check that functions don't crash
     allTestsPassed &= testSinglePrecisionBatchSmoke(context);
-    allTestsPassed &= testDoublePrecisionBatchSmoke(context);
-    allTestsPassed &= testComplexBatchSmoke(context);
+    auto skipIfNoFp64 = [](const char* name, auto fn) -> bool {
+        try {
+            return fn();
+        } catch (const std::exception& e) {
+            std::string msg(e.what());
+            if (msg.find("fp64 is not supported") != std::string::npos ||
+                msg.find("unsupported device") != std::string::npos) {
+                std::cout << name << " SKIPPED (device does not support fp64)" << std::endl;
+                return true;
+            }
+            throw;
+        }
+    };
+    allTestsPassed &= skipIfNoFp64("Double precision batch smoke",
+        [&]{ return testDoublePrecisionBatchSmoke(context); });
+    allTestsPassed &= skipIfNoFp64("Complex batch smoke",
+        [&]{ return testComplexBatchSmoke(context); });
     
     // Clean up
     H4I::MKLShim::Destroy(context);
