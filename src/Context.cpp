@@ -76,13 +76,18 @@ Context* Update(Context* ctxt, unsigned long const* handles, int numOfHandles) {
 #if HAS_UR_API
         // MKL 2025 uses UR API
         ctxt->platform = sycl::detail::make_platform((ur_native_handle_t)hDriver, sycl::backend::ext_oneapi_level_zero);
-        ctxt->device = sycl::detail::make_device((ur_native_handle_t)hDevice, sycl::backend::ext_oneapi_level_zero);
-
-        std::vector<sycl::device> sycl_devices;
-        sycl_devices = ctxt->platform.get_devices();
-	// Use the specific device from CHIP-SPV, not all system devices
+        // urDeviceCreateWithNativeHandle requires the UR adapter's device list to be populated
+        // first (via get_devices()), otherwise the native handle lookup fails with
+        // UR_RESULT_ERROR_INVALID_VALUE. Match by native handle instead of calling make_device.
+        for (auto& d : ctxt->platform.get_devices()) {
+            if (sycl::get_native<sycl::backend::ext_oneapi_level_zero>(d) == hDevice) {
+                ctxt->device = d;
+                break;
+            }
+        }
+        // Pass only the matched device — native context was created for one device.
         ctxt->context = sycl::detail::make_context((ur_native_handle_t)hContext, {}, sycl::backend::ext_oneapi_level_zero, false,
-						   sycl_devices);
+                                                   {ctxt->device});
         
         if (isImmCmdList) {
             ctxt->queue = sycl::detail::make_queue((ur_native_handle_t)hCommandList, true, ctxt->context, &ctxt->device, true, 
