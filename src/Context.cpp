@@ -76,12 +76,18 @@ Context* Update(Context* ctxt, unsigned long const* handles, int numOfHandles) {
 #if HAS_UR_API
         // MKL 2025 uses UR API
         ctxt->platform = sycl::detail::make_platform((ur_native_handle_t)hDriver, sycl::backend::ext_oneapi_level_zero);
-        ctxt->device = sycl::detail::make_device((ur_native_handle_t)hDevice, sycl::backend::ext_oneapi_level_zero);
-
-        // Use only the specific device from CHIP-SPV; passing all platform devices causes
-        // UR_RESULT_ERROR_INVALID_VALUE when the native context was created for one device.
+        // urDeviceCreateWithNativeHandle requires the UR adapter's device list to be populated
+        // first (via get_devices()), otherwise the native handle lookup fails with
+        // UR_RESULT_ERROR_INVALID_VALUE. Match by native handle instead of calling make_device.
+        for (auto& d : ctxt->platform.get_devices()) {
+            if (sycl::get_native<sycl::backend::ext_oneapi_level_zero>(d) == hDevice) {
+                ctxt->device = d;
+                break;
+            }
+        }
+        // Pass only the matched device — native context was created for one device.
         ctxt->context = sycl::detail::make_context((ur_native_handle_t)hContext, {}, sycl::backend::ext_oneapi_level_zero, false,
-						   {ctxt->device});
+                                                   {ctxt->device});
         
         if (isImmCmdList) {
             ctxt->queue = sycl::detail::make_queue((ur_native_handle_t)hCommandList, true, ctxt->context, &ctxt->device, true, 
@@ -95,8 +101,10 @@ Context* Update(Context* ctxt, unsigned long const* handles, int numOfHandles) {
         ctxt->platform = sycl::ext::oneapi::level_zero::make_platform((pi_native_handle)hDriver);
         ctxt->device = sycl::ext::oneapi::level_zero::make_device(ctxt->platform, (pi_native_handle)hDevice);
 
-        ctxt->context = sycl::ext::oneapi::level_zero::make_context({ctxt->device}, (pi_native_handle)hContext, 1);
-
+        std::vector<sycl::device> sycl_devices;
+        sycl_devices = ctxt->platform.get_devices();
+        ctxt->context = sycl::ext::oneapi::level_zero::make_context(sycl_devices, (pi_native_handle)hContext, 1);
+        
         if (isImmCmdList) {
             ctxt->queue = sycl::ext::oneapi::level_zero::make_queue(ctxt->context, ctxt->device, (pi_native_handle)hCommandList, true, 1, sycl::property::queue::in_order());
         } else {
@@ -107,8 +115,10 @@ Context* Update(Context* ctxt, unsigned long const* handles, int numOfHandles) {
         ctxt->platform = sycl::ext::oneapi::level_zero::make_platform((pi_native_handle)hDriver);
         ctxt->device = sycl::ext::oneapi::level_zero::make_device(ctxt->platform, (pi_native_handle)hDevice);
 
-        ctxt->context = sycl::ext::oneapi::level_zero::make_context({ctxt->device}, (pi_native_handle)hContext, 1);
-
+        std::vector<sycl::device> sycl_devices;
+        sycl_devices = ctxt->platform.get_devices();
+        ctxt->context = sycl::ext::oneapi::level_zero::make_context(sycl_devices, (pi_native_handle)hContext, 1);
+        
         ctxt->queue = sycl::ext::oneapi::level_zero::make_queue(ctxt->context, ctxt->device, (pi_native_handle)hQueue, 1);
 #endif
     } else {
