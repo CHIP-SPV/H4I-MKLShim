@@ -1,9 +1,2 @@
-# CTest regex patterns (one per line) for tests excluded from CI.
-# Blank lines and '#' comments are ignored.
-#
-# H4I tests use SYCL directly (oneMKL) and all fail with:
-#   sycl::exception: Native API failed. Native API returns: 4 (UR_RESULT_ERROR_INVALID_VALUE)
-# during queue/context creation in the chipStar integrated CI environment.
-# The library builds correctly; these tests need SYCL device environment investigation.
-# H4I-* repos' own CI is build-only and does not run ctest.
-.*
+# CTest exclude patterns. Each entry links to an upstream issue.
+# Fix the test, then remove the entry.
