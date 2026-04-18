@@ -8,7 +8,6 @@
 #include <algorithm>
 #include <cmath>
 #include <complex.h>
-#include <string>
 #include <hip/hip_runtime.h>
 #include <hip/hip_interop.h>
 #include "h4i/mklshim/mklshim.h"
@@ -1335,46 +1334,24 @@ int main() {
     
     bool allTestsPassed = true;
     
-    // Wrapper to skip fp64 tests on devices that lack native fp64 (e.g. Intel Arc A380).
-    auto skipIfNoFp64 = [](const char* name, auto fn) -> bool {
-        try {
-            return fn();
-        } catch (const std::exception& e) {
-            std::string msg(e.what());
-            if (msg.find("fp64 is not supported") != std::string::npos ||
-                msg.find("unsupported device") != std::string::npos) {
-                std::cout << name << " SKIPPED (device does not support fp64)" << std::endl;
-                return true;
-            }
-            throw;
-        }
-    };
-
     // Run correctness tests comparing batch vs non-batch implementations
     std::cout << "\n--- Batch vs Non-Batch Comparison Tests ---" << std::endl;
     allTestsPassed &= testSgetrfBatchVsNonBatch(context);
     allTestsPassed &= testSgetrsBatchVsNonBatch(context);
-    allTestsPassed &= skipIfNoFp64("Dgetrf batch vs non-batch",
-        [&]{ return testDgetrfBatchVsNonBatch(context); });
-
-    // Run CPU-based verification tests
+    allTestsPassed &= testDgetrfBatchVsNonBatch(context);
+    
+    // Run CPU-based verification tests  
     std::cout << "\n--- CPU Mathematical Verification Tests ---" << std::endl;
     // allTestsPassed &= testSgetrfCorrectnessCPU(context);
     std::cout << "Sgetrf correctness: SKIPPED" << std::endl;
     allTestsPassed &= testSgetrfCorrectnessCPU(context);
-    allTestsPassed &= skipIfNoFp64("DGemmBatchedEx correctness",
-        [&]{ return testDGemmBatchedExCorrectness(context); });
-    allTestsPassed &= skipIfNoFp64("CGemmBatchedEx correctness",
-        [&]{ return testCGemmBatchedExCorrectness(context); });
-    allTestsPassed &= skipIfNoFp64("ZGemmBatchedEx correctness",
-        [&]{ return testZGemmBatchedExCorrectness(context); });
+    allTestsPassed &= testDGemmBatchedExCorrectness(context);
+    allTestsPassed &= testCGemmBatchedExCorrectness(context);
+    allTestsPassed &= testZGemmBatchedExCorrectness(context);
     allTestsPassed &= testSGemmBatchedCorrectness(context);
-    allTestsPassed &= skipIfNoFp64("DGemmBatched correctness",
-        [&]{ return testDGemmBatchedCorrectness(context); });
-    allTestsPassed &= skipIfNoFp64("CGemmBatched correctness",
-        [&]{ return testCGemmBatchedCorrectness(context); });
-    allTestsPassed &= skipIfNoFp64("ZGemmBatched correctness",
-        [&]{ return testZGemmBatchedCorrectness(context); });
+    allTestsPassed &= testDGemmBatchedCorrectness(context);
+    allTestsPassed &= testCGemmBatchedCorrectness(context);
+    allTestsPassed &= testZGemmBatchedCorrectness(context);
     
     // Ensure all GPU operations are complete before cleanup
     std::cout << "\nSynchronizing all GPU operations..." << std::endl;
