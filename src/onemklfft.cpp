@@ -55,6 +55,46 @@ namespace H4I::MKLShim
           // ctxt->queue.wait();
       }
 
+      // descriptor with explicit FWD/BWD strides (for padded PlanMany)
+      fftDescriptorSR(Context* ctxt,
+                      std::vector<std::int64_t> dimensions,
+                      std::vector<std::int64_t> fwd_strides,
+                      std::vector<std::int64_t> bwd_strides)
+          : fft_plan(dimensions),
+            stored_fwd_strides(fwd_strides),
+            stored_bwd_strides(bwd_strides)
+      {
+          // Separate FWD/BWD strides imply out-of-place; set PLACEMENT accordingly
+          // so oneMKL doesn't reject strides that are inconsistent with in-place storage.
+          fft_plan.set_value(oneapi::mkl::dft::config_param::PLACEMENT,
+                             oneapi::mkl::dft::config_value::NOT_INPLACE);
+          // oneMKL REAL domain default is COMPLEX_REAL conjugate-even storage,
+          // where BWD_STRIDES must be expressed in real-element units. To pass
+          // BWD_STRIDES in complex-element units (cuFFT convention), we must
+          // switch to COMPLEX_COMPLEX storage.
+          fft_plan.set_value(oneapi::mkl::dft::config_param::CONJUGATE_EVEN_STORAGE,
+                             DFTI_COMPLEX_COMPLEX);
+          fft_plan.set_value(oneapi::mkl::dft::config_param::FWD_STRIDES, fwd_strides);
+          fft_plan.set_value(oneapi::mkl::dft::config_param::BWD_STRIDES, bwd_strides);
+          fft_plan.commit(ctxt->queue);
+          ctxt->queue.wait();
+      }
+
+      void recommit(Context* ctxt)
+      {
+          if (!stored_fwd_strides.empty() || !stored_bwd_strides.empty()) {
+              fft_plan.set_value(oneapi::mkl::dft::config_param::PLACEMENT, DFTI_NOT_INPLACE);
+              fft_plan.set_value(oneapi::mkl::dft::config_param::CONJUGATE_EVEN_STORAGE,
+                                 DFTI_COMPLEX_COMPLEX);
+          }
+          if (!stored_fwd_strides.empty())
+              fft_plan.set_value(oneapi::mkl::dft::config_param::FWD_STRIDES, stored_fwd_strides);
+          if (!stored_bwd_strides.empty())
+              fft_plan.set_value(oneapi::mkl::dft::config_param::BWD_STRIDES, stored_bwd_strides);
+          fft_plan.commit(ctxt->queue);
+          ctxt->queue.wait();
+      }
+
       // execute R2C ... is it better to do this in the struct?
       void fftR2C(Context *ctxt, float *idata)
       {
@@ -64,7 +104,9 @@ namespace H4I::MKLShim
 
       oneapi::mkl::dft::descriptor<oneapi::mkl::dft::precision::SINGLE,
                                    oneapi::mkl::dft::domain::REAL> fft_plan;
-      
+      std::vector<std::int64_t> stored_fwd_strides;
+      std::vector<std::int64_t> stored_bwd_strides;
+
       ~fftDescriptorSR() {}
   };
 
@@ -263,6 +305,17 @@ namespace H4I::MKLShim
   fftDescriptorSR* createFFTDescriptorSR(Context* ctxt, std::vector<std::int64_t> dimensions) {
      auto d = new fftDescriptorSR(ctxt, dimensions);
      return d;
+  }
+
+  fftDescriptorSR* createFFTDescriptorSR(Context* ctxt,
+                                          std::vector<std::int64_t> dimensions,
+                                          std::vector<std::int64_t> fwd_strides,
+                                          std::vector<std::int64_t> bwd_strides) {
+     return new fftDescriptorSR(ctxt, dimensions, fwd_strides, bwd_strides);
+  }
+
+  void recommitFFTDescriptorSR(Context* ctxt, fftDescriptorSR* desc) {
+     desc->recommit(ctxt);
   }
 
   fftDescriptorSC* createFFTDescriptorSC(Context* ctxt, std::vector<std::int64_t> dimensions) {

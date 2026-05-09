@@ -2,6 +2,7 @@
 // See LICENSE.txt in the root of the source distribution for license info.
 #pragma once
 #include <sycl/sycl.hpp>
+#include <level_zero/ze_api.h>
 #include <atomic>
 
 namespace H4I::MKLShim
@@ -12,7 +13,12 @@ namespace H4I::MKLShim
         sycl::device device;
         sycl::context context;
         sycl::platform platform;
-        
+
+        // chipStar's immediate L0 command list (stored for cross-queue sync).
+        // When oneMKL uses an independent SYCL queue, we must drain this list
+        // before submitting FFT work so that preceding HIP kernels are visible.
+        ze_command_list_handle_t chipstar_cmd_list = nullptr;
+
         // Reference count for manual reference counting
         std::atomic<int> ref_count;
 
