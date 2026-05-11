@@ -104,6 +104,13 @@ jobs:
           DOWNSTREAM="$GITHUB_WORKSPACE/downstream"
           rm -rf "$DOWNSTREAM" && mkdir -p "$DOWNSTREAM"
 
+          # Each downstream gets its own writable install prefix.
+          # HipBLAS/HipSOLVER fetch ROCm headers via ExternalProject and copy
+          # the LICENSE into ${CMAKE_INSTALL_PREFIX}/share/licenses during
+          # the build, which fails if the prefix is the default /usr/local.
+          # The chain also lets HipSOLVER find HipBLAS via CMAKE_PREFIX_PATH.
+          DOWNSTREAM_PREFIX_PATH="$PREFIX"
+
           build_and_test_downstream() {
             local repo="$1"
             local branch="$2"
@@ -119,16 +126,19 @@ jobs:
               cxx="$(which clang++)"
               path_flag="-DCLANG_COMPILER_PATH=$cxx"
             fi
+            local inst="$PWD/install"
             cmake -S . -B build \
               -DCMAKE_BUILD_TYPE=RelWithDebInfo \
               -DCMAKE_CXX_COMPILER="$cxx" \
               $path_flag \
-              -DCMAKE_PREFIX_PATH="$PREFIX" \
+              -DCMAKE_PREFIX_PATH="$DOWNSTREAM_PREFIX_PATH" \
+              -DCMAKE_INSTALL_PREFIX="$inst" \
               -DCMAKE_POLICY_VERSION_MINIMUM=3.5
-            cmake --build build -j 8
+            cmake --build build -j 8 --target install
             for be in opencl level0; do
               ( cd build && CHIP_BE=$be ctest --output-on-failure -j 4 )
             done
+            DOWNSTREAM_PREFIX_PATH="$inst;$DOWNSTREAM_PREFIX_PATH"
           }
 
           build_and_test_downstream H4I-HipBLAS    develop  clang
