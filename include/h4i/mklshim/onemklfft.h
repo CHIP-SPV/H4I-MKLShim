@@ -24,6 +24,13 @@ namespace H4I::MKLShim
   fftDescriptorDR* createFFTDescriptorDR(Context *ctxt, std::vector<std::int64_t> dimensions);
   fftDescriptorDC* createFFTDescriptorDC(Context *ctxt, std::vector<std::int64_t> dimensions);
 
+  // stride-aware version for PlanMany with padded embeddings (FWD=real, BWD=complex strides)
+  fftDescriptorSR* createFFTDescriptorSR(Context *ctxt, std::vector<std::int64_t> dimensions,
+                                          std::vector<std::int64_t> fwd_strides,
+                                          std::vector<std::int64_t> bwd_strides);
+
+  void recommitFFTDescriptorSR(Context *ctxt, fftDescriptorSR *desc);
+
   // destroy the fft descriptor
   void destroyFFTDescriptorSR(Context *ctxt, fftDescriptorSR *descSR);
   void destroyFFTDescriptorSC(Context *ctxt, fftDescriptorSC *descSC);

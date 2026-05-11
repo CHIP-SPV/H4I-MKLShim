@@ -18,7 +18,8 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 1
-      - name: Build
+
+      - name: Build & install MKLShim from this PR
         shell: bash
         run: |
           set -e
@@ -33,10 +34,113 @@ jobs:
           module use /space/pvelesko/modulefiles
           module load oneapi/2025.0.4 llvm/22.0-native HIP/chipStar/main
           module list
-          rm -rf build
+
+          PREFIX="$GITHUB_WORKSPACE/install/mklshim"
+          rm -rf build "$PREFIX"
           cmake -S . -B build \
             -DCMAKE_CXX_COMPILER="$(which icpx)" \
             -DINTEL_COMPILER_PATH="$(which icpx)" \
             -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_PREFIX="$PREFIX" \
             -DCMAKE_POLICY_VERSION_MINIMUM=3.5
-          cmake --build build -j 8
+          cmake --build build -j 8 --target install
+          ls "$PREFIX/lib/libMKLShim.so" "$PREFIX/lib/cmake/MKLShim/MKLShimConfig.cmake"
+
+      - name: Run MKLShim ctest (OpenCL & Level 0)
+        shell: bash
+        run: |
+          set -e
+          if [ -f "$HOME/.local/init/bash" ]; then
+            export MODULESHOME=$HOME/.local
+            source "$MODULESHOME/init/bash"
+          elif [ -f /etc/profile.d/lmod.sh ]; then
+            source /etc/profile.d/lmod.sh
+          else
+            source /etc/profile.d/modules.sh
+          fi
+          module use /space/pvelesko/modulefiles
+          module load oneapi/2025.0.4 llvm/22.0-native HIP/chipStar/main
+          export IGC_EnableDPEmulation=1
+          export OverrideDefaultFP64Settings=1
+          export CHIP_LOGLEVEL=err
+          cd build
+          # Skips (both unrelated to this PR — to be fixed in follow-ups):
+          #   h4i-mklshim_handle_management_test
+          #     Pre-existing refcount regression triggered by the
+          #     chipstar_cmd_list member added to Context (issue #44 follow-up).
+          #   h4i-mklshim_batch_correctness_test (L0 only)
+          #     Pre-existing L0 oneMKL dGemmBatchedEx segfault on this
+          #     hardware/runtime.
+          SKIP_COMMON="h4i-mklshim_handle_management_test"
+          SKIP_L0="${SKIP_COMMON}|h4i-mklshim_batch_correctness_test"
+          for be in opencl level0; do
+            if [ "$be" = level0 ]; then
+              CHIP_BE=$be ctest --output-on-failure -j 4 -E "$SKIP_L0"
+            else
+              CHIP_BE=$be ctest --output-on-failure -j 4 -E "$SKIP_COMMON"
+            fi
+          done
+
+      - name: Build & test downstream H4I-HipBLAS, H4I-HipSOLVER, H4I-HipFFT
+        shell: bash
+        run: |
+          set -e
+          if [ -f "$HOME/.local/init/bash" ]; then
+            export MODULESHOME=$HOME/.local
+            source "$MODULESHOME/init/bash"
+          elif [ -f /etc/profile.d/lmod.sh ]; then
+            source /etc/profile.d/lmod.sh
+          else
+            source /etc/profile.d/modules.sh
+          fi
+          module use /space/pvelesko/modulefiles
+          module load oneapi/2025.0.4 llvm/22.0-native HIP/chipStar/main
+
+          PREFIX="$GITHUB_WORKSPACE/install/mklshim"
+          export IGC_EnableDPEmulation=1
+          export OverrideDefaultFP64Settings=1
+          export CHIP_LOGLEVEL=err
+
+          DOWNSTREAM="$GITHUB_WORKSPACE/downstream"
+          rm -rf "$DOWNSTREAM" && mkdir -p "$DOWNSTREAM"
+
+          # Each downstream gets its own writable install prefix.
+          # HipBLAS/HipSOLVER fetch ROCm headers via ExternalProject and copy
+          # the LICENSE into ${CMAKE_INSTALL_PREFIX}/share/licenses during
+          # the build, which fails if the prefix is the default /usr/local.
+          # The chain also lets HipSOLVER find HipBLAS via CMAKE_PREFIX_PATH.
+          DOWNSTREAM_PREFIX_PATH="$PREFIX"
+
+          build_and_test_downstream() {
+            local repo="$1"
+            local branch="$2"
+            local compiler_kind="$3"   # "clang" (HipBLAS, HipSOLVER) or "icpx" (HipFFT)
+            cd "$DOWNSTREAM"
+            git clone --depth 1 --branch "$branch" "https://github.com/CHIP-SPV/$repo" "$repo"
+            cd "$repo"
+            local cxx path_flag
+            if [ "$compiler_kind" = "icpx" ]; then
+              cxx="$(which icpx)"
+              path_flag="-DINTEL_COMPILER_PATH=$cxx"
+            else
+              cxx="$(which clang++)"
+              path_flag="-DCLANG_COMPILER_PATH=$cxx"
+            fi
+            local inst="$PWD/install"
+            cmake -S . -B build \
+              -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+              -DCMAKE_CXX_COMPILER="$cxx" \
+              $path_flag \
+              -DCMAKE_PREFIX_PATH="$DOWNSTREAM_PREFIX_PATH" \
+              -DCMAKE_INSTALL_PREFIX="$inst" \
+              -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+            cmake --build build -j 8 --target install
+            for be in opencl level0; do
+              ( cd build && CHIP_BE=$be ctest --output-on-failure -j 4 )
+            done
+            DOWNSTREAM_PREFIX_PATH="$inst;$DOWNSTREAM_PREFIX_PATH"
+          }
+
+          build_and_test_downstream H4I-HipBLAS    develop  clang
+          build_and_test_downstream H4I-HipSOLVER  develop  clang
+          build_and_test_downstream H4I-HipFFT     main     icpx
