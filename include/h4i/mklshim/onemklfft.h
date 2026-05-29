@@ -31,6 +31,12 @@ namespace H4I::MKLShim
 
   void recommitFFTDescriptorSR(Context *ctxt, fftDescriptorSR *desc);
 
+  // Rebind each FFT descriptor type onto ctxt->queue (after SetStream/Update).
+  void rebindFFTDescriptorSR(Context *ctxt, fftDescriptorSR *desc);
+  void rebindFFTDescriptorSC(Context *ctxt, fftDescriptorSC *desc);
+  void rebindFFTDescriptorDR(Context *ctxt, fftDescriptorDR *desc);
+  void rebindFFTDescriptorDC(Context *ctxt, fftDescriptorDC *desc);
+
   // destroy the fft descriptor
   void destroyFFTDescriptorSR(Context *ctxt, fftDescriptorSR *descSR);
   void destroyFFTDescriptorSC(Context *ctxt, fftDescriptorSC *descSC);
