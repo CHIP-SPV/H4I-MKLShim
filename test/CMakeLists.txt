@@ -30,6 +30,13 @@ target_include_directories(mklshim_handle_management_test PRIVATE
                           ${CMAKE_SOURCE_DIR}/include)
 target_compile_options(mklshim_handle_management_test PRIVATE -fsycl)
 
+# Reproducer: 3D R2C must produce cuFFT-compatible interleaved-complex output
+add_executable(mklshim_fft_3d_cufft_layout_test fft_3d_cufft_layout_test.cpp)
+target_link_libraries(mklshim_fft_3d_cufft_layout_test PRIVATE MKLShim hip::host)
+target_include_directories(mklshim_fft_3d_cufft_layout_test PRIVATE
+                          ${CMAKE_BINARY_DIR}/include
+                          ${CMAKE_SOURCE_DIR}/include)
+
 # Add tests to CTest
 add_test(NAME h4i-mklshim_context_test COMMAND mklshim_context_test) 
 set_tests_properties(h4i-mklshim_context_test PROPERTIES 
@@ -46,3 +53,7 @@ set_tests_properties(h4i-mklshim_batch_correctness_test PROPERTIES
 add_test(NAME h4i-mklshim_handle_management_test COMMAND mklshim_handle_management_test)
 set_tests_properties(h4i-mklshim_handle_management_test PROPERTIES
     PASS_REGULAR_EXPRESSION "All handle management tests passed successfully!")
+
+add_test(NAME h4i-mklshim_fft_3d_cufft_layout_test COMMAND mklshim_fft_3d_cufft_layout_test)
+set_tests_properties(h4i-mklshim_fft_3d_cufft_layout_test PROPERTIES
+    PASS_REGULAR_EXPRESSION "All cuFFT-layout 3D R2C tests passed!")
