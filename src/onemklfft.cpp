@@ -467,17 +467,100 @@ namespace H4I::MKLShim
       }
   }
 
-  // execute the plans (D2Z/Z2D not yet implemented; placeholder no-op)
-  void fftExecD2Z(Context *ctxt, fftDescriptorDR *descDR, double *idata, double _Complex *odata) {}
-  void fftExecZ2D(Context *ctxt, fftDescriptorDR *descDR, double _Complex *idata, double *odata) {}
+  void fftExecD2Z(Context *ctxt, fftDescriptorDR *descDR, double *idata, double _Complex *odata)
+  {
+      int64_t value = 0;
+      descDR->fft_plan.get_value(oneapi::mkl::dft::config_param::PLACEMENT, &value);
+
+      if (idata == (double*)odata)
+      {
+          if (value != DFTI_INPLACE)
+          {
+              descDR->fft_plan.set_value(oneapi::mkl::dft::config_param::PLACEMENT, DFTI_INPLACE);
+              descDR->fft_plan.commit(ctxt->queue);
+              ctxt->queue.wait();
+          }
+
+          oneapi::mkl::dft::compute_forward(descDR->fft_plan, idata);
+      }
+      else
+      {
+          if (value != DFTI_NOT_INPLACE)
+          {
+              descDR->fft_plan.set_value(oneapi::mkl::dft::config_param::PLACEMENT, DFTI_NOT_INPLACE);
+              descDR->fft_plan.commit(ctxt->queue);
+              ctxt->queue.wait();
+          }
+
+          oneapi::mkl::dft::compute_forward(descDR->fft_plan, idata,
+                                            reinterpret_cast<std::complex<double> *>(odata));
+      }
+  }
+
+  void fftExecZ2D(Context *ctxt, fftDescriptorDR *descDR, double _Complex *idata, double *odata)
+  {
+      int64_t value = 0;
+      descDR->fft_plan.get_value(oneapi::mkl::dft::config_param::PLACEMENT, &value);
+
+      if ((double*)idata == odata)
+      {
+          if (value != DFTI_INPLACE)
+          {
+              descDR->fft_plan.set_value(oneapi::mkl::dft::config_param::PLACEMENT, DFTI_INPLACE);
+              descDR->fft_plan.commit(ctxt->queue);
+              ctxt->queue.wait();
+          }
+
+          oneapi::mkl::dft::compute_backward(descDR->fft_plan, odata);
+      }
+      else
+      {
+          if (value != DFTI_NOT_INPLACE)
+          {
+              descDR->fft_plan.set_value(oneapi::mkl::dft::config_param::PLACEMENT, DFTI_NOT_INPLACE);
+              descDR->fft_plan.commit(ctxt->queue);
+              ctxt->queue.wait();
+          }
+
+          oneapi::mkl::dft::compute_backward(descDR->fft_plan,
+                                             reinterpret_cast<std::complex<double> *>(idata),
+                                             odata);
+      }
+  }
 
   void fftExecZ2Zforward(Context *ctxt,
                          fftDescriptorDC *descDC,
                          double _Complex *idata,
                          double _Complex *odata)
   {
-      ctxt->queue.wait();
-      return;
+      int64_t value = 0;
+      descDC->fft_plan.get_value(oneapi::mkl::dft::config_param::PLACEMENT, &value);
+
+      if (idata == odata)
+      {
+          if (value != DFTI_INPLACE)
+          {
+              descDC->fft_plan.set_value(oneapi::mkl::dft::config_param::PLACEMENT, DFTI_INPLACE);
+              descDC->fft_plan.commit(ctxt->queue);
+              ctxt->queue.wait();
+          }
+
+          oneapi::mkl::dft::compute_forward(descDC->fft_plan,
+                                            reinterpret_cast<std::complex<double> *>(idata));
+      }
+      else
+      {
+          if (value != DFTI_NOT_INPLACE)
+          {
+              descDC->fft_plan.set_value(oneapi::mkl::dft::config_param::PLACEMENT, DFTI_NOT_INPLACE);
+              descDC->fft_plan.commit(ctxt->queue);
+              ctxt->queue.wait();
+          }
+
+          oneapi::mkl::dft::compute_forward(descDC->fft_plan,
+                                            reinterpret_cast<std::complex<double> *>(idata),
+                                            reinterpret_cast<std::complex<double> *>(odata));
+      }
   }
 
   void fftExecZ2Zbackward(Context *ctxt,
