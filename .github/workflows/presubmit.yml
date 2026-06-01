@@ -64,6 +64,10 @@ jobs:
           export OverrideDefaultFP64Settings=1
           export CHIP_LOGLEVEL=err
           cd build
+          # HIP/chipStar/main module exposes a pre-installed libMKLShim.so on
+          # LD_LIBRARY_PATH, which would override our freshly built one. Pin
+          # the just-built library first so ctest exercises THIS PR's code.
+          export LD_LIBRARY_PATH="$PWD/src:${LD_LIBRARY_PATH:-}"
           # Skips (both unrelated to this PR — to be fixed in follow-ups):
           #   h4i-mklshim_handle_management_test
           #     Pre-existing refcount regression triggered by the
@@ -100,6 +104,9 @@ jobs:
           export IGC_EnableDPEmulation=1
           export OverrideDefaultFP64Settings=1
           export CHIP_LOGLEVEL=err
+          # Pin this PR's freshly built MKLShim ahead of the one bundled with
+          # the HIP/chipStar/main module on LD_LIBRARY_PATH.
+          export LD_LIBRARY_PATH="$PREFIX/lib:${LD_LIBRARY_PATH:-}"
 
           DOWNSTREAM="$GITHUB_WORKSPACE/downstream"
           rm -rf "$DOWNSTREAM" && mkdir -p "$DOWNSTREAM"

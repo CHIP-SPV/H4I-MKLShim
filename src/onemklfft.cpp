@@ -42,9 +42,27 @@ namespace H4I::MKLShim
       // descriptor for multi-dimensional transforms
       fftDescriptorSR(Context* ctxt, std::vector<std::int64_t> dimensions) : fft_plan(dimensions)
       {
-          // commit the plan
+          // cuFFT-compatible layout: store output as N/2+1 interleaved complex
+          // values along the last dim (not oneMKL's default packed CCE format),
+          // with NOT_INPLACE placement and contiguous row-major strides.
+          if (dimensions.size() >= 2) {
+              fft_plan.set_value(oneapi::mkl::dft::config_param::PLACEMENT, DFTI_NOT_INPLACE);
+              fft_plan.set_value(oneapi::mkl::dft::config_param::CONJUGATE_EVEN_STORAGE,
+                                 DFTI_COMPLEX_COMPLEX);
+              stored_fwd_strides.assign(dimensions.size() + 1, 0);
+              stored_bwd_strides.assign(dimensions.size() + 1, 0);
+              std::int64_t s = 1, cs = 1;
+              for (int i = dimensions.size() - 1; i >= 0; i--) {
+                  stored_fwd_strides[i + 1] = s;
+                  stored_bwd_strides[i + 1] = cs;
+                  s *= dimensions[i];
+                  cs *= (i == (int)dimensions.size() - 1)
+                            ? (dimensions[i] / 2 + 1) : dimensions[i];
+              }
+              fft_plan.set_value(oneapi::mkl::dft::config_param::FWD_STRIDES, stored_fwd_strides);
+              fft_plan.set_value(oneapi::mkl::dft::config_param::BWD_STRIDES, stored_bwd_strides);
+          }
           fft_plan.commit(ctxt->queue);
-          // wait for everything to complete before continuing
           ctxt->queue.wait();
       }
 
@@ -164,9 +182,25 @@ namespace H4I::MKLShim
       // descriptor for multi-dimensional transforms
       fftDescriptorDR(Context* ctxt, std::vector<std::int64_t> dimensions) : fft_plan(dimensions)
       {
-          // commit the plan
+          // cuFFT-compatible layout: see fftDescriptorSR multi-dim ctor for rationale.
+          if (dimensions.size() >= 2) {
+              fft_plan.set_value(oneapi::mkl::dft::config_param::PLACEMENT, DFTI_NOT_INPLACE);
+              fft_plan.set_value(oneapi::mkl::dft::config_param::CONJUGATE_EVEN_STORAGE,
+                                 DFTI_COMPLEX_COMPLEX);
+              std::vector<std::int64_t> fwd_strides(dimensions.size() + 1, 0);
+              std::vector<std::int64_t> bwd_strides(dimensions.size() + 1, 0);
+              std::int64_t s = 1, cs = 1;
+              for (int i = dimensions.size() - 1; i >= 0; i--) {
+                  fwd_strides[i + 1] = s;
+                  bwd_strides[i + 1] = cs;
+                  s *= dimensions[i];
+                  cs *= (i == (int)dimensions.size() - 1)
+                            ? (dimensions[i] / 2 + 1) : dimensions[i];
+              }
+              fft_plan.set_value(oneapi::mkl::dft::config_param::FWD_STRIDES, fwd_strides);
+              fft_plan.set_value(oneapi::mkl::dft::config_param::BWD_STRIDES, bwd_strides);
+          }
           fft_plan.commit(ctxt->queue);
-          // wait for everything to complete before continuing
           ctxt->queue.wait();
 
 	  // use the soon-to-be default (can be removed in the future) for storing complex numbers
@@ -323,6 +357,22 @@ namespace H4I::MKLShim
 
   void recommitFFTDescriptorSR(Context* ctxt, fftDescriptorSR* desc) {
      desc->recommit(ctxt);
+  }
+
+  // Re-commit each descriptor on ctxt->queue.  Used by hipfftSetStream after
+  // updating the context's SYCL queue, so subsequent compute_* submissions
+  // land on the new queue rather than the one captured at the original commit.
+  void rebindFFTDescriptorSR(Context* ctxt, fftDescriptorSR* desc) {
+      if (desc != nullptr) { desc->fft_plan.commit(ctxt->queue); ctxt->queue.wait(); }
+  }
+  void rebindFFTDescriptorSC(Context* ctxt, fftDescriptorSC* desc) {
+      if (desc != nullptr) { desc->fft_plan.commit(ctxt->queue); ctxt->queue.wait(); }
+  }
+  void rebindFFTDescriptorDR(Context* ctxt, fftDescriptorDR* desc) {
+      if (desc != nullptr) { desc->fft_plan.commit(ctxt->queue); ctxt->queue.wait(); }
+  }
+  void rebindFFTDescriptorDC(Context* ctxt, fftDescriptorDC* desc) {
+      if (desc != nullptr) { desc->fft_plan.commit(ctxt->queue); ctxt->queue.wait(); }
   }
 
   // execute the plans
