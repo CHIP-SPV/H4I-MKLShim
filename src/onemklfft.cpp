@@ -532,6 +532,11 @@ namespace H4I::MKLShim
           }
 
           oneapi::mkl::dft::compute_forward(descDR->fft_plan, idata);
+          // On L0 the MKL compute submission is not ordered against the
+          // caller's subsequent HIP memcpy on chipStar's stream, so the
+          // readback can race ahead and observe stale data. Sync here, as
+          // fftExecZ2Zbackward already does.
+          ctxt->queue.wait();
       }
       else
       {
@@ -544,6 +549,7 @@ namespace H4I::MKLShim
 
           oneapi::mkl::dft::compute_forward(descDR->fft_plan, idata,
                                             reinterpret_cast<std::complex<double> *>(odata));
+          ctxt->queue.wait();
       }
   }
 
@@ -562,6 +568,9 @@ namespace H4I::MKLShim
           }
 
           oneapi::mkl::dft::compute_backward(descDR->fft_plan, odata);
+          // See fftExecD2Z: sync so a subsequent HIP readback on L0 cannot
+          // race ahead of the MKL compute.
+          ctxt->queue.wait();
       }
       else
       {
@@ -575,6 +584,7 @@ namespace H4I::MKLShim
           oneapi::mkl::dft::compute_backward(descDR->fft_plan,
                                              reinterpret_cast<std::complex<double> *>(idata),
                                              odata);
+          ctxt->queue.wait();
       }
   }
 
