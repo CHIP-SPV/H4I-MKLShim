@@ -148,6 +148,6 @@ jobs:
             DOWNSTREAM_PREFIX_PATH="$inst;$DOWNSTREAM_PREFIX_PATH"
           }
 
-          build_and_test_downstream H4I-HipBLAS    develop  clang
-          build_and_test_downstream H4I-HipSOLVER  develop  clang
-          build_and_test_downstream H4I-HipFFT     main     icpx
+          build_and_test_downstream H4I-HipBLAS    main  clang
+          build_and_test_downstream H4I-HipSOLVER  main  clang
+          build_and_test_downstream H4I-HipFFT     main  icpx
