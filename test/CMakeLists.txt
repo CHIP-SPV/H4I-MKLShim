@@ -57,3 +57,14 @@ set_tests_properties(h4i-mklshim_handle_management_test PROPERTIES
 add_test(NAME h4i-mklshim_fft_3d_cufft_layout_test COMMAND mklshim_fft_3d_cufft_layout_test)
 set_tests_properties(h4i-mklshim_fft_3d_cufft_layout_test PROPERTIES
     PASS_REGULAR_EXPRESSION "All cuFFT-layout 3D R2C tests passed!")
+
+# Regression: Create+Update+Destroy must not leak entries in context_tbl
+add_executable(mklshim_context_tbl_leak_test context_tbl_leak_test.cpp)
+target_link_libraries(mklshim_context_tbl_leak_test PRIVATE MKLShim hip::host)
+target_include_directories(mklshim_context_tbl_leak_test PRIVATE
+                          ${CMAKE_BINARY_DIR}/include
+                          ${CMAKE_SOURCE_DIR}/include)
+
+add_test(NAME h4i-mklshim_context_tbl_leak_test COMMAND mklshim_context_tbl_leak_test)
+set_tests_properties(h4i-mklshim_context_tbl_leak_test PROPERTIES
+    PASS_REGULAR_EXPRESSION "PASSED")
