@@ -173,11 +173,16 @@ Destroy(Context* ctxt)
         // Lock the mutex to protect access to context_tbl
         std::lock_guard<std::mutex> lock(context_tbl_mutex);
         
-        // Remove context from the table
-        context_tbl.erase(std::find_if(context_tbl.begin(), context_tbl.end(),
-                                       [ctxt](const auto& pair) {
-                                           return pair.second == ctxt;
-                                       }));
+        // Remove every entry that still points to this context.
+        // Update() inserts an additional entry whenever a Context is
+        // rebound to a new native queue without bumping the refcount,
+        // so a single Destroy() may need to clear multiple keys.
+        for (auto it = context_tbl.begin(); it != context_tbl.end(); ) {
+            if (it->second == ctxt)
+                it = context_tbl.erase(it);
+            else
+                ++it;
+        }
         delete ctxt;
     }
     // If newRefCount > 0, other references still exist, don't delete
