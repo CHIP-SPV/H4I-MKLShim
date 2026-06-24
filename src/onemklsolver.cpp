@@ -1082,7 +1082,78 @@ namespace H4I::MKLShim
     ONEMKL_CATCH("Zgetrf_batch")
   }
 
-  // getri_batch  
+  // getrfnp_batch
+  int64_t Sgetrfnp_batch_ScPadSz(Context* ctxt, int64_t group_count, int64_t* m, int64_t* n, int64_t* lda, int64_t* group_sizes){
+    ONEMKL_TRY_RETURN(-1)
+    auto size = oneapi::mkl::lapack::getrfnp_batch_scratchpad_size<float>(ctxt->queue, m, n, lda, group_count, group_sizes);
+    return size;
+    ONEMKL_CATCH_NO_FLUSH("Sgetrfnp_batch_ScPadSz")
+  }
+
+  int64_t Dgetrfnp_batch_ScPadSz(Context* ctxt, int64_t group_count, int64_t* m, int64_t* n, int64_t* lda, int64_t* group_sizes){
+    ONEMKL_TRY_RETURN(-1)
+    auto size = oneapi::mkl::lapack::getrfnp_batch_scratchpad_size<double>(ctxt->queue, m, n, lda, group_count, group_sizes);
+    return size;
+    ONEMKL_CATCH_NO_FLUSH("Dgetrfnp_batch_ScPadSz")
+  }
+
+  int64_t Cgetrfnp_batch_ScPadSz(Context* ctxt, int64_t group_count, int64_t* m, int64_t* n, int64_t* lda, int64_t* group_sizes){
+    ONEMKL_TRY_RETURN(-1)
+    auto size = oneapi::mkl::lapack::getrfnp_batch_scratchpad_size<std::complex<float>>(ctxt->queue, m, n, lda, group_count, group_sizes);
+    return size;
+    ONEMKL_CATCH_NO_FLUSH("Cgetrfnp_batch_ScPadSz")
+  }
+
+  int64_t Zgetrfnp_batch_ScPadSz(Context* ctxt, int64_t group_count, int64_t* m, int64_t* n, int64_t* lda, int64_t* group_sizes){
+    ONEMKL_TRY_RETURN(-1)
+    auto size = oneapi::mkl::lapack::getrfnp_batch_scratchpad_size<std::complex<double>>(ctxt->queue, m, n, lda, group_count, group_sizes);
+    return size;
+    ONEMKL_CATCH_NO_FLUSH("Zgetrfnp_batch_ScPadSz")
+  }
+
+  void Sgetrfnp_batch(Context* ctxt, int64_t* m, int64_t* n, float** A, int64_t* lda, int64_t group_count,
+                      int64_t* group_sizes, float* scratchpad, int64_t scratchpad_size){
+    ONEMKL_TRY
+    auto status = oneapi::mkl::lapack::getrfnp_batch(ctxt->queue, m, n, A, lda, group_count, group_sizes,
+                                                     scratchpad, scratchpad_size, {});
+    // Wait for the operation to complete before function returns
+    ctxt->queue.wait();
+    ONEMKL_CATCH("Sgetrfnp_batch")
+  }
+
+  void Dgetrfnp_batch(Context* ctxt, int64_t* m, int64_t* n, double** A, int64_t* lda, int64_t group_count,
+                      int64_t* group_sizes, double* scratchpad, int64_t scratchpad_size){
+    ONEMKL_TRY
+    auto status = oneapi::mkl::lapack::getrfnp_batch(ctxt->queue, m, n, A, lda, group_count, group_sizes,
+                                                     scratchpad, scratchpad_size, {});
+    // Wait for the operation to complete before function returns
+    ctxt->queue.wait();
+    ONEMKL_CATCH("Dgetrfnp_batch")
+  }
+
+  void Cgetrfnp_batch(Context* ctxt, int64_t* m, int64_t* n, float _Complex** A, int64_t* lda, int64_t group_count,
+                      int64_t* group_sizes, float _Complex* scratchpad, int64_t scratchpad_size){
+    ONEMKL_TRY
+    auto status = oneapi::mkl::lapack::getrfnp_batch(ctxt->queue, m, n, reinterpret_cast<std::complex<float>**>(A), lda,
+                                                     group_count, group_sizes,
+                                                     reinterpret_cast<std::complex<float>*>(scratchpad), scratchpad_size, {});
+    // Wait for the operation to complete before function returns
+    ctxt->queue.wait();
+    ONEMKL_CATCH("Cgetrfnp_batch")
+  }
+
+  void Zgetrfnp_batch(Context* ctxt, int64_t* m, int64_t* n, double _Complex** A, int64_t* lda, int64_t group_count,
+                      int64_t* group_sizes, double _Complex* scratchpad, int64_t scratchpad_size){
+    ONEMKL_TRY
+    auto status = oneapi::mkl::lapack::getrfnp_batch(ctxt->queue, m, n, reinterpret_cast<std::complex<double>**>(A), lda,
+                                                     group_count, group_sizes,
+                                                     reinterpret_cast<std::complex<double>*>(scratchpad), scratchpad_size, {});
+    // Wait for the operation to complete before function returns
+    ctxt->queue.wait();
+    ONEMKL_CATCH("Zgetrfnp_batch")
+  }
+
+  // getri_batch
   int64_t Sgetri_batch_ScPadSz(Context* ctxt, int64_t group_count, int64_t* n, int64_t* lda, int64_t* group_sizes){
     ONEMKL_TRY_RETURN(-1)
     auto size = oneapi::mkl::lapack::getri_batch_scratchpad_size<float>(ctxt->queue, n, lda, group_count, group_sizes);

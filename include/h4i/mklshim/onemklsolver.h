@@ -158,6 +158,20 @@ namespace H4I::MKLShim
   void Zgetrf_batch(Context* ctxt, int64_t* m, int64_t* n, double _Complex** A, int64_t* lda, int64_t** ipiv, int64_t group_count,
                     int64_t* group_sizes, double _Complex* scratchpad, int64_t scratchpad_size);
 
+  //getrfnp_batch (Group Version)
+  int64_t Sgetrfnp_batch_ScPadSz(Context* ctxt, int64_t group_count, int64_t* m, int64_t* n, int64_t* lda, int64_t* group_sizes);
+  int64_t Dgetrfnp_batch_ScPadSz(Context* ctxt, int64_t group_count, int64_t* m, int64_t* n, int64_t* lda, int64_t* group_sizes);
+  int64_t Cgetrfnp_batch_ScPadSz(Context* ctxt, int64_t group_count, int64_t* m, int64_t* n, int64_t* lda, int64_t* group_sizes);
+  int64_t Zgetrfnp_batch_ScPadSz(Context* ctxt, int64_t group_count, int64_t* m, int64_t* n, int64_t* lda, int64_t* group_sizes);
+  void Sgetrfnp_batch(Context* ctxt, int64_t* m, int64_t* n, float** A, int64_t* lda, int64_t group_count,
+                      int64_t* group_sizes, float* scratchpad, int64_t scratchpad_size);
+  void Dgetrfnp_batch(Context* ctxt, int64_t* m, int64_t* n, double** A, int64_t* lda, int64_t group_count,
+                      int64_t* group_sizes, double* scratchpad, int64_t scratchpad_size);
+  void Cgetrfnp_batch(Context* ctxt, int64_t* m, int64_t* n, float _Complex** A, int64_t* lda, int64_t group_count,
+                      int64_t* group_sizes, float _Complex* scratchpad, int64_t scratchpad_size);
+  void Zgetrfnp_batch(Context* ctxt, int64_t* m, int64_t* n, double _Complex** A, int64_t* lda, int64_t group_count,
+                      int64_t* group_sizes, double _Complex* scratchpad, int64_t scratchpad_size);
+
   //getri_batch (Group Version)
   /** Calculate scratchpad size for Sgetri_batch
    * @param ctxt MKLShim context
