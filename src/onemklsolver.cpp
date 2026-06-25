@@ -1201,6 +1201,49 @@ namespace H4I::MKLShim
     __CATCH__("convert_ipiv_to_int32")
   }
 
+  // Batched device copy A[b] -> C[b] for getri's in-place inversion. A and C are
+  // device arrays of device pointers (batchCount each).
+  template <typename T>
+  static void copy_batch_a_to_c_impl(Context* ctxt, const T** A, T** C,
+                                     int64_t n, int64_t lda, int64_t ldc, int64_t batchCount){
+    ONEMKL_TRY
+    size_t nn = static_cast<size_t>(n) * static_cast<size_t>(n);
+    // One work-item per matrix element.
+    auto status = ctxt->queue.parallel_for(
+        sycl::range<1>(static_cast<size_t>(batchCount) * nn),
+        [=](sycl::id<1> gid){
+      size_t work_item = gid;
+      size_t batch   = work_item / nn;               // which matrix
+      size_t elem   = work_item % nn;               // element within the matrix
+      size_t col = elem / static_cast<size_t>(n);
+      size_t row = elem % static_cast<size_t>(n);
+      C[batch][col * static_cast<size_t>(ldc) + row] = A[batch][col * static_cast<size_t>(lda) + row];
+    });
+    ctxt->queue.wait();
+    __CATCH__("copy_batch_a_to_c")
+  }
+
+  void Scopy_batch_a_to_c(Context* ctxt, const float** A, float** C,
+                          int64_t n, int64_t lda, int64_t ldc, int64_t batchCount){
+    copy_batch_a_to_c_impl<float>(ctxt, A, C, n, lda, ldc, batchCount);
+  }
+  void Dcopy_batch_a_to_c(Context* ctxt, const double** A, double** C,
+                          int64_t n, int64_t lda, int64_t ldc, int64_t batchCount){
+    copy_batch_a_to_c_impl<double>(ctxt, A, C, n, lda, ldc, batchCount);
+  }
+  void Ccopy_batch_a_to_c(Context* ctxt, const float _Complex** A, float _Complex** C,
+                          int64_t n, int64_t lda, int64_t ldc, int64_t batchCount){
+    copy_batch_a_to_c_impl<std::complex<float>>(ctxt, reinterpret_cast<const std::complex<float>**>(A),
+                                                reinterpret_cast<std::complex<float>**>(C),
+                                                n, lda, ldc, batchCount);
+  }
+  void Zcopy_batch_a_to_c(Context* ctxt, const double _Complex** A, double _Complex** C,
+                          int64_t n, int64_t lda, int64_t ldc, int64_t batchCount){
+    copy_batch_a_to_c_impl<std::complex<double>>(ctxt, reinterpret_cast<const std::complex<double>**>(A),
+                                                 reinterpret_cast<std::complex<double>**>(C),
+                                                 n, lda, ldc, batchCount);
+  }
+
   // getri_batch
   int64_t Sgetri_batch_ScPadSz(Context* ctxt, int64_t group_count, int64_t* n, int64_t* lda, int64_t* group_sizes){
     ONEMKL_TRY_RETURN(-1)
