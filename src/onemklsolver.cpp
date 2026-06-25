@@ -1153,6 +1153,54 @@ namespace H4I::MKLShim
     ONEMKL_CATCH("Zgetrfnp_batch")
   }
 
+  // ipiv conversion helpers (device-side).
+  // The hipBLAS API gives pivots as int* (device), but oneMKL's group
+  // routines require an int64_t** pivot-pointer array. These run a SYCL kernel
+  // on the context queue so the copy-to-or-from-int64 and pointer-array assembly happen
+  // on the device
+
+  // Build the pointer list for an int64 pivot buffer
+  void make_ipiv_int64_ptr_list(Context* ctxt, int64_t* ipiv_mkl, int64_t** ipiv_mkl_ptrs,
+                                int64_t n, int64_t batchCount){
+    ONEMKL_TRY
+    auto status = ctxt->queue.parallel_for(sycl::range<1>(static_cast<size_t>(batchCount)),
+                                           [=](sycl::id<1> idx){
+      ipiv_mkl_ptrs[idx] = ipiv_mkl + static_cast<int64_t>(idx) * n;
+    });
+    ctxt->queue.wait();
+    __CATCH__("make_ipiv_int64_ptr_list")
+  }
+
+  // Populate the int64 pivot buffer ipiv_mkl and build its per-batch pointer list
+  // When ipiv_in != nullptr, copy the caller's int pivots into int62 ipiv_mkl;
+  // when ipiv_in == nullptr, fill ipiv_mkl with the 1-based identity permutation
+  // after this, make the pointer list based on ipiv_mkl
+  void convert_ipiv_to_int64_and_make_ptr_list(Context* ctxt, const int* ipiv_in, int64_t* ipiv_mkl,
+                                               int64_t** ipiv_mkl_ptrs, int64_t n, int64_t batchCount){
+    ONEMKL_TRY
+    auto status = ctxt->queue.parallel_for(sycl::range<1>(static_cast<size_t>(n * batchCount)),
+                                           [=](sycl::id<1> idx){
+      size_t t = idx;
+      if (ipiv_in != nullptr) ipiv_mkl[t] = static_cast<int64_t>(ipiv_in[t]);
+      else                    ipiv_mkl[t] = static_cast<int64_t>(t % n) + 1;
+      if (t < static_cast<size_t>(batchCount))
+        ipiv_mkl_ptrs[t] = ipiv_mkl + static_cast<int64_t>(t) * n;
+    });
+    ctxt->queue.wait();
+    __CATCH__("convert_ipiv_to_int64_and_make_ptr_list")
+  }
+
+  // Copy elements of a contiguous device int64 pivot buffer to a contiguous device int pivot buffer
+  void convert_ipiv_to_int32(Context* ctxt, const int64_t* ipiv_mkl, int* ipiv_out, int64_t count){
+    ONEMKL_TRY
+    auto status = ctxt->queue.parallel_for(sycl::range<1>(static_cast<size_t>(count)),
+                                           [=](sycl::id<1> idx){
+      ipiv_out[idx] = static_cast<int>(ipiv_mkl[idx]);
+    });
+    ctxt->queue.wait();
+    __CATCH__("convert_ipiv_to_int32")
+  }
+
   // getri_batch
   int64_t Sgetri_batch_ScPadSz(Context* ctxt, int64_t group_count, int64_t* n, int64_t* lda, int64_t* group_sizes){
     ONEMKL_TRY_RETURN(-1)
