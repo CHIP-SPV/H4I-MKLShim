@@ -172,6 +172,18 @@ namespace H4I::MKLShim
   void Zgetrfnp_batch(Context* ctxt, int64_t* m, int64_t* n, double _Complex** A, int64_t* lda, int64_t group_count,
                       int64_t* group_sizes, double _Complex* scratchpad, int64_t scratchpad_size);
 
+  // pivot array conversion helpers
+
+  // Build the pointer list for an int64 pivot buffer: 
+  // ipiv_mkl_ptrs[i] = ipiv_mkl + i*n.
+  void make_ipiv_int64_ptr_list(Context* ctxt, int64_t* ipiv_mkl, int64_t** ipiv_mkl_ptrs,
+                                int64_t n, int64_t batchCount);
+  // Populate the int64 pivot buffer ipiv_mkl and build its per-batch pointer list
+  void convert_ipiv_to_int64_and_make_ptr_list(Context* ctxt, const int* ipiv_in, int64_t* ipiv_mkl,
+                                               int64_t** ipiv_mkl_ptrs, int64_t n, int64_t batchCount);
+  // Copy elements of a contiguous device int64 pivot buffer to a contiguous device int pivot buffer
+  void convert_ipiv_to_int32(Context* ctxt, const int64_t* ipiv_mkl, int* ipiv_out, int64_t count);
+
   //getri_batch (Group Version)
   /** Calculate scratchpad size for Sgetri_batch
    * @param ctxt MKLShim context
