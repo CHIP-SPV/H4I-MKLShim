@@ -183,6 +183,15 @@ namespace H4I::MKLShim
                                                int64_t** ipiv_mkl_ptrs, int64_t n, int64_t batchCount);
   // Copy elements of a contiguous device int64 pivot buffer to a contiguous device int pivot buffer
   void convert_ipiv_to_int32(Context* ctxt, const int64_t* ipiv_mkl, int* ipiv_out, int64_t count);
+  // Batched device copy A[b] -> C[b] (getri in-place inversion staging)
+  void Scopy_batch_a_to_c(Context* ctxt, const float** A, float** C,
+                          int64_t n, int64_t lda, int64_t ldc, int64_t batchCount);
+  void Dcopy_batch_a_to_c(Context* ctxt, const double** A, double** C,
+                          int64_t n, int64_t lda, int64_t ldc, int64_t batchCount);
+  void Ccopy_batch_a_to_c(Context* ctxt, const float _Complex** A, float _Complex** C,
+                          int64_t n, int64_t lda, int64_t ldc, int64_t batchCount);
+  void Zcopy_batch_a_to_c(Context* ctxt, const double _Complex** A, double _Complex** C,
+                          int64_t n, int64_t lda, int64_t ldc, int64_t batchCount);
 
   //getri_batch (Group Version)
   /** Calculate scratchpad size for Sgetri_batch
