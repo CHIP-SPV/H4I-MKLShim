@@ -172,9 +172,46 @@ namespace H4I::MKLShim
   void Zgetrfnp_batch(Context* ctxt, int64_t* m, int64_t* n, double _Complex** A, int64_t* lda, int64_t group_count,
                       int64_t* group_sizes, double _Complex* scratchpad, int64_t scratchpad_size);
 
+  //getrf_batch (Strided Version)
+  /** Calculate scratchpad size for Sgetrf_strided_batch
+   * @param ctxt MKLShim context
+   * @param m Number of rows of each matrix
+   * @param n Number of columns of each matrix
+   * @param lda Leading dimension of each matrix
+   * @param stride_a Stride (in elements) between consecutive matrices in A
+   * @param stride_ipiv Stride (in elements) between consecutive pivot vectors
+   * @param batch_size Number of matrices in the batch
+   */
+  int64_t Sgetrf_strided_batch_ScPadSz(Context* ctxt, int64_t m, int64_t n, int64_t lda, int64_t stride_a, int64_t stride_ipiv, int64_t batch_size);
+  int64_t Dgetrf_strided_batch_ScPadSz(Context* ctxt, int64_t m, int64_t n, int64_t lda, int64_t stride_a, int64_t stride_ipiv, int64_t batch_size);
+  int64_t Cgetrf_strided_batch_ScPadSz(Context* ctxt, int64_t m, int64_t n, int64_t lda, int64_t stride_a, int64_t stride_ipiv, int64_t batch_size);
+  int64_t Zgetrf_strided_batch_ScPadSz(Context* ctxt, int64_t m, int64_t n, int64_t lda, int64_t stride_a, int64_t stride_ipiv, int64_t batch_size);
+  void Sgetrf_strided_batch(Context* ctxt, int64_t m, int64_t n, float* A, int64_t lda, int64_t stride_a, int64_t* ipiv,
+                            int64_t stride_ipiv, int64_t batch_size, float* scratchpad, int64_t scratchpad_size);
+  void Dgetrf_strided_batch(Context* ctxt, int64_t m, int64_t n, double* A, int64_t lda, int64_t stride_a, int64_t* ipiv,
+                            int64_t stride_ipiv, int64_t batch_size, double* scratchpad, int64_t scratchpad_size);
+  void Cgetrf_strided_batch(Context* ctxt, int64_t m, int64_t n, float _Complex* A, int64_t lda, int64_t stride_a, int64_t* ipiv,
+                            int64_t stride_ipiv, int64_t batch_size, float _Complex* scratchpad, int64_t scratchpad_size);
+  void Zgetrf_strided_batch(Context* ctxt, int64_t m, int64_t n, double _Complex* A, int64_t lda, int64_t stride_a, int64_t* ipiv,
+                            int64_t stride_ipiv, int64_t batch_size, double _Complex* scratchpad, int64_t scratchpad_size);
+
+  //getrfnp_batch (Strided Version)
+  int64_t Sgetrfnp_strided_batch_ScPadSz(Context* ctxt, int64_t m, int64_t n, int64_t lda, int64_t stride_a, int64_t batch_size);
+  int64_t Dgetrfnp_strided_batch_ScPadSz(Context* ctxt, int64_t m, int64_t n, int64_t lda, int64_t stride_a, int64_t batch_size);
+  int64_t Cgetrfnp_strided_batch_ScPadSz(Context* ctxt, int64_t m, int64_t n, int64_t lda, int64_t stride_a, int64_t batch_size);
+  int64_t Zgetrfnp_strided_batch_ScPadSz(Context* ctxt, int64_t m, int64_t n, int64_t lda, int64_t stride_a, int64_t batch_size);
+  void Sgetrfnp_strided_batch(Context* ctxt, int64_t m, int64_t n, float* A, int64_t lda, int64_t stride_a,
+                              int64_t batch_size, float* scratchpad, int64_t scratchpad_size);
+  void Dgetrfnp_strided_batch(Context* ctxt, int64_t m, int64_t n, double* A, int64_t lda, int64_t stride_a,
+                              int64_t batch_size, double* scratchpad, int64_t scratchpad_size);
+  void Cgetrfnp_strided_batch(Context* ctxt, int64_t m, int64_t n, float _Complex* A, int64_t lda, int64_t stride_a,
+                              int64_t batch_size, float _Complex* scratchpad, int64_t scratchpad_size);
+  void Zgetrfnp_strided_batch(Context* ctxt, int64_t m, int64_t n, double _Complex* A, int64_t lda, int64_t stride_a,
+                              int64_t batch_size, double _Complex* scratchpad, int64_t scratchpad_size);
+
   // pivot array conversion helpers
 
-  // Build the pointer list for an int64 pivot buffer: 
+  // Build the pointer list for an int64 pivot buffer:
   // ipiv_mkl_ptrs[i] = ipiv_mkl + i*n.
   void make_ipiv_int64_ptr_list(Context* ctxt, int64_t* ipiv_mkl, int64_t** ipiv_mkl_ptrs,
                                 int64_t n, int64_t batchCount);
@@ -183,6 +220,19 @@ namespace H4I::MKLShim
                                                int64_t** ipiv_mkl_ptrs, int64_t n, int64_t batchCount);
   // Copy elements of a contiguous device int64 pivot buffer to a contiguous device int pivot buffer
   void convert_ipiv_to_int32(Context* ctxt, const int64_t* ipiv_mkl, int* ipiv_out, int64_t count);
+
+  // Strided-batch pivot helpers. The oneMKL strided getrf/getrs use a contiguous
+  // int64 pivot buffer (per-vector stride = n); the hipBLAS strided API exposes an
+  // int32 pivot buffer with an arbitrary caller stride stride_ipiv.
+
+  // Gather the caller's int pivots (stride stride_ipiv) into the contiguous int64
+  // buffer ipiv_mkl. When ipiv_in == nullptr, fill the 1-based identity permutation.
+  void convert_ipiv_to_int64_strided(Context* ctxt, const int* ipiv_in, int64_t stride_ipiv,
+                                     int64_t* ipiv_mkl, int64_t n, int64_t batchCount);
+  // Scatter the contiguous int64 buffer ipiv_mkl into the caller's int pivots
+  // (stride stride_ipiv).
+  void convert_ipiv_to_int32_strided(Context* ctxt, const int64_t* ipiv_mkl, int* ipiv_out,
+                                     int64_t stride_ipiv, int64_t n, int64_t batchCount);
   // Batched device copy A[b] -> C[b] (getri in-place inversion staging)
   void Scopy_batch_a_to_c(Context* ctxt, const float** A, float** C,
                           int64_t n, int64_t lda, int64_t ldc, int64_t batchCount);
@@ -245,6 +295,62 @@ namespace H4I::MKLShim
   void Zgetrs_batch(Context* ctxt, onemklTranspose* trans, int64_t* n, int64_t* nrhs, double _Complex** A, int64_t* lda,
                     int64_t** ipiv, double _Complex** B, int64_t* ldb, int64_t group_count, int64_t* group_sizes,
                     double _Complex* scratchpad, int64_t scratchpad_size);
+
+  //getrs_batch (Strided Version)
+  /** Calculate scratchpad size for Sgetrs_strided_batch
+   * @param ctxt MKLShim context
+   * @param trans Transpose operation applied to each matrix A
+   * @param n Order of each matrix A
+   * @param nrhs Number of right-hand sides
+   * @param lda Leading dimension of each matrix A
+   * @param stride_a Stride (in elements) between consecutive matrices in A
+   * @param stride_ipiv Stride (in elements) between consecutive pivot vectors
+   * @param ldb Leading dimension of each matrix B
+   * @param stride_b Stride (in elements) between consecutive matrices in B
+   * @param batch_size Number of systems in the batch
+   */
+  int64_t Sgetrs_strided_batch_ScPadSz(Context* ctxt, onemklTranspose trans, int64_t n, int64_t nrhs, int64_t lda,
+                                       int64_t stride_a, int64_t stride_ipiv, int64_t ldb, int64_t stride_b, int64_t batch_size);
+  int64_t Dgetrs_strided_batch_ScPadSz(Context* ctxt, onemklTranspose trans, int64_t n, int64_t nrhs, int64_t lda,
+                                       int64_t stride_a, int64_t stride_ipiv, int64_t ldb, int64_t stride_b, int64_t batch_size);
+  int64_t Cgetrs_strided_batch_ScPadSz(Context* ctxt, onemklTranspose trans, int64_t n, int64_t nrhs, int64_t lda,
+                                       int64_t stride_a, int64_t stride_ipiv, int64_t ldb, int64_t stride_b, int64_t batch_size);
+  int64_t Zgetrs_strided_batch_ScPadSz(Context* ctxt, onemklTranspose trans, int64_t n, int64_t nrhs, int64_t lda,
+                                       int64_t stride_a, int64_t stride_ipiv, int64_t ldb, int64_t stride_b, int64_t batch_size);
+  void Sgetrs_strided_batch(Context* ctxt, onemklTranspose trans, int64_t n, int64_t nrhs, float* A, int64_t lda,
+                            int64_t stride_a, int64_t* ipiv, int64_t stride_ipiv, float* B, int64_t ldb, int64_t stride_b,
+                            int64_t batch_size, float* scratchpad, int64_t scratchpad_size);
+  void Dgetrs_strided_batch(Context* ctxt, onemklTranspose trans, int64_t n, int64_t nrhs, double* A, int64_t lda,
+                            int64_t stride_a, int64_t* ipiv, int64_t stride_ipiv, double* B, int64_t ldb, int64_t stride_b,
+                            int64_t batch_size, double* scratchpad, int64_t scratchpad_size);
+  void Cgetrs_strided_batch(Context* ctxt, onemklTranspose trans, int64_t n, int64_t nrhs, float _Complex* A, int64_t lda,
+                            int64_t stride_a, int64_t* ipiv, int64_t stride_ipiv, float _Complex* B, int64_t ldb, int64_t stride_b,
+                            int64_t batch_size, float _Complex* scratchpad, int64_t scratchpad_size);
+  void Zgetrs_strided_batch(Context* ctxt, onemklTranspose trans, int64_t n, int64_t nrhs, double _Complex* A, int64_t lda,
+                            int64_t stride_a, int64_t* ipiv, int64_t stride_ipiv, double _Complex* B, int64_t ldb, int64_t stride_b,
+                            int64_t batch_size, double _Complex* scratchpad, int64_t scratchpad_size);
+
+  //getrsnp_batch (Strided Version, no pivoting)
+  int64_t Sgetrsnp_strided_batch_ScPadSz(Context* ctxt, onemklTranspose trans, int64_t n, int64_t nrhs, int64_t lda,
+                                         int64_t stride_a, int64_t ldb, int64_t stride_b, int64_t batch_size);
+  int64_t Dgetrsnp_strided_batch_ScPadSz(Context* ctxt, onemklTranspose trans, int64_t n, int64_t nrhs, int64_t lda,
+                                         int64_t stride_a, int64_t ldb, int64_t stride_b, int64_t batch_size);
+  int64_t Cgetrsnp_strided_batch_ScPadSz(Context* ctxt, onemklTranspose trans, int64_t n, int64_t nrhs, int64_t lda,
+                                         int64_t stride_a, int64_t ldb, int64_t stride_b, int64_t batch_size);
+  int64_t Zgetrsnp_strided_batch_ScPadSz(Context* ctxt, onemklTranspose trans, int64_t n, int64_t nrhs, int64_t lda,
+                                         int64_t stride_a, int64_t ldb, int64_t stride_b, int64_t batch_size);
+  void Sgetrsnp_strided_batch(Context* ctxt, onemklTranspose trans, int64_t n, int64_t nrhs, float* A, int64_t lda,
+                              int64_t stride_a, float* B, int64_t ldb, int64_t stride_b,
+                              int64_t batch_size, float* scratchpad, int64_t scratchpad_size);
+  void Dgetrsnp_strided_batch(Context* ctxt, onemklTranspose trans, int64_t n, int64_t nrhs, double* A, int64_t lda,
+                              int64_t stride_a, double* B, int64_t ldb, int64_t stride_b,
+                              int64_t batch_size, double* scratchpad, int64_t scratchpad_size);
+  void Cgetrsnp_strided_batch(Context* ctxt, onemklTranspose trans, int64_t n, int64_t nrhs, float _Complex* A, int64_t lda,
+                              int64_t stride_a, float _Complex* B, int64_t ldb, int64_t stride_b,
+                              int64_t batch_size, float _Complex* scratchpad, int64_t scratchpad_size);
+  void Zgetrsnp_strided_batch(Context* ctxt, onemklTranspose trans, int64_t n, int64_t nrhs, double _Complex* A, int64_t lda,
+                              int64_t stride_a, double _Complex* B, int64_t ldb, int64_t stride_b,
+                              int64_t batch_size, double _Complex* scratchpad, int64_t scratchpad_size);
 
   //potrf
   int64_t Spotrf_ScPadSz(Context* ctxt, onemklUplo uplo, int64_t n, int64_t lda);

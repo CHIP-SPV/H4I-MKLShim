@@ -1153,6 +1153,148 @@ namespace H4I::MKLShim
     ONEMKL_CATCH("Zgetrfnp_batch")
   }
 
+  // getrf_strided_batch
+  int64_t Sgetrf_strided_batch_ScPadSz(Context* ctxt, int64_t m, int64_t n, int64_t lda, int64_t stride_a, int64_t stride_ipiv, int64_t batch_size){
+    ONEMKL_TRY_RETURN(-1)
+    auto size = oneapi::mkl::lapack::getrf_batch_scratchpad_size<float>(ctxt->queue, m, n, lda, stride_a, stride_ipiv, batch_size);
+    return size;
+    ONEMKL_CATCH_NO_FLUSH("Sgetrf_strided_batch_ScPadSz")
+  }
+
+  int64_t Dgetrf_strided_batch_ScPadSz(Context* ctxt, int64_t m, int64_t n, int64_t lda, int64_t stride_a, int64_t stride_ipiv, int64_t batch_size){
+    ONEMKL_TRY_RETURN(-1)
+    auto size = oneapi::mkl::lapack::getrf_batch_scratchpad_size<double>(ctxt->queue, m, n, lda, stride_a, stride_ipiv, batch_size);
+    return size;
+    ONEMKL_CATCH_NO_FLUSH("Dgetrf_strided_batch_ScPadSz")
+  }
+
+  int64_t Cgetrf_strided_batch_ScPadSz(Context* ctxt, int64_t m, int64_t n, int64_t lda, int64_t stride_a, int64_t stride_ipiv, int64_t batch_size){
+    ONEMKL_TRY_RETURN(-1)
+    auto size = oneapi::mkl::lapack::getrf_batch_scratchpad_size<std::complex<float>>(ctxt->queue, m, n, lda, stride_a, stride_ipiv, batch_size);
+    return size;
+    ONEMKL_CATCH_NO_FLUSH("Cgetrf_strided_batch_ScPadSz")
+  }
+
+  int64_t Zgetrf_strided_batch_ScPadSz(Context* ctxt, int64_t m, int64_t n, int64_t lda, int64_t stride_a, int64_t stride_ipiv, int64_t batch_size){
+    ONEMKL_TRY_RETURN(-1)
+    auto size = oneapi::mkl::lapack::getrf_batch_scratchpad_size<std::complex<double>>(ctxt->queue, m, n, lda, stride_a, stride_ipiv, batch_size);
+    return size;
+    ONEMKL_CATCH_NO_FLUSH("Zgetrf_strided_batch_ScPadSz")
+  }
+
+  void Sgetrf_strided_batch(Context* ctxt, int64_t m, int64_t n, float* A, int64_t lda, int64_t stride_a, int64_t* ipiv,
+                            int64_t stride_ipiv, int64_t batch_size, float* scratchpad, int64_t scratchpad_size){
+    ONEMKL_TRY
+    auto status = oneapi::mkl::lapack::getrf_batch(ctxt->queue, m, n, A, lda, stride_a, ipiv, stride_ipiv, batch_size,
+                                                   scratchpad, scratchpad_size, {});
+    // Wait for the operation to complete before function returns
+    ctxt->queue.wait();
+    ONEMKL_CATCH("Sgetrf_strided_batch")
+  }
+
+  void Dgetrf_strided_batch(Context* ctxt, int64_t m, int64_t n, double* A, int64_t lda, int64_t stride_a, int64_t* ipiv,
+                            int64_t stride_ipiv, int64_t batch_size, double* scratchpad, int64_t scratchpad_size){
+    ONEMKL_TRY
+    auto status = oneapi::mkl::lapack::getrf_batch(ctxt->queue, m, n, A, lda, stride_a, ipiv, stride_ipiv, batch_size,
+                                                   scratchpad, scratchpad_size, {});
+    // Wait for the operation to complete before function returns
+    ctxt->queue.wait();
+    ONEMKL_CATCH("Dgetrf_strided_batch")
+  }
+
+  void Cgetrf_strided_batch(Context* ctxt, int64_t m, int64_t n, float _Complex* A, int64_t lda, int64_t stride_a, int64_t* ipiv,
+                            int64_t stride_ipiv, int64_t batch_size, float _Complex* scratchpad, int64_t scratchpad_size){
+    ONEMKL_TRY
+    auto status = oneapi::mkl::lapack::getrf_batch(ctxt->queue, m, n, reinterpret_cast<std::complex<float>*>(A), lda, stride_a,
+                                                   ipiv, stride_ipiv, batch_size,
+                                                   reinterpret_cast<std::complex<float>*>(scratchpad), scratchpad_size, {});
+    // Wait for the operation to complete before function returns
+    ctxt->queue.wait();
+    ONEMKL_CATCH("Cgetrf_strided_batch")
+  }
+
+  void Zgetrf_strided_batch(Context* ctxt, int64_t m, int64_t n, double _Complex* A, int64_t lda, int64_t stride_a, int64_t* ipiv,
+                            int64_t stride_ipiv, int64_t batch_size, double _Complex* scratchpad, int64_t scratchpad_size){
+    ONEMKL_TRY
+    auto status = oneapi::mkl::lapack::getrf_batch(ctxt->queue, m, n, reinterpret_cast<std::complex<double>*>(A), lda, stride_a,
+                                                   ipiv, stride_ipiv, batch_size,
+                                                   reinterpret_cast<std::complex<double>*>(scratchpad), scratchpad_size, {});
+    // Wait for the operation to complete before function returns
+    ctxt->queue.wait();
+    ONEMKL_CATCH("Zgetrf_strided_batch")
+  }
+
+  // getrfnp_strided_batch
+  int64_t Sgetrfnp_strided_batch_ScPadSz(Context* ctxt, int64_t m, int64_t n, int64_t lda, int64_t stride_a, int64_t batch_size){
+    ONEMKL_TRY_RETURN(-1)
+    auto size = oneapi::mkl::lapack::getrfnp_batch_scratchpad_size<float>(ctxt->queue, m, n, lda, stride_a, batch_size);
+    return size;
+    ONEMKL_CATCH_NO_FLUSH("Sgetrfnp_strided_batch_ScPadSz")
+  }
+
+  int64_t Dgetrfnp_strided_batch_ScPadSz(Context* ctxt, int64_t m, int64_t n, int64_t lda, int64_t stride_a, int64_t batch_size){
+    ONEMKL_TRY_RETURN(-1)
+    auto size = oneapi::mkl::lapack::getrfnp_batch_scratchpad_size<double>(ctxt->queue, m, n, lda, stride_a, batch_size);
+    return size;
+    ONEMKL_CATCH_NO_FLUSH("Dgetrfnp_strided_batch_ScPadSz")
+  }
+
+  int64_t Cgetrfnp_strided_batch_ScPadSz(Context* ctxt, int64_t m, int64_t n, int64_t lda, int64_t stride_a, int64_t batch_size){
+    ONEMKL_TRY_RETURN(-1)
+    auto size = oneapi::mkl::lapack::getrfnp_batch_scratchpad_size<std::complex<float>>(ctxt->queue, m, n, lda, stride_a, batch_size);
+    return size;
+    ONEMKL_CATCH_NO_FLUSH("Cgetrfnp_strided_batch_ScPadSz")
+  }
+
+  int64_t Zgetrfnp_strided_batch_ScPadSz(Context* ctxt, int64_t m, int64_t n, int64_t lda, int64_t stride_a, int64_t batch_size){
+    ONEMKL_TRY_RETURN(-1)
+    auto size = oneapi::mkl::lapack::getrfnp_batch_scratchpad_size<std::complex<double>>(ctxt->queue, m, n, lda, stride_a, batch_size);
+    return size;
+    ONEMKL_CATCH_NO_FLUSH("Zgetrfnp_strided_batch_ScPadSz")
+  }
+
+  void Sgetrfnp_strided_batch(Context* ctxt, int64_t m, int64_t n, float* A, int64_t lda, int64_t stride_a,
+                              int64_t batch_size, float* scratchpad, int64_t scratchpad_size){
+    ONEMKL_TRY
+    auto status = oneapi::mkl::lapack::getrfnp_batch(ctxt->queue, m, n, A, lda, stride_a, batch_size,
+                                                     scratchpad, scratchpad_size, {});
+    // Wait for the operation to complete before function returns
+    ctxt->queue.wait();
+    ONEMKL_CATCH("Sgetrfnp_strided_batch")
+  }
+
+  void Dgetrfnp_strided_batch(Context* ctxt, int64_t m, int64_t n, double* A, int64_t lda, int64_t stride_a,
+                              int64_t batch_size, double* scratchpad, int64_t scratchpad_size){
+    ONEMKL_TRY
+    auto status = oneapi::mkl::lapack::getrfnp_batch(ctxt->queue, m, n, A, lda, stride_a, batch_size,
+                                                     scratchpad, scratchpad_size, {});
+    // Wait for the operation to complete before function returns
+    ctxt->queue.wait();
+    ONEMKL_CATCH("Dgetrfnp_strided_batch")
+  }
+
+  void Cgetrfnp_strided_batch(Context* ctxt, int64_t m, int64_t n, float _Complex* A, int64_t lda, int64_t stride_a,
+                              int64_t batch_size, float _Complex* scratchpad, int64_t scratchpad_size){
+    ONEMKL_TRY
+    auto status = oneapi::mkl::lapack::getrfnp_batch(ctxt->queue, m, n, reinterpret_cast<std::complex<float>*>(A), lda, stride_a,
+                                                     batch_size,
+                                                     reinterpret_cast<std::complex<float>*>(scratchpad), scratchpad_size, {});
+    // Wait for the operation to complete before function returns
+    ctxt->queue.wait();
+    ONEMKL_CATCH("Cgetrfnp_strided_batch")
+  }
+
+  void Zgetrfnp_strided_batch(Context* ctxt, int64_t m, int64_t n, double _Complex* A, int64_t lda, int64_t stride_a,
+                              int64_t batch_size, double _Complex* scratchpad, int64_t scratchpad_size){
+    ONEMKL_TRY
+    auto status = oneapi::mkl::lapack::getrfnp_batch(ctxt->queue, m, n, reinterpret_cast<std::complex<double>*>(A), lda, stride_a,
+                                                     batch_size,
+                                                     reinterpret_cast<std::complex<double>*>(scratchpad), scratchpad_size, {});
+    // Wait for the operation to complete before function returns
+    ctxt->queue.wait();
+    ONEMKL_CATCH("Zgetrfnp_strided_batch")
+  }
+
   // ipiv conversion helpers (device-side).
   // The hipBLAS API gives pivots as int* (device), but oneMKL's group
   // routines require an int64_t** pivot-pointer array. These run a SYCL kernel
@@ -1199,6 +1341,40 @@ namespace H4I::MKLShim
     });
     ctxt->queue.wait();
     __CATCH__("convert_ipiv_to_int32")
+  }
+
+  // Gather the caller's int pivots (per-vector stride stride_ipiv) into the contiguous
+  // int64 buffer ipiv_mkl (per-vector stride n). When ipiv_in == nullptr, fill the
+  // 1-based identity permutation.
+  void convert_ipiv_to_int64_strided(Context* ctxt, const int* ipiv_in, int64_t stride_ipiv,
+                                     int64_t* ipiv_mkl, int64_t n, int64_t batchCount){
+    ONEMKL_TRY
+    auto status = ctxt->queue.parallel_for(sycl::range<1>(static_cast<size_t>(n * batchCount)),
+                                           [=](sycl::id<1> idx){
+      size_t t = idx;
+      int64_t b = static_cast<int64_t>(t) / n;
+      int64_t j = static_cast<int64_t>(t) % n;
+      if (ipiv_in != nullptr) ipiv_mkl[t] = static_cast<int64_t>(ipiv_in[b * stride_ipiv + j]);
+      else                    ipiv_mkl[t] = j + 1;
+    });
+    ctxt->queue.wait();
+    __CATCH__("convert_ipiv_to_int64_strided")
+  }
+
+  // Scatter the contiguous int64 buffer ipiv_mkl (per-vector stride n) into the caller's
+  // int pivots (per-vector stride stride_ipiv).
+  void convert_ipiv_to_int32_strided(Context* ctxt, const int64_t* ipiv_mkl, int* ipiv_out,
+                                     int64_t stride_ipiv, int64_t n, int64_t batchCount){
+    ONEMKL_TRY
+    auto status = ctxt->queue.parallel_for(sycl::range<1>(static_cast<size_t>(n * batchCount)),
+                                           [=](sycl::id<1> idx){
+      size_t t = idx;
+      int64_t b = static_cast<int64_t>(t) / n;
+      int64_t j = static_cast<int64_t>(t) % n;
+      ipiv_out[b * stride_ipiv + j] = static_cast<int>(ipiv_mkl[t]);
+    });
+    ctxt->queue.wait();
+    __CATCH__("convert_ipiv_to_int32_strided")
   }
 
   // Batched device copy A[b] -> C[b] for getri's in-place inversion. A and C are
@@ -1432,5 +1608,175 @@ namespace H4I::MKLShim
     // Wait for the operation to complete before trans_vec goes out of scope
     ctxt->queue.wait();
     ONEMKL_CATCH("Zgetrs_batch")
+  }
+
+  // getrs_strided_batch
+  int64_t Sgetrs_strided_batch_ScPadSz(Context* ctxt, onemklTranspose trans, int64_t n, int64_t nrhs, int64_t lda,
+                                       int64_t stride_a, int64_t stride_ipiv, int64_t ldb, int64_t stride_b, int64_t batch_size){
+    ONEMKL_TRY_RETURN(-1)
+    auto size = oneapi::mkl::lapack::getrs_batch_scratchpad_size<float>(ctxt->queue, convert(trans), n, nrhs, lda,
+                                                                        stride_a, stride_ipiv, ldb, stride_b, batch_size);
+    return size;
+    ONEMKL_CATCH_NO_FLUSH("Sgetrs_strided_batch_ScPadSz")
+  }
+
+  int64_t Dgetrs_strided_batch_ScPadSz(Context* ctxt, onemklTranspose trans, int64_t n, int64_t nrhs, int64_t lda,
+                                       int64_t stride_a, int64_t stride_ipiv, int64_t ldb, int64_t stride_b, int64_t batch_size){
+    ONEMKL_TRY_RETURN(-1)
+    auto size = oneapi::mkl::lapack::getrs_batch_scratchpad_size<double>(ctxt->queue, convert(trans), n, nrhs, lda,
+                                                                         stride_a, stride_ipiv, ldb, stride_b, batch_size);
+    return size;
+    ONEMKL_CATCH_NO_FLUSH("Dgetrs_strided_batch_ScPadSz")
+  }
+
+  int64_t Cgetrs_strided_batch_ScPadSz(Context* ctxt, onemklTranspose trans, int64_t n, int64_t nrhs, int64_t lda,
+                                       int64_t stride_a, int64_t stride_ipiv, int64_t ldb, int64_t stride_b, int64_t batch_size){
+    ONEMKL_TRY_RETURN(-1)
+    auto size = oneapi::mkl::lapack::getrs_batch_scratchpad_size<std::complex<float>>(ctxt->queue, convert(trans), n, nrhs, lda,
+                                                                                      stride_a, stride_ipiv, ldb, stride_b, batch_size);
+    return size;
+    ONEMKL_CATCH_NO_FLUSH("Cgetrs_strided_batch_ScPadSz")
+  }
+
+  int64_t Zgetrs_strided_batch_ScPadSz(Context* ctxt, onemklTranspose trans, int64_t n, int64_t nrhs, int64_t lda,
+                                       int64_t stride_a, int64_t stride_ipiv, int64_t ldb, int64_t stride_b, int64_t batch_size){
+    ONEMKL_TRY_RETURN(-1)
+    auto size = oneapi::mkl::lapack::getrs_batch_scratchpad_size<std::complex<double>>(ctxt->queue, convert(trans), n, nrhs, lda,
+                                                                                       stride_a, stride_ipiv, ldb, stride_b, batch_size);
+    return size;
+    ONEMKL_CATCH_NO_FLUSH("Zgetrs_strided_batch_ScPadSz")
+  }
+
+  void Sgetrs_strided_batch(Context* ctxt, onemklTranspose trans, int64_t n, int64_t nrhs, float* A, int64_t lda,
+                            int64_t stride_a, int64_t* ipiv, int64_t stride_ipiv, float* B, int64_t ldb, int64_t stride_b,
+                            int64_t batch_size, float* scratchpad, int64_t scratchpad_size){
+    ONEMKL_TRY
+    auto status = oneapi::mkl::lapack::getrs_batch(ctxt->queue, convert(trans), n, nrhs, A, lda, stride_a, ipiv, stride_ipiv,
+                                                   B, ldb, stride_b, batch_size, scratchpad, scratchpad_size, {});
+    // Wait for the operation to complete before function returns
+    ctxt->queue.wait();
+    ONEMKL_CATCH("Sgetrs_strided_batch")
+  }
+
+  void Dgetrs_strided_batch(Context* ctxt, onemklTranspose trans, int64_t n, int64_t nrhs, double* A, int64_t lda,
+                            int64_t stride_a, int64_t* ipiv, int64_t stride_ipiv, double* B, int64_t ldb, int64_t stride_b,
+                            int64_t batch_size, double* scratchpad, int64_t scratchpad_size){
+    ONEMKL_TRY
+    auto status = oneapi::mkl::lapack::getrs_batch(ctxt->queue, convert(trans), n, nrhs, A, lda, stride_a, ipiv, stride_ipiv,
+                                                   B, ldb, stride_b, batch_size, scratchpad, scratchpad_size, {});
+    // Wait for the operation to complete before function returns
+    ctxt->queue.wait();
+    ONEMKL_CATCH("Dgetrs_strided_batch")
+  }
+
+  void Cgetrs_strided_batch(Context* ctxt, onemklTranspose trans, int64_t n, int64_t nrhs, float _Complex* A, int64_t lda,
+                            int64_t stride_a, int64_t* ipiv, int64_t stride_ipiv, float _Complex* B, int64_t ldb, int64_t stride_b,
+                            int64_t batch_size, float _Complex* scratchpad, int64_t scratchpad_size){
+    ONEMKL_TRY
+    auto status = oneapi::mkl::lapack::getrs_batch(ctxt->queue, convert(trans), n, nrhs,
+                                                   reinterpret_cast<std::complex<float>*>(A), lda, stride_a, ipiv, stride_ipiv,
+                                                   reinterpret_cast<std::complex<float>*>(B), ldb, stride_b, batch_size,
+                                                   reinterpret_cast<std::complex<float>*>(scratchpad), scratchpad_size, {});
+    // Wait for the operation to complete before function returns
+    ctxt->queue.wait();
+    ONEMKL_CATCH("Cgetrs_strided_batch")
+  }
+
+  void Zgetrs_strided_batch(Context* ctxt, onemklTranspose trans, int64_t n, int64_t nrhs, double _Complex* A, int64_t lda,
+                            int64_t stride_a, int64_t* ipiv, int64_t stride_ipiv, double _Complex* B, int64_t ldb, int64_t stride_b,
+                            int64_t batch_size, double _Complex* scratchpad, int64_t scratchpad_size){
+    ONEMKL_TRY
+    auto status = oneapi::mkl::lapack::getrs_batch(ctxt->queue, convert(trans), n, nrhs,
+                                                   reinterpret_cast<std::complex<double>*>(A), lda, stride_a, ipiv, stride_ipiv,
+                                                   reinterpret_cast<std::complex<double>*>(B), ldb, stride_b, batch_size,
+                                                   reinterpret_cast<std::complex<double>*>(scratchpad), scratchpad_size, {});
+    // Wait for the operation to complete before function returns
+    ctxt->queue.wait();
+    ONEMKL_CATCH("Zgetrs_strided_batch")
+  }
+
+  // getrsnp_strided_batch (no pivoting)
+  int64_t Sgetrsnp_strided_batch_ScPadSz(Context* ctxt, onemklTranspose trans, int64_t n, int64_t nrhs, int64_t lda,
+                                         int64_t stride_a, int64_t ldb, int64_t stride_b, int64_t batch_size){
+    ONEMKL_TRY_RETURN(-1)
+    auto size = oneapi::mkl::lapack::getrsnp_batch_scratchpad_size<float>(ctxt->queue, convert(trans), n, nrhs, lda,
+                                                                          stride_a, ldb, stride_b, batch_size);
+    return size;
+    ONEMKL_CATCH_NO_FLUSH("Sgetrsnp_strided_batch_ScPadSz")
+  }
+
+  int64_t Dgetrsnp_strided_batch_ScPadSz(Context* ctxt, onemklTranspose trans, int64_t n, int64_t nrhs, int64_t lda,
+                                         int64_t stride_a, int64_t ldb, int64_t stride_b, int64_t batch_size){
+    ONEMKL_TRY_RETURN(-1)
+    auto size = oneapi::mkl::lapack::getrsnp_batch_scratchpad_size<double>(ctxt->queue, convert(trans), n, nrhs, lda,
+                                                                           stride_a, ldb, stride_b, batch_size);
+    return size;
+    ONEMKL_CATCH_NO_FLUSH("Dgetrsnp_strided_batch_ScPadSz")
+  }
+
+  int64_t Cgetrsnp_strided_batch_ScPadSz(Context* ctxt, onemklTranspose trans, int64_t n, int64_t nrhs, int64_t lda,
+                                         int64_t stride_a, int64_t ldb, int64_t stride_b, int64_t batch_size){
+    ONEMKL_TRY_RETURN(-1)
+    auto size = oneapi::mkl::lapack::getrsnp_batch_scratchpad_size<std::complex<float>>(ctxt->queue, convert(trans), n, nrhs, lda,
+                                                                                        stride_a, ldb, stride_b, batch_size);
+    return size;
+    ONEMKL_CATCH_NO_FLUSH("Cgetrsnp_strided_batch_ScPadSz")
+  }
+
+  int64_t Zgetrsnp_strided_batch_ScPadSz(Context* ctxt, onemklTranspose trans, int64_t n, int64_t nrhs, int64_t lda,
+                                         int64_t stride_a, int64_t ldb, int64_t stride_b, int64_t batch_size){
+    ONEMKL_TRY_RETURN(-1)
+    auto size = oneapi::mkl::lapack::getrsnp_batch_scratchpad_size<std::complex<double>>(ctxt->queue, convert(trans), n, nrhs, lda,
+                                                                                         stride_a, ldb, stride_b, batch_size);
+    return size;
+    ONEMKL_CATCH_NO_FLUSH("Zgetrsnp_strided_batch_ScPadSz")
+  }
+
+  void Sgetrsnp_strided_batch(Context* ctxt, onemklTranspose trans, int64_t n, int64_t nrhs, float* A, int64_t lda,
+                              int64_t stride_a, float* B, int64_t ldb, int64_t stride_b,
+                              int64_t batch_size, float* scratchpad, int64_t scratchpad_size){
+    ONEMKL_TRY
+    auto status = oneapi::mkl::lapack::getrsnp_batch(ctxt->queue, convert(trans), n, nrhs, A, lda, stride_a,
+                                                     B, ldb, stride_b, batch_size, scratchpad, scratchpad_size, {});
+    // Wait for the operation to complete before function returns
+    ctxt->queue.wait();
+    ONEMKL_CATCH("Sgetrsnp_strided_batch")
+  }
+
+  void Dgetrsnp_strided_batch(Context* ctxt, onemklTranspose trans, int64_t n, int64_t nrhs, double* A, int64_t lda,
+                              int64_t stride_a, double* B, int64_t ldb, int64_t stride_b,
+                              int64_t batch_size, double* scratchpad, int64_t scratchpad_size){
+    ONEMKL_TRY
+    auto status = oneapi::mkl::lapack::getrsnp_batch(ctxt->queue, convert(trans), n, nrhs, A, lda, stride_a,
+                                                     B, ldb, stride_b, batch_size, scratchpad, scratchpad_size, {});
+    // Wait for the operation to complete before function returns
+    ctxt->queue.wait();
+    ONEMKL_CATCH("Dgetrsnp_strided_batch")
+  }
+
+  void Cgetrsnp_strided_batch(Context* ctxt, onemklTranspose trans, int64_t n, int64_t nrhs, float _Complex* A, int64_t lda,
+                              int64_t stride_a, float _Complex* B, int64_t ldb, int64_t stride_b,
+                              int64_t batch_size, float _Complex* scratchpad, int64_t scratchpad_size){
+    ONEMKL_TRY
+    auto status = oneapi::mkl::lapack::getrsnp_batch(ctxt->queue, convert(trans), n, nrhs,
+                                                     reinterpret_cast<std::complex<float>*>(A), lda, stride_a,
+                                                     reinterpret_cast<std::complex<float>*>(B), ldb, stride_b, batch_size,
+                                                     reinterpret_cast<std::complex<float>*>(scratchpad), scratchpad_size, {});
+    // Wait for the operation to complete before function returns
+    ctxt->queue.wait();
+    ONEMKL_CATCH("Cgetrsnp_strided_batch")
+  }
+
+  void Zgetrsnp_strided_batch(Context* ctxt, onemklTranspose trans, int64_t n, int64_t nrhs, double _Complex* A, int64_t lda,
+                              int64_t stride_a, double _Complex* B, int64_t ldb, int64_t stride_b,
+                              int64_t batch_size, double _Complex* scratchpad, int64_t scratchpad_size){
+    ONEMKL_TRY
+    auto status = oneapi::mkl::lapack::getrsnp_batch(ctxt->queue, convert(trans), n, nrhs,
+                                                     reinterpret_cast<std::complex<double>*>(A), lda, stride_a,
+                                                     reinterpret_cast<std::complex<double>*>(B), ldb, stride_b, batch_size,
+                                                     reinterpret_cast<std::complex<double>*>(scratchpad), scratchpad_size, {});
+    // Wait for the operation to complete before function returns
+    ctxt->queue.wait();
+    ONEMKL_CATCH("Zgetrsnp_strided_batch")
   }
 }//H4I::MKLShim
