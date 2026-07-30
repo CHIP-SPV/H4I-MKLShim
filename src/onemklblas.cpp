@@ -1300,6 +1300,25 @@ namespace H4I::MKLShim
     return true;
   }
 
+  bool dGemmEx(Context* ctxt, onemklTranspose transA, onemklTranspose transB,
+              int64_t m, int64_t n, int64_t k, double alpha,
+              const void *A, onemklDatatype_t Atype, int64_t lda,
+              const void *B, onemklDatatype_t Btype, int64_t ldb, double beta,
+              void *C, onemklDatatype_t Ctype, int64_t ldc) {
+    ONEMKL_TRY_RETURN(false)
+    sycl::event status;
+    if (Atype == ONEMKL_R_64F && Btype == ONEMKL_R_64F && Ctype == ONEMKL_R_64F) {
+    status = oneapi::mkl::blas::column_major::gemm(ctxt->queue, convert(transA),
+                                          convert(transB), m, n, k, alpha, reinterpret_cast<const double *>(A),
+                                          lda, reinterpret_cast<const double *>(B), ldb, beta,
+                                          reinterpret_cast<double *>(C), ldc);
+    } else {
+      return false;
+    }
+    ONEMKL_CATCH("DGEMM-EX");
+    return true;
+  }
+
   void sGemmBatchedEx(Context* ctxt, onemklTranspose transA, onemklTranspose transB,
               int64_t m, int64_t n, int64_t k, float alpha,
               const void *A, onemklDatatype_t Atype, int64_t lda,int64_t stridea,

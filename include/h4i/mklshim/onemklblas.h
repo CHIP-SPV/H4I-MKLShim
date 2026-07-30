@@ -373,6 +373,15 @@ namespace H4I::MKLShim
                               const void *B, onemklDatatype_t Btype, int64_t ldb, float beta,
                               void *C, onemklDatatype_t Ctype, int64_t ldc);
 
+  // Double precision counterpart of sGemmEx, for the combinations whose scale
+  // factors cannot be represented exactly in single precision.
+  // Returns false, without touching C, for unsupported combinations.
+  bool dGemmEx(Context* ctxt, onemklTranspose transA, onemklTranspose transB,
+                              int64_t m, int64_t n, int64_t k, double alpha,
+                              const void *A, onemklDatatype_t Atype, int64_t lda,
+                              const void *B, onemklDatatype_t Btype, int64_t ldb, double beta,
+                              void *C, onemklDatatype_t Ctype, int64_t ldc);
+
   void sGemmBatchedEx(Context* ctxt, onemklTranspose transA, onemklTranspose transB,
               int64_t m, int64_t n, int64_t k, float alpha,
               const void *A, onemklDatatype_t Atype, int64_t lda,int64_t stridea,
