@@ -1278,6 +1278,13 @@ namespace H4I::MKLShim
                                           convert(transB), m, n, k, alpha, reinterpret_cast<const int8_t *>(A),
                                           lda, reinterpret_cast<const int8_t *>(B), ldb, beta,
                                           reinterpret_cast<float *>(C), ldc);
+    } else if(Atype == ONEMKL_R_8I && Btype == ONEMKL_R_8I && Ctype == ONEMKL_R_32I) {
+    // oneMKL declares gemm(std::int8_t, std::int8_t, std::int32_t, float), so
+    // the integer accumulator variant keeps a single precision alpha/beta.
+    status = oneapi::mkl::blas::column_major::gemm(ctxt->queue, convert(transA),
+                                          convert(transB), m, n, k, alpha, reinterpret_cast<const std::int8_t *>(A),
+                                          lda, reinterpret_cast<const std::int8_t *>(B), ldb, beta,
+                                          reinterpret_cast<std::int32_t *>(C), ldc);
     } else if(Atype == ONEMKL_R_32F && Btype == ONEMKL_R_32F && Ctype == ONEMKL_R_32F) {
     status = oneapi::mkl::blas::column_major::gemm(ctxt->queue, convert(transA),
                                           convert(transB), m, n, k, alpha, reinterpret_cast<const float *>(A),
