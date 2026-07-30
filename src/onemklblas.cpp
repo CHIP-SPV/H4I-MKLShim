@@ -11,6 +11,19 @@
 namespace H4I::MKLShim
 {
   //dot
+  void hDot(Context* ctxt, int64_t n, const void *x, int64_t incx, const void *y,
+            int64_t incy, void *result) {
+    ONEMKL_TRY
+    // oneMKL declares dot() for sycl::half operands with a sycl::half result
+    // (ONEMKL_DECLARE_DOT(sycl::half, sycl::half) in oneapi/mkl/blas), so the
+    // half dot product maps straight onto a native oneMKL entry point.
+    auto status = oneapi::mkl::blas::column_major::dot(ctxt->queue, n,
+                                        reinterpret_cast<const sycl::half *>(x), incx,
+                                        reinterpret_cast<const sycl::half *>(y), incy,
+                                        reinterpret_cast<sycl::half *>(result));
+    ONEMKL_CATCH("DOT")
+  }
+
   void sDot(Context* ctxt, int64_t n, const float *x, int64_t incx, const float *y,
             int64_t incy, float *result) {
     ONEMKL_TRY

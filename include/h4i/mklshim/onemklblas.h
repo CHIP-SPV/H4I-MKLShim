@@ -4,6 +4,13 @@
 
 namespace H4I::MKLShim
 {
+  // Half precision dot product.
+  // x, y and result address 16-bit IEEE 754 binary16 values.  They are typed
+  // as void* rather than sycl::half* because this header is also consumed by
+  // translation units built with a non-SYCL compiler, which cannot name
+  // sycl::half.  The same convention is already used by sGemmEx below.
+  void hDot(Context* ctxt, int64_t n, const void *x, int64_t incx, const void *y,
+            int64_t incy, void *result);
   void sDot(Context* ctxt, int64_t n, const float *x, int64_t incx, const float *y,
             int64_t incy, float *result);
   void dDot(Context* ctxt, int64_t n, const double *x, int64_t incx, const double *y,
