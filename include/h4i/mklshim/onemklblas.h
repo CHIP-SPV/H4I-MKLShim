@@ -363,7 +363,11 @@ namespace H4I::MKLShim
                             double _Complex beta, double _Complex *C,
                             int64_t ldc);
 
-  void sGemmEx(Context* ctxt, onemklTranspose transA, onemklTranspose transB,
+  // Mixed precision GEMM with a single precision scale factor.
+  // Returns false, without touching C, when oneMKL has no gemm for the
+  // requested (Atype, Btype, Ctype) combination so that the caller can report
+  // the failure instead of silently returning an unmodified C.
+  bool sGemmEx(Context* ctxt, onemklTranspose transA, onemklTranspose transB,
                               int64_t m, int64_t n, int64_t k, float alpha,
                               const void *A, onemklDatatype_t Atype, int64_t lda,
                               const void *B, onemklDatatype_t Btype, int64_t ldb, float beta,

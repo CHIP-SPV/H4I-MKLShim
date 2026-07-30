@@ -1246,12 +1246,12 @@ namespace H4I::MKLShim
         reinterpret_cast<std::complex<double> *>(C), ldc);
     ONEMKL_CATCH("GEMM");
   }
-  void sGemmEx(Context* ctxt, onemklTranspose transA, onemklTranspose transB,
+  bool sGemmEx(Context* ctxt, onemklTranspose transA, onemklTranspose transB,
               int64_t m, int64_t n, int64_t k, float alpha,
               const void *A, onemklDatatype_t Atype, int64_t lda,
               const void *B, onemklDatatype_t Btype, int64_t ldb, float beta,
               void *C, onemklDatatype_t Ctype, int64_t ldc) {
-    ONEMKL_TRY
+    ONEMKL_TRY_RETURN(false)
     sycl::event status;
     if  (Atype == ONEMKL_R_16F && Btype == ONEMKL_R_16F && Ctype == ONEMKL_R_16F){
     status = oneapi::mkl::blas::column_major::gemm(ctxt->queue, convert(transA),
@@ -1283,8 +1283,14 @@ namespace H4I::MKLShim
                                           convert(transB), m, n, k, alpha, reinterpret_cast<const float *>(A),
                                           lda, reinterpret_cast<const float *>(B), ldb, beta,
                                           reinterpret_cast<float *>(C), ldc);
+    } else {
+      // No oneMKL gemm exists for this combination.  Report it rather than
+      // falling through and leaving C untouched, which looks to the caller
+      // like a successful multiplication that produced all zeros.
+      return false;
     }
     ONEMKL_CATCH("SGEMM-EX");
+    return true;
   }
 
   void sGemmBatchedEx(Context* ctxt, onemklTranspose transA, onemklTranspose transB,
