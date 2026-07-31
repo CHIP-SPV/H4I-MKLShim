@@ -37,8 +37,17 @@ target_include_directories(mklshim_fft_3d_cufft_layout_test PRIVATE
                           ${CMAKE_BINARY_DIR}/include
                           ${CMAKE_SOURCE_DIR}/include)
 
+# Mixed precision BLAS-Ex correctness test (hDot, sGemmEx, dGemmEx).
+# Also links the host (non-SYCL) MKL target, because every GPU result is
+# validated against classic CBLAS running on the CPU.
+add_executable(mklshim_blas_ex_correctness_test blas_ex_correctness_test.cpp)
+target_link_libraries(mklshim_blas_ex_correctness_test PRIVATE MKLShim hip::host MKL::MKL)
+target_include_directories(mklshim_blas_ex_correctness_test PRIVATE
+                          ${CMAKE_BINARY_DIR}/include
+                          ${CMAKE_SOURCE_DIR}/include)
+
 # Add tests to CTest
-add_test(NAME h4i-mklshim_context_test COMMAND mklshim_context_test) 
+add_test(NAME h4i-mklshim_context_test COMMAND mklshim_context_test)
 set_tests_properties(h4i-mklshim_context_test PROPERTIES 
     PASS_REGULAR_EXPRESSION "All tests passed successfully!")
 
@@ -68,3 +77,7 @@ target_include_directories(mklshim_context_tbl_leak_test PRIVATE
 add_test(NAME h4i-mklshim_context_tbl_leak_test COMMAND mklshim_context_tbl_leak_test)
 set_tests_properties(h4i-mklshim_context_tbl_leak_test PROPERTIES
     PASS_REGULAR_EXPRESSION "PASSED")
+
+add_test(NAME h4i-mklshim_blas_ex_correctness_test COMMAND mklshim_blas_ex_correctness_test)
+set_tests_properties(h4i-mklshim_blas_ex_correctness_test PROPERTIES
+    PASS_REGULAR_EXPRESSION "All BLAS-Ex correctness tests passed!")

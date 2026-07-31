@@ -4,6 +4,13 @@
 
 namespace H4I::MKLShim
 {
+  // Half precision dot product.
+  // x, y and result address 16-bit IEEE 754 binary16 values.  They are typed
+  // as void* rather than sycl::half* because this header is also consumed by
+  // translation units built with a non-SYCL compiler, which cannot name
+  // sycl::half.  The same convention is already used by sGemmEx below.
+  void hDot(Context* ctxt, int64_t n, const void *x, int64_t incx, const void *y,
+            int64_t incy, void *result);
   void sDot(Context* ctxt, int64_t n, const float *x, int64_t incx, const float *y,
             int64_t incy, float *result);
   void dDot(Context* ctxt, int64_t n, const double *x, int64_t incx, const double *y,
@@ -356,10 +363,23 @@ namespace H4I::MKLShim
                             double _Complex beta, double _Complex *C,
                             int64_t ldc);
 
-  void sGemmEx(Context* ctxt, onemklTranspose transA, onemklTranspose transB,
+  // Mixed precision GEMM with a single precision scale factor.
+  // Returns false, without touching C, when oneMKL has no gemm for the
+  // requested (Atype, Btype, Ctype) combination so that the caller can report
+  // the failure instead of silently returning an unmodified C.
+  bool sGemmEx(Context* ctxt, onemklTranspose transA, onemklTranspose transB,
                               int64_t m, int64_t n, int64_t k, float alpha,
                               const void *A, onemklDatatype_t Atype, int64_t lda,
                               const void *B, onemklDatatype_t Btype, int64_t ldb, float beta,
+                              void *C, onemklDatatype_t Ctype, int64_t ldc);
+
+  // Double precision counterpart of sGemmEx, for the combinations whose scale
+  // factors cannot be represented exactly in single precision.
+  // Returns false, without touching C, for unsupported combinations.
+  bool dGemmEx(Context* ctxt, onemklTranspose transA, onemklTranspose transB,
+                              int64_t m, int64_t n, int64_t k, double alpha,
+                              const void *A, onemklDatatype_t Atype, int64_t lda,
+                              const void *B, onemklDatatype_t Btype, int64_t ldb, double beta,
                               void *C, onemklDatatype_t Ctype, int64_t ldc);
 
   void sGemmBatchedEx(Context* ctxt, onemklTranspose transA, onemklTranspose transB,

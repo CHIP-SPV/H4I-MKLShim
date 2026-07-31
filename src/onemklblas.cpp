@@ -11,6 +11,19 @@
 namespace H4I::MKLShim
 {
   //dot
+  void hDot(Context* ctxt, int64_t n, const void *x, int64_t incx, const void *y,
+            int64_t incy, void *result) {
+    ONEMKL_TRY
+    // oneMKL declares dot() for sycl::half operands with a sycl::half result
+    // (ONEMKL_DECLARE_DOT(sycl::half, sycl::half) in oneapi/mkl/blas), so the
+    // half dot product maps straight onto a native oneMKL entry point.
+    auto status = oneapi::mkl::blas::column_major::dot(ctxt->queue, n,
+                                        reinterpret_cast<const sycl::half *>(x), incx,
+                                        reinterpret_cast<const sycl::half *>(y), incy,
+                                        reinterpret_cast<sycl::half *>(result));
+    ONEMKL_CATCH("DOT")
+  }
+
   void sDot(Context* ctxt, int64_t n, const float *x, int64_t incx, const float *y,
             int64_t incy, float *result) {
     ONEMKL_TRY
@@ -1233,12 +1246,12 @@ namespace H4I::MKLShim
         reinterpret_cast<std::complex<double> *>(C), ldc);
     ONEMKL_CATCH("GEMM");
   }
-  void sGemmEx(Context* ctxt, onemklTranspose transA, onemklTranspose transB,
+  bool sGemmEx(Context* ctxt, onemklTranspose transA, onemklTranspose transB,
               int64_t m, int64_t n, int64_t k, float alpha,
               const void *A, onemklDatatype_t Atype, int64_t lda,
               const void *B, onemklDatatype_t Btype, int64_t ldb, float beta,
               void *C, onemklDatatype_t Ctype, int64_t ldc) {
-    ONEMKL_TRY
+    ONEMKL_TRY_RETURN(false)
     sycl::event status;
     if  (Atype == ONEMKL_R_16F && Btype == ONEMKL_R_16F && Ctype == ONEMKL_R_16F){
     status = oneapi::mkl::blas::column_major::gemm(ctxt->queue, convert(transA),
@@ -1265,13 +1278,45 @@ namespace H4I::MKLShim
                                           convert(transB), m, n, k, alpha, reinterpret_cast<const int8_t *>(A),
                                           lda, reinterpret_cast<const int8_t *>(B), ldb, beta,
                                           reinterpret_cast<float *>(C), ldc);
+    } else if(Atype == ONEMKL_R_8I && Btype == ONEMKL_R_8I && Ctype == ONEMKL_R_32I) {
+    // oneMKL declares gemm(std::int8_t, std::int8_t, std::int32_t, float), so
+    // the integer accumulator variant keeps a single precision alpha/beta.
+    status = oneapi::mkl::blas::column_major::gemm(ctxt->queue, convert(transA),
+                                          convert(transB), m, n, k, alpha, reinterpret_cast<const std::int8_t *>(A),
+                                          lda, reinterpret_cast<const std::int8_t *>(B), ldb, beta,
+                                          reinterpret_cast<std::int32_t *>(C), ldc);
     } else if(Atype == ONEMKL_R_32F && Btype == ONEMKL_R_32F && Ctype == ONEMKL_R_32F) {
     status = oneapi::mkl::blas::column_major::gemm(ctxt->queue, convert(transA),
                                           convert(transB), m, n, k, alpha, reinterpret_cast<const float *>(A),
                                           lda, reinterpret_cast<const float *>(B), ldb, beta,
                                           reinterpret_cast<float *>(C), ldc);
+    } else {
+      // No oneMKL gemm exists for this combination.  Report it rather than
+      // falling through and leaving C untouched, which looks to the caller
+      // like a successful multiplication that produced all zeros.
+      return false;
     }
     ONEMKL_CATCH("SGEMM-EX");
+    return true;
+  }
+
+  bool dGemmEx(Context* ctxt, onemklTranspose transA, onemklTranspose transB,
+              int64_t m, int64_t n, int64_t k, double alpha,
+              const void *A, onemklDatatype_t Atype, int64_t lda,
+              const void *B, onemklDatatype_t Btype, int64_t ldb, double beta,
+              void *C, onemklDatatype_t Ctype, int64_t ldc) {
+    ONEMKL_TRY_RETURN(false)
+    sycl::event status;
+    if (Atype == ONEMKL_R_64F && Btype == ONEMKL_R_64F && Ctype == ONEMKL_R_64F) {
+    status = oneapi::mkl::blas::column_major::gemm(ctxt->queue, convert(transA),
+                                          convert(transB), m, n, k, alpha, reinterpret_cast<const double *>(A),
+                                          lda, reinterpret_cast<const double *>(B), ldb, beta,
+                                          reinterpret_cast<double *>(C), ldc);
+    } else {
+      return false;
+    }
+    ONEMKL_CATCH("DGEMM-EX");
+    return true;
   }
 
   void sGemmBatchedEx(Context* ctxt, onemklTranspose transA, onemklTranspose transB,
