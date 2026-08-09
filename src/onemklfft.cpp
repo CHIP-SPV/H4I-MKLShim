@@ -30,13 +30,6 @@ namespace H4I::MKLShim
 	  fft_plan.commit(ctxt->queue);
 	  // wait for everything to complete before continuing
 	  ctxt->queue.wait();
-
-	  // use the soon-to-be default (can be removed in the future) for storing complex numbers
-	  // fft_plan.set_value(oneapi::mkl::dft::config_param::CONJUGATE_EVEN_STORAGE, DFTI_COMPLEX_COMPLEX);
-	  // commit the plan
-          // fft_plan.commit(ctxt->queue);
-          // wait for everything to complete before continuing
-          // ctxt->queue.wait();
       }
 
       // descriptor for multi-dimensional transforms
@@ -123,13 +116,6 @@ namespace H4I::MKLShim
           fft_plan.commit(ctxt->queue);
           // wait for everything to complete before continuing
           ctxt->queue.wait();
-
-	  // use the soon-to-be default (can be removed in the future) for storing complex numbers
-          // fft_plan.set_value(oneapi::mkl::dft::config_param::CONJUGATE_EVEN_STORAGE, oneapi::mkl::dft::config_value::COMPLEX_COMPLEX);
-          // commit the plan
-          // fft_plan.commit(ctxt->queue);
-          // wait for everything to complete before continuing
-          // ctxt->queue.wait();
       }
 
       // descriptor for multi-dimensional transforms
@@ -139,13 +125,6 @@ namespace H4I::MKLShim
           fft_plan.commit(ctxt->queue);
           // wait for everything to complete before continuing
           ctxt->queue.wait();
-
-	  // use the soon-to-be default (can be removed in the future) for storing complex numbers
-          // fft_plan.set_value(oneapi::mkl::dft::config_param::CONJUGATE_EVEN_STORAGE, oneapi::mkl::dft::config_value::COMPLEX_COMPLEX);
-          // commit the plan
-          // fft_plan.commit(ctxt->queue);
-          // wait for everything to complete before continuing
-          // ctxt->queue.wait();
       }
 
       oneapi::mkl::dft::descriptor<oneapi::mkl::dft::precision::SINGLE,
@@ -164,13 +143,6 @@ namespace H4I::MKLShim
           fft_plan.commit(ctxt->queue);
           // wait for everything to complete before continuing
           ctxt->queue.wait();
-
-	  // use the soon-to-be default (can be removed in the future) for storing complex numbers
-          // fft_plan.set_value(oneapi::mkl::dft::config_param::CONJUGATE_EVEN_STORAGE, oneapi::mkl::dft::config_value::COMPLEX_COMPLEX);
-          // commit the plan
-          // fft_plan.commit(ctxt->queue);
-          // wait for everything to complete before continuing
-          // ctxt->queue.wait();
       }
 
       // descriptor for multi-dimensional transforms
@@ -194,13 +166,6 @@ namespace H4I::MKLShim
           }
           fft_plan.commit(ctxt->queue);
           ctxt->queue.wait();
-
-	  // use the soon-to-be default (can be removed in the future) for storing complex numbers
-          // fft_plan.set_value(oneapi::mkl::dft::config_param::CONJUGATE_EVEN_STORAGE, oneapi::mkl::dft::config_value::COMPLEX_COMPLEX);
-          // commit the plan
-          // fft_plan.commit(ctxt->queue);
-          // wait for everything to complete before continuing
-          // ctxt->queue.wait();
       }
 
       oneapi::mkl::dft::descriptor<oneapi::mkl::dft::precision::DOUBLE,
@@ -219,13 +184,6 @@ namespace H4I::MKLShim
           fft_plan.commit(ctxt->queue);
           // wait for everything to complete before continuing
           ctxt->queue.wait();
-
-	  // use the soon-to-be default (can be removed in the future) for storing complex numbers
-          // fft_plan.set_value(oneapi::mkl::dft::config_param::CONJUGATE_EVEN_STORAGE, oneapi::mkl::dft::config_value::COMPLEX_COMPLEX);
-          // commit the plan
-          // fft_plan.commit(ctxt->queue);
-          // wait for everything to complete before continuing
-          // ctxt->queue.wait();
       }
 
       // descriptor for multi-dimensional transforms
@@ -235,13 +193,6 @@ namespace H4I::MKLShim
           fft_plan.commit(ctxt->queue);
           // wait for everything to complete before continuing
           ctxt->queue.wait();
-
-	  // use the soon-to-be default (can be removed in the future) for storing complex numbers
-          // fft_plan.set_value(oneapi::mkl::dft::config_param::CONJUGATE_EVEN_STORAGE, oneapi::mkl::dft::config_value::COMPLEX_COMPLEX);
-          // commit the plan
-          // fft_plan.commit(ctxt->queue);
-          // wait for everything to complete before continuing
-          // ctxt->queue.wait();
       }
 
       oneapi::mkl::dft::descriptor<oneapi::mkl::dft::precision::DOUBLE,
@@ -375,12 +326,12 @@ namespace H4I::MKLShim
   // reads it back); on the hot exec path it is pure overhead.
   void fftExecR2C(Context *ctxt, fftDescriptorSR *descSR, float *idata, float _Complex *odata)
   {
-      int64_t value = 0;
+      oneapi::mkl::dft::config_value value;
       descSR->fft_plan.get_value(oneapi::mkl::dft::config_param::PLACEMENT, &value);
 
       if (idata == (float*)odata)
       {
-          if (value != static_cast<int64_t>(oneapi::mkl::dft::config_value::INPLACE))
+          if (value != oneapi::mkl::dft::config_value::INPLACE)
           {
               descSR->fft_plan.set_value(oneapi::mkl::dft::config_param::PLACEMENT, oneapi::mkl::dft::config_value::INPLACE);
               descSR->fft_plan.commit(ctxt->queue);
@@ -391,7 +342,7 @@ namespace H4I::MKLShim
       }
       else
       {
-          if (value != static_cast<int64_t>(oneapi::mkl::dft::config_value::NOT_INPLACE))
+          if (value != oneapi::mkl::dft::config_value::NOT_INPLACE)
           {
               descSR->fft_plan.set_value(oneapi::mkl::dft::config_param::PLACEMENT, oneapi::mkl::dft::config_value::NOT_INPLACE);
               descSR->fft_plan.commit(ctxt->queue);
@@ -406,12 +357,12 @@ namespace H4I::MKLShim
 
   void fftExecC2R(Context *ctxt, fftDescriptorSR *descSR, float _Complex *idata, float *odata)
   {
-      int64_t value = 0;
+      oneapi::mkl::dft::config_value value;
       descSR->fft_plan.get_value(oneapi::mkl::dft::config_param::PLACEMENT, &value);
 
       if ((float*)idata == odata)
       {
-          if (value != static_cast<int64_t>(oneapi::mkl::dft::config_value::INPLACE))
+          if (value != oneapi::mkl::dft::config_value::INPLACE)
           {
               descSR->fft_plan.set_value(oneapi::mkl::dft::config_param::PLACEMENT, oneapi::mkl::dft::config_value::INPLACE);
               descSR->fft_plan.commit(ctxt->queue);
@@ -423,7 +374,7 @@ namespace H4I::MKLShim
       }
       else
       {
-          if (value != static_cast<int64_t>(oneapi::mkl::dft::config_value::NOT_INPLACE))
+          if (value != oneapi::mkl::dft::config_value::NOT_INPLACE)
           {
               descSR->fft_plan.set_value(oneapi::mkl::dft::config_param::PLACEMENT, oneapi::mkl::dft::config_value::NOT_INPLACE);
               descSR->fft_plan.commit(ctxt->queue);
@@ -442,12 +393,12 @@ namespace H4I::MKLShim
                          float _Complex *idata,
                          float _Complex *odata)
   {
-      int64_t value = 0;
+      oneapi::mkl::dft::config_value value;
       descSC->fft_plan.get_value(oneapi::mkl::dft::config_param::PLACEMENT, &value);
 
       if (idata == odata)
       {
-          if (value != static_cast<int64_t>(oneapi::mkl::dft::config_value::INPLACE))
+          if (value != oneapi::mkl::dft::config_value::INPLACE)
           {
               descSC->fft_plan.set_value(oneapi::mkl::dft::config_param::PLACEMENT, oneapi::mkl::dft::config_value::INPLACE);
               descSC->fft_plan.commit(ctxt->queue);
@@ -459,7 +410,7 @@ namespace H4I::MKLShim
       }
       else
       {
-          if (value != static_cast<int64_t>(oneapi::mkl::dft::config_value::NOT_INPLACE))
+          if (value != oneapi::mkl::dft::config_value::NOT_INPLACE)
           {
               descSC->fft_plan.set_value(oneapi::mkl::dft::config_param::PLACEMENT, oneapi::mkl::dft::config_value::NOT_INPLACE);
               descSC->fft_plan.commit(ctxt->queue);
@@ -477,12 +428,12 @@ namespace H4I::MKLShim
                           float _Complex *idata,
                           float _Complex *odata)
   {
-      int64_t value = 0;
+      oneapi::mkl::dft::config_value value;
       descSC->fft_plan.get_value(oneapi::mkl::dft::config_param::PLACEMENT, &value);
 
       if (idata == odata)
       {
-          if (value != static_cast<int64_t>(oneapi::mkl::dft::config_value::INPLACE))
+          if (value != oneapi::mkl::dft::config_value::INPLACE)
           {
               descSC->fft_plan.set_value(oneapi::mkl::dft::config_param::PLACEMENT, oneapi::mkl::dft::config_value::INPLACE);
               descSC->fft_plan.commit(ctxt->queue);
@@ -494,7 +445,7 @@ namespace H4I::MKLShim
       }
       else
       {
-          if (value != static_cast<int64_t>(oneapi::mkl::dft::config_value::NOT_INPLACE))
+          if (value != oneapi::mkl::dft::config_value::NOT_INPLACE)
           {
               descSC->fft_plan.set_value(oneapi::mkl::dft::config_param::PLACEMENT, oneapi::mkl::dft::config_value::NOT_INPLACE);
               descSC->fft_plan.commit(ctxt->queue);
@@ -509,12 +460,12 @@ namespace H4I::MKLShim
 
   void fftExecD2Z(Context *ctxt, fftDescriptorDR *descDR, double *idata, double _Complex *odata)
   {
-      int64_t value = 0;
+      oneapi::mkl::dft::config_value value;
       descDR->fft_plan.get_value(oneapi::mkl::dft::config_param::PLACEMENT, &value);
 
       if (idata == (double*)odata)
       {
-          if (value != static_cast<int64_t>(oneapi::mkl::dft::config_value::INPLACE))
+          if (value != oneapi::mkl::dft::config_value::INPLACE)
           {
               descDR->fft_plan.set_value(oneapi::mkl::dft::config_param::PLACEMENT, oneapi::mkl::dft::config_value::INPLACE);
               descDR->fft_plan.commit(ctxt->queue);
@@ -530,7 +481,7 @@ namespace H4I::MKLShim
       }
       else
       {
-          if (value != static_cast<int64_t>(oneapi::mkl::dft::config_value::NOT_INPLACE))
+          if (value != oneapi::mkl::dft::config_value::NOT_INPLACE)
           {
               descDR->fft_plan.set_value(oneapi::mkl::dft::config_param::PLACEMENT, oneapi::mkl::dft::config_value::NOT_INPLACE);
               descDR->fft_plan.commit(ctxt->queue);
@@ -545,12 +496,12 @@ namespace H4I::MKLShim
 
   void fftExecZ2D(Context *ctxt, fftDescriptorDR *descDR, double _Complex *idata, double *odata)
   {
-      int64_t value = 0;
+      oneapi::mkl::dft::config_value value;
       descDR->fft_plan.get_value(oneapi::mkl::dft::config_param::PLACEMENT, &value);
 
       if ((double*)idata == odata)
       {
-          if (value != static_cast<int64_t>(oneapi::mkl::dft::config_value::INPLACE))
+          if (value != oneapi::mkl::dft::config_value::INPLACE)
           {
               descDR->fft_plan.set_value(oneapi::mkl::dft::config_param::PLACEMENT, oneapi::mkl::dft::config_value::INPLACE);
               descDR->fft_plan.commit(ctxt->queue);
@@ -564,7 +515,7 @@ namespace H4I::MKLShim
       }
       else
       {
-          if (value != static_cast<int64_t>(oneapi::mkl::dft::config_value::NOT_INPLACE))
+          if (value != oneapi::mkl::dft::config_value::NOT_INPLACE)
           {
               descDR->fft_plan.set_value(oneapi::mkl::dft::config_param::PLACEMENT, oneapi::mkl::dft::config_value::NOT_INPLACE);
               descDR->fft_plan.commit(ctxt->queue);
@@ -583,12 +534,12 @@ namespace H4I::MKLShim
                          double _Complex *idata,
                          double _Complex *odata)
   {
-      int64_t value = 0;
+      oneapi::mkl::dft::config_value value;
       descDC->fft_plan.get_value(oneapi::mkl::dft::config_param::PLACEMENT, &value);
 
       if (idata == odata)
       {
-          if (value != static_cast<int64_t>(oneapi::mkl::dft::config_value::INPLACE))
+          if (value != oneapi::mkl::dft::config_value::INPLACE)
           {
               descDC->fft_plan.set_value(oneapi::mkl::dft::config_param::PLACEMENT, oneapi::mkl::dft::config_value::INPLACE);
               descDC->fft_plan.commit(ctxt->queue);
@@ -600,7 +551,7 @@ namespace H4I::MKLShim
       }
       else
       {
-          if (value != static_cast<int64_t>(oneapi::mkl::dft::config_value::NOT_INPLACE))
+          if (value != oneapi::mkl::dft::config_value::NOT_INPLACE)
           {
               descDC->fft_plan.set_value(oneapi::mkl::dft::config_param::PLACEMENT, oneapi::mkl::dft::config_value::NOT_INPLACE);
               descDC->fft_plan.commit(ctxt->queue);
@@ -620,13 +571,13 @@ namespace H4I::MKLShim
   {
       ctxt->queue.wait();
 
-      int64_t value = 0;
+      oneapi::mkl::dft::config_value value;
       descDC->fft_plan.get_value(oneapi::mkl::dft::config_param::PLACEMENT, &value);
       ctxt->queue.wait();
 
       if (idata == odata)
       {
-          if (value != static_cast<int64_t>(oneapi::mkl::dft::config_value::INPLACE))
+          if (value != oneapi::mkl::dft::config_value::INPLACE)
           {
               descDC->fft_plan.set_value(oneapi::mkl::dft::config_param::PLACEMENT, oneapi::mkl::dft::config_value::INPLACE);
               ctxt->queue.wait();
@@ -644,7 +595,7 @@ namespace H4I::MKLShim
       }
       else
       {
-          if (value != static_cast<int64_t>(oneapi::mkl::dft::config_value::NOT_INPLACE))
+          if (value != oneapi::mkl::dft::config_value::NOT_INPLACE)
           {
               descDC->fft_plan.set_value(oneapi::mkl::dft::config_param::PLACEMENT, oneapi::mkl::dft::config_value::NOT_INPLACE);
               ctxt->queue.wait();
